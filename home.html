@@ -30,26 +30,28 @@
     <div class="jumbotron">
       	<p class"lead well"> What do you think about Axiomatic Semantics? </p>
     </div>
-    <div class="list-group radio">
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
-				Option one is this and that&mdash;be sure to include why it's great
-			</label>
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
-				Option one is this and that&mdash;be sure to include why it's great
-			</label>
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
-				Option one is this and that&mdash;be sure to include why it's great
-			</label>
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
-				Option one is this and that&mdash;be sure to include why it's great
-			</label>
-	</div>
-	<a class="btn btn-lg btn-success sub-btn" href="#">
-        <span class="glyphicon glyphicon-send" aria-hidden="true"></span>  Submit</a>
+    <form id="form">
+	    <div class="list-group radio">
+				<label class="radio list-group-item">
+					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
+					Option one is this and that&mdash;be sure to include why it's great
+				</label>
+				<label class="radio list-group-item">
+					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option2">
+					Option one is this and that&mdash;be sure to include why it's great
+				</label>
+				<label class="radio list-group-item">
+					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option3">
+					Option one is this and that&mdash;be sure to include why it's great
+				</label>
+				<label class="radio list-group-item">
+					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option4">
+					Option one is this and that&mdash;be sure to include why it's great
+				</label>
+		</div>
+		<a class="btn btn-lg btn-success sub-btn" href="#" onclick="submit(document.getElementById('form'));">
+	        <span class="glyphicon glyphicon-send" aria-hidden="true"></span>  Submit</a>
+    </form>
    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
@@ -61,6 +63,9 @@
 	    setInterval(function(){
 	    		clock.innerHTML = countdown(targetDate).toString();
 	  		}, 1000);
+	    function submit(ob){
+	    	alert(ob);
+	    }
     </script>
   </body>
 </html>

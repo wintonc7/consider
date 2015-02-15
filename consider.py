@@ -17,12 +17,7 @@ class MainPage(webapp2.RequestHandler):
 		user = users.get_current_user()
 
 		if user:
-			url = users.create_logout_url(self.request.uri)
-			template_values = {
-		    	'url': url
-			}
-			template = JINJA_ENVIRONMENT.get_template('home.html')
-			self.response.write(template.render(template_values))
+			self.redirect('/home');
 		else:
 			url = users.create_login_url(self.request.uri)
 			template_values = {
@@ -31,6 +26,24 @@ class MainPage(webapp2.RequestHandler):
 			template = JINJA_ENVIRONMENT.get_template('login.html')
 			self.response.write(template.render(template_values))
 
+class HomePage(webapp2.RequestHandler):
+	"""docstring for HomePage"""
+	def get(self):
+		
+		user = users.get_current_user()
+
+		if user:
+			url = users.create_logout_url(self.request.uri)
+			template_values = {
+		    	'url': url
+			}
+			template = JINJA_ENVIRONMENT.get_template('home.html')
+			self.response.write(template.render(template_values))
+		else:
+			self.redirect('/');
+		
+
 application = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/home', HomePage),
 ], debug=True)
