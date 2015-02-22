@@ -27,7 +27,7 @@ class MainPage(webapp2.RequestHandler):
 			self.response.write(template.render(template_values))
 
 class HomePage(webapp2.RequestHandler):
-	"""docstring for HomePage"""
+	"""Handling answer input"""
 	def get(self):
 		
 		user = users.get_current_user()
@@ -41,6 +41,9 @@ class HomePage(webapp2.RequestHandler):
 			self.response.write(template.render(template_values))
 		else:
 			self.redirect('/');
+
+	def post(self):
+		self.response.write("Got it!");
 		
 
 application = webapp2.WSGIApplication([

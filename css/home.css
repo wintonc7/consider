@@ -1,10 +1,18 @@
 .list-group-item {
 	margin: 15px auto;
-	padding: 20px;
+	padding: 15px;
 }
 
 .list-group {
 	margin-top: -30px;
+}
+
+.panel-group {
+	margin-top: -30px;
+}
+
+.panel-heading {
+	padding: 15px;
 }
 
 .header{
@@ -14,6 +22,16 @@
 .row{
 	padding-right: 20px;
 	padding-left: 20px;
+}
+
+a, a:hover, a:focus {
+	color: #646464;
+	text-decoration: none !important;
+}
+
+a:hover > .panel-heading {
+	background: rgb(189, 189, 189);
+	color: white;
 }
 
 body {

@@ -30,27 +30,72 @@
     <div class="jumbotron">
       	<p class"lead well"> What do you think about Axiomatic Semantics? </p>
     </div>
-    <form id="form">
-	    <div class="list-group radio">
-				<label class="radio list-group-item">
-					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
-					Option one is this and that&mdash;be sure to include why it's great
-				</label>
-				<label class="radio list-group-item">
-					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option2">
-					Option one is this and that&mdash;be sure to include why it's great
-				</label>
-				<label class="radio list-group-item">
-					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option3">
-					Option one is this and that&mdash;be sure to include why it's great
-				</label>
-				<label class="radio list-group-item">
-					<input type="radio" name="optionsRadios" id="optionsRadios1" value="option4">
-					Option one is this and that&mdash;be sure to include why it's great
-				</label>
+    <form id="form" method="post">
+	    <!-- <div class="list-group">
+			<label class="radio list-group-item">
+				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
+				Option one is this and that&mdash;be sure to include why it's great
+			</label>
+			<label class="radio list-group-item">
+				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option2">
+				Option one is this and that&mdash;be sure to include why it's great
+			</label>
+			<label class="radio list-group-item">
+				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option3">
+				Option one is this and that&mdash;be sure to include why it's great
+			</label>
+			<label class="radio list-group-item">
+				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option4">
+				Option one is this and that&mdash;be sure to include why it's great
+			</label>
+		</div> -->
+		<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+			<div class="panel panel-default">
+				<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+					<div class="panel-heading" role="tab" id="headingOne">
+					  <h4 class="panel-title">
+					 	Option One
+					  </h4>
+					</div>
+				</a>
+				<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+				  <div class="panel-body form-group">
+				    <textarea class="form-control" rows="3" id="commentOne" placeholder="Please enter why you support this option"></textarea>
+				  </div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+					<div class="panel-heading" role="tab" id="headingTwo">
+					  <h4 class="panel-title">
+					    Option Two
+					  </h4>
+					</div>
+				</a>
+				<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+				  <div class="panel-body form-group">
+				    <textarea class="form-control" rows="3" id="commentTwo" placeholder="Please enter why you support this option"></textarea>
+				  </div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+					<div class="panel-heading" role="tab" id="headingThree">
+					  <h4 class="panel-title">
+					    Option Three
+					  </h4>
+					</div>
+				</a>
+				<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+				  <div class="panel-body form-group">
+				    <textarea class="form-control" rows="3" id="commentThree" placeholder="Please enter why you support this option"></textarea>
+				  </div>
+				</div>
+			</div>
 		</div>
 		<a class="btn btn-lg btn-success sub-btn" href="#" onclick="submit(document.getElementById('form'));">
-	        <span class="glyphicon glyphicon-send" aria-hidden="true"></span>  Submit</a>
+	    <span class="glyphicon glyphicon-send" aria-hidden="true"></span>  Submit
+	    </a>
     </form>
    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -64,7 +109,7 @@
 	    		clock.innerHTML = countdown(targetDate).toString();
 	  		}, 1000);
 	    function submit(ob){
-	    	alert(ob);
+	    	ob.submit();
 	    }
     </script>
   </body>
