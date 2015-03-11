@@ -21,7 +21,7 @@ class Admin(ndb.Model):
 	"""A main model for representing admins"""
 	email = ndb.StringProperty(required="True")
 
-class MainPage(webapp2.RequestHandler):
+class AdminPage(webapp2.RequestHandler):
 	"""Main function that will handle the first request"""
 	def get(self):
 
@@ -44,19 +44,7 @@ class MainPage(webapp2.RequestHandler):
 			}
 			template = JINJA_ENVIRONMENT.get_template('login.html')
 			self.response.write(template.render(template_values))
-
-	def post(self):
-		class_name = self.request.get('class').lower()
-		email = self.request.get('email').lower()
-		admin = Admin(parent=class_key(class_name),id=email)
-
-		if users.is_current_user_admin():
-		    admin.email = email
-		    admin.put()
-		    self.response.write(email)
-		else:
-			self.redirect('/');
 		
 application = webapp2.WSGIApplication([
-    ('/secretlandingpage', MainPage),
+    ('/admin', AdminPage),
 ], debug=True)
