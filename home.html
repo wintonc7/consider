@@ -30,77 +30,41 @@
     <div class="jumbotron">
       	<p class"lead well"> What do you think about Axiomatic Semantics? </p>
     </div>
-    <form id="form" method="post">
+    <form id="form" method="post" action="/home">
 	    <div class="list-group">
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">
+	    	<input type="radio" name="optionsRadios" id="option1" value="option1">
+			<label class="radio list-group-item" for="option1">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option2">
+			<input type="radio" name="optionsRadios" id="option2" value="option2">
+			<label class="radio list-group-item" for="option2">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option3">
+			<input type="radio" name="optionsRadios" id="option3" value="option3">
+			<label class="radio list-group-item" for="option3">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
-			<label class="radio list-group-item">
-				<input type="radio" name="optionsRadios" id="optionsRadios1" value="option4">
+			<input type="radio" name="optionsRadios" id="option4" value="option4">
+			<label class="radio list-group-item" for="option4">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
 		</div>
-		<!-- <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-			<div class="panel panel-default">
-				<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-					<div class="panel-heading" role="tab" id="headingOne">
-					  <h4 class="panel-title">
-					 	Option One
-					  </h4>
-					</div>
-				</a>
-				<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-				  <div class="panel-body form-group">
-				    <textarea class="form-control" rows="3" id="commentOne" placeholder="Please enter why you support this option"></textarea>
-				  </div>
-				</div>
-			</div>
-			<div class="panel panel-default">
-				<a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-					<div class="panel-heading" role="tab" id="headingTwo">
-					  <h4 class="panel-title">
-					    Option Two
-					  </h4>
-					</div>
-				</a>
-				<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-				  <div class="panel-body form-group">
-				    <textarea class="form-control" rows="3" id="commentTwo" placeholder="Please enter why you support this option"></textarea>
-				  </div>
-				</div>
-			</div>
-			<div class="panel panel-default">
-				<a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-					<div class="panel-heading" role="tab" id="headingThree">
-					  <h4 class="panel-title">
-					    Option Three
-					  </h4>
-					</div>
-				</a>
-				<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-				  <div class="panel-body form-group">
-				    <textarea class="form-control" rows="3" id="commentThree" placeholder="Please enter why you support this option"></textarea>
-				  </div>
-				</div>
-			</div>
-		</div> -->
-		<a class="btn btn-lg btn-success sub-btn" href="#" onclick="submit(document.getElementById('form'));">
-	    <span class="glyphicon glyphicon-send" aria-hidden="true"></span>  Submit
-	    </a>
+		<textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required>
+		{%- if comment -%}{{comment}}
+		{%- endif -%}
+		</textarea>
+		<button type="submit" class="btn btn-lg btn-success sub-btn"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
     </form>
    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/countdown.min.js"></script>
+    <script src="/js/bootbox.min.js"></script>
+    {%- if option -%}
+    		<script type="text/javascript">
+    			$("#{{option}}").prop("checked",true);
+	    	</script>
+	  {%- endif -%}
     <script type="text/javascript">
 	    var clock = document.getElementById("countdown");
 	    targetDate = new Date(2015,03,01);
@@ -108,9 +72,26 @@
 	    setInterval(function(){
 	    		clock.innerHTML = countdown(targetDate).toString();
 	  		}, 1000);
-	    function submit(ob){
-	    	ob.submit();
-	    }
+
+	    $("#form").submit(function (event){
+	    	//Prevent the default behaviour
+	        event.preventDefault();
+
+	        //collect form elements
+	        var $form = $(this);
+
+	        if ($form.find("input:radio[name='optionsRadios']:checked").val() === undefined) {
+	        	alert("Please select one of the options");
+	        }
+	        else {
+	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val(),
+	        	comment = $form.find("textarea").val(),
+	        	url = $form.attr("action");
+	        	$.post(url,{option:radio, comm:comment},function (data) {
+		        	bootbox.alert(data);
+		        });
+	        }
+	    });
     </script>
   </body>
 </html>

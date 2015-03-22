@@ -41,6 +41,18 @@ body {
   text-align: center;
 }
 
+label {
+	cursor: pointer;
+}
+
+.list-group input[type="radio"] {
+	display: none;
+}
+
+.list-group input[type="radio"]:checked + label{
+	background: #BCBAF2;
+}
+
 .jumbotron {
   margin: 80px auto;
   background: #ffffff;
