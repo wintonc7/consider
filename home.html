@@ -19,7 +19,7 @@
   <body>
   <div class="container">
   	<div class="row">
-	  	<div id="count-container" class="alert alert-warning col-md-6"><p>Time left to complete: <span id="countdown"> </span></p></div>
+	  	<div id="count-container" class="alert alert-warning col-md-6"><p>Time left to complete: {% if expired -%} Time is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p></div>
 	  	<a class="btn btn-warning sign-out-btn col-md-2 col-md-offset-4" href="{{url}}">
 		 <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
 	    </a>
@@ -30,30 +30,30 @@
     <div class="jumbotron">
       	<p class"lead well"> What do you think about Axiomatic Semantics? </p>
     </div>
-    <form id="form" method="post" action="/home">
+    <form id="form" method="post" {% if not expired -%} action="/home" {%- endif -%}>
 	    <div class="list-group">
-	    	<input type="radio" name="optionsRadios" id="option1" value="option1">
+	    	<input type="radio" name="optionsRadios" id="option1" value="option1" {% if expired -%} disabled="true" {%- endif -%}>
 			<label class="radio list-group-item" for="option1">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
-			<input type="radio" name="optionsRadios" id="option2" value="option2">
+			<input type="radio" name="optionsRadios" id="option2" value="option2" {% if expired -%} disabled="true" {%- endif -%}>
 			<label class="radio list-group-item" for="option2">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
-			<input type="radio" name="optionsRadios" id="option3" value="option3">
+			<input type="radio" name="optionsRadios" id="option3" value="option3" {% if expired -%} disabled="true" {%- endif -%}>
 			<label class="radio list-group-item" for="option3">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
-			<input type="radio" name="optionsRadios" id="option4" value="option4">
+			<input type="radio" name="optionsRadios" id="option4" value="option4" {% if expired -%} disabled="true" {%- endif -%}>
 			<label class="radio list-group-item" for="option4">
 				Option one is this and that&mdash;be sure to include why it's great
 			</label>
 		</div>
-		<textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required>
+		<textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required {% if expired -%} disabled="true" {%- endif -%}>
 		{%- if comment -%}{{comment}}
 		{%- endif -%}
 		</textarea>
-		<button type="submit" class="btn btn-lg btn-success sub-btn"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
+		<button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
     </form>
    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -66,8 +66,9 @@
 	    	</script>
 	  {%- endif -%}
     <script type="text/javascript">
+    {% if not expired -%}
 	    var clock = document.getElementById("countdown");
-	    targetDate = new Date(2015,03,01);
+	    targetDate = new Date("{{deadline}}");
 	    clock.innerHTML = countdown(targetDate).toString();
 	    setInterval(function(){
 	    		clock.innerHTML = countdown(targetDate).toString();
@@ -81,7 +82,7 @@
 	        var $form = $(this);
 
 	        if ($form.find("input:radio[name='optionsRadios']:checked").val() === undefined) {
-	        	alert("Please select one of the options");
+	        	bootbox.alert("Please select one of the options");
 	        }
 	        else {
 	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val(),
@@ -92,6 +93,7 @@
 		        });
 	        }
 	    });
+	   {%- endif -%}
     </script>
   </body>
 </html>

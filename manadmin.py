@@ -11,11 +11,12 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-def class_key(class_name):
-    """Constructs a Datastore key for a Admin entity.
-    We use class_name as the key.
-    """
-    return ndb.Key('ClassName', class_name)
+class Class(ndb.Model):
+	"""A main model for a particular class and root of the application"""
+	name = ndb.StringProperty(required="True")
+	groups = ndb.IntegerProperty(default=0, indexed=False)
+	current_round = ndb.IntegerProperty(default=0, indexed=False)
+	rounds = ndb.IntegerProperty(default=0, indexed=False)
 
 class Admin(ndb.Model):
 	"""A main model for representing admins"""
@@ -46,14 +47,18 @@ class MainPage(webapp2.RequestHandler):
 			self.response.write(template.render(template_values))
 
 	def post(self):
-		class_name = self.request.get('class').lower()
+		class_name = self.request.get('class')
 		email = self.request.get('email').lower()
-		admin = Admin(parent=class_key(class_name),id=email)
-
+		
 		if users.is_current_user_admin():
-		    admin.email = email
-		    admin.put()
-		    self.response.write(email)
+			newClass = Class(id=class_name)
+			newClass.name = class_name
+			newClass.put()
+
+			admin = Admin(parent=newClass.key,id=email)
+			admin.email = email
+			admin.put()
+			self.response.write(email)
 		else:
 			self.redirect('/');
 		

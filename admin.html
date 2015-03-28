@@ -33,7 +33,7 @@
 
         // do the POST and get the callback
         $.post(url,{email:email2, class:class2},function (data) {
-          alert(data+" has been added as student for "+ class2);
+          bootbox.alert(data+" has been added as student for "+ class2);
         });
       });
 </script>
