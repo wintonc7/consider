@@ -60,12 +60,10 @@
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/countdown.min.js"></script>
     <script src="/js/bootbox.min.js"></script>
-    {%- if option -%}
-    		<script type="text/javascript">
-    			$("#{{option}}").prop("checked",true);
-	    	</script>
-	  {%- endif -%}
     <script type="text/javascript">
+    {%- if option -%}
+    			$("#{{option}}").prop("checked",true);
+	  {%- endif -%}
     {% if not expired -%}
 	    var clock = document.getElementById("countdown");
 	    targetDate = new Date("{{deadline}}");

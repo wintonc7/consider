@@ -1,0 +1,26 @@
+body {
+  padding-top: 70px;
+}
+
+h1 {
+	text-align: center;
+	background-color: white !important;
+	font-size: 2em !important;
+}
+
+form {
+	text-align: center;
+}
+
+#submit {
+	margin: 10px;
+}
+
+.row {
+	text-align: center;
+}
+
+.jumbotron {
+	padding: 10px;
+	padding-bottom: 20px;
+}

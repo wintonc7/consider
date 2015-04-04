@@ -47,6 +47,7 @@
   
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/bootbox.min.js"></script>
     <script>
       $("#form").submit(function (event) {
         //Prevent the default behaviour
@@ -60,7 +61,7 @@
 
         //do the POST and get the callback
         $.post(url,{email:email2, class:class2},function (data) {
-          alert(data+" has been added as administrator for "+ class2);
+          bootbox.alert(data+" has been added as administrator for "+ class2);
         });
       });
     </script>
