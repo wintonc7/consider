@@ -179,33 +179,36 @@ class Discussion(webapp2.RequestHandler):
 						logging.info(deadline)
 						current_time = datetime.datetime.now()
 						logging.info(current_time)
-						# response = Response.get_by_id(student.email, parent=quiz_key(student.class_name,1))
-						# logging.info(str(response))
-						# if response:	
-						# 	template_values = {
-						#     	'url': url,
-						#     	'option':response.option,
-						#     	'comment':response.comment
-						# 	}
-						# else:
-						# 	template_values = {
-						#     	'url': url
-						# 	}
-						template_values = {
-							    	'url': url,
-							    	'alias': student.alias
-								}
-						if deadline < current_time:
-							template_values['expired'] = True
-						template_values['deadline'] = current_round.deadline
-						template = JINJA_ENVIRONMENT.get_template('discussion.html')
-						self.response.write(template.render(template_values))
+						group = Group.get_by_id(student.group, parent=student.key.parent().parent())
+						if group:
+							comments = []
+							for stu in group.members:
+								response = Response.get_by_id(stu, parent=quiz_key(student.class_name,1))
+								if response:
+									comment = {
+										'alias': Student.get_by_id(stu, parent=student.key.parent()).alias,
+										'response': response.comment
+									}
+									comments.append(comment)
+							logging.info(comments)
+							template_values = {
+								    	'url': url,
+								    	'alias': student.alias,
+								    	'comments': comments
+									}
+							if deadline < current_time:
+								template_values['expired'] = True
+							template_values['deadline'] = current_round.deadline
+							template = JINJA_ENVIRONMENT.get_template('discussion.html')
+							self.response.write(template.render(template_values))
+						else:
+							self.response.write('Sorry, your group was not found. Please contact your professor. <a href="'+url+'"">Logout</a>')
 					else:
-						self.response.write("Sorry rounds are not active. <a href='"+url+"'>Logout</a>")
+						self.response.write('Sorry rounds are not active. <a href="'+url+'"">Logout</a>')
 				else:
-					self.response.write("Sorry no rounds are active right now, please check back later. <a href='"+url+"'>Logout</a>")
+					self.response.write('Sorry no rounds are active right now, please check back later. <a href="'+url+'"">Logout</a>')
 			else:
-				self.response.write("Sorry you are not yet registered with this application, please contact your professor. <a href='"+url+"'>Logout</a>")
+				self.response.write('Sorry you are not yet registered with this application, please contact your professor. <a href="'+url+'"">Logout</a>')
 		else:
 			self.redirect('/')
 

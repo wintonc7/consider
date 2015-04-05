@@ -32,7 +32,7 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">Round 1</a></li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
       </div>
     </nav>
     <div class="container">
@@ -43,13 +43,15 @@
         </a>
       </div>
       <h1 class="well lead">Welcome {{alias}}</h1>
-      <div class="jumbotron">
-        <h2>S1</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-        <button type="button" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support</button>
-        <button type="button" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral</button>
-        <button type="button" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
+      {% for comment in comments %}
+      <div class="jumbotron" id="jum_{{loop.index}}">
+        <h2>{{comment.alias}}</h2>
+        <p>{{comment.response}}</p>
+        <button type="button" id="sup_{{loop.index}}" onclick="updateJumb(this)" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support</button>
+        <button type="button" id="neu_{{loop.index}}" onclick="updateJumb(this)" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral</button>
+        <button type="button" id="dis_{{loop.index}}" onclick="updateJumb(this)" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
       </div>
+      {% endfor %}
       <form>
         <textarea class="form-control" rows="5" id="comment" placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%} disabled="true" {%- endif -%}>
         {%- if comment -%}{{comment}}
@@ -70,6 +72,14 @@
       setInterval(function(){
           clock.innerHTML = countdown(targetDate).toString();
         }, 1000);
+
+      function updateJumb(obj) {
+        type = obj.id.substring(0,3);
+        index = obj.id.substring(4);
+        if (type == "sup") {$("#jum_"+index).removeClass().addClass('jumbotron').addClass('support');}
+        else if(type == "neu") {$("#jum_"+index).removeClass().addClass('jumbotron').addClass('neutral');}
+        else {$("#jum_"+index).removeClass().addClass('jumbotron').addClass('disagree');}
+      }
     </script>   
   </body>
 </html>

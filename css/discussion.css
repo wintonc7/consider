@@ -24,3 +24,15 @@ form {
 	padding: 10px;
 	padding-bottom: 20px;
 }
+
+.support {
+	background-color: rgb(186, 255, 186);
+}
+
+.neutral {
+	background-color: rgb(186, 255, 247);
+}
+
+.disagree {
+	background-color: rgb(255, 186, 186);
+}
