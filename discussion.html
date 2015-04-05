@@ -52,7 +52,7 @@
         <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
       </div>
       {% endfor %}
-        <div id="alert_comment" class="alert alert-warning fade in" style="display: none;">
+        <div id="alert_comment" class="alert alert-info fade in" role="alert" style="display: none;">
             <button type="button" class="close" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -61,7 +61,7 @@
             <p id="alert_{{loop.index}}"></p>
             {% endfor %}
         </div>
-      <form>
+      <form id="form" method="post" {% if not expired -%} action="/discussion" {%- endif -%}>
         <textarea class="form-control" rows="5" id="comment" placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%} disabled="true" {%- endif -%}>
         {%- if comment -%}{{comment}}
         {%- endif -%}
@@ -75,36 +75,51 @@
     <script src="/js/countdown.min.js"></script>
     <script src="/js/bootbox.min.js"></script>
     <script type="text/javascript">
-      var clock = document.getElementById("countdown");
-      targetDate = new Date("{{deadline}}");
-      clock.innerHTML = countdown(targetDate).toString();
-      setInterval(function(){
-          clock.innerHTML = countdown(targetDate).toString();
-        }, 1000);
+        {%- if not expired -%}
+            var clock = document.getElementById("countdown");
+            targetDate = new Date("{{deadline}}");
+            clock.innerHTML = countdown(targetDate).toString();
+            setInterval(function(){
+              clock.innerHTML = countdown(targetDate).toString();
+            }, 1000);
 
-      $('.alert .close').on('click', function(e) {
-          $(this).parent().hide();
-      });
+            $('.alert .close').on('click', function(e) {
+              $(this).parent().hide();
+            });
 
-      function updateAlert(obj) {
-          var type = obj.id.substring(0, 3);
-          var index = obj.id.substring(4);
-          if (type == "sup") {
-              $("#jum_"+index).removeClass().addClass('jumbotron').addClass('support');
-              $("#alert_"+index).html("Why you Support S"+index+"?");
-              $("#alert_comment").show();
-          }
-          else if(type == "neu") {
-              $("#jum_"+index).removeClass().addClass('jumbotron').addClass('neutral');
-              $("#alert_"+index).html("You are neutral with S"+index+"...");
-              $("#alert_comment").show();
-          }
-          else {
-              $("#jum_"+index).removeClass().addClass('jumbotron').addClass('disagree');
-              $("#alert_"+index).html("Why you Disagree with S"+index+"?");
-              $("#alert_comment").show();
-          }
-      }
+            $("#form").submit(function (event){
+                //Prevent the default behaviour
+                event.preventDefault();
+
+                //collect form elements
+                var $form = $(this);
+                var comment = $form.find("textarea").val();
+                var url = $form.attr("action");
+                $.post(url,{comm:comment},function (data) {
+                    bootbox.alert(data);
+                });
+            });
+
+            function updateAlert(obj) {
+              var type = obj.id.substring(0, 3);
+              var index = obj.id.substring(4);
+              if (type == "sup") {
+                  $("#jum_"+index).removeClass().addClass('jumbotron').addClass('support');
+                  $("#alert_"+index).html("Why you Support S"+index+"?");
+                  $("#alert_comment").show();
+              }
+              else if(type == "neu") {
+                  $("#jum_"+index).removeClass().addClass('jumbotron').addClass('neutral');
+                  $("#alert_"+index).html("You are neutral with S"+index+"...");
+                  $("#alert_comment").show();
+              }
+              else {
+                  $("#jum_"+index).removeClass().addClass('jumbotron').addClass('disagree');
+                  $("#alert_"+index).html("Why you Disagree with S"+index+"?");
+                  $("#alert_comment").show();
+              }
+            }
+        {% endif %}
     </script>   
   </body>
 </html>

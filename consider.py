@@ -36,7 +36,7 @@ class Student(ndb.Model):
 
 
 class Group(ndb.Model):
-    """A model to hold the propeties of groups of each class"""
+    """A model to hold the properties of groups of each class"""
     number = ndb.IntegerProperty(required=True)
     members = ndb.StringProperty(repeated=True)
     size = ndb.IntegerProperty(default=0, indexed=False)

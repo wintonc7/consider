@@ -83,9 +83,9 @@
 	        	bootbox.alert("Please select one of the options");
 	        }
 	        else {
-	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val(),
-	        	comment = $form.find("textarea").val(),
-	        	url = $form.attr("action");
+	        	var radio = $form.find("input:radio[name='optionsRadios']:checked").val();
+	        	var comment = $form.find("textarea").val();
+	        	var url = $form.attr("action");
 	        	$.post(url,{option:radio, comm:comment},function (data) {
 		        	bootbox.alert(data);
 		        });
