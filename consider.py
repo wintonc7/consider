@@ -52,6 +52,7 @@ class Response(ndb.Model):
     """A response model for all the answers"""
     option = ndb.StringProperty(default='NA', indexed=False)
     comment = ndb.StringProperty(required=True, indexed=False)
+    response = ndb.StringProperty(repeated=True, indexed=False)
     student = ndb.StringProperty(required=True)
 
 
@@ -146,14 +147,13 @@ class HomePage(webapp2.RequestHandler):
                         logging.info(deadline)
                         current_time = datetime.datetime.now()
                         logging.info(current_time)
-                        if deadline > current_time:
+                        if deadline >= current_time:
                             response = Response(parent=current_round.key, id=student.email)
                             response.option = option
                             response.comment = comment
                             response.student = student.email
                             response.put()
-                            logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(
-                                option) + ', comment: ' + str(comment))
+                            logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(option) + ', comment: ' + str(comment))
                             self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
                         else:
                             self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
@@ -163,6 +163,13 @@ class HomePage(webapp2.RequestHandler):
                 self.response.write('Sorry! There was some error submitting your response please try again later.')
         else:
             self.response.write('Sorry! There was some error submitting your response please try again later.')
+
+
+def check_response(response):
+    for i in range(1, len(response)):
+        if response[i] not in ['support', 'neutral', 'disagree']:
+            return True
+    return False
 
 
 class Discussion(webapp2.RequestHandler):
@@ -202,22 +209,24 @@ class Discussion(webapp2.RequestHandler):
                                 'alias': student.alias,
                                 'comments': comments
                             }
+                            response = Response.get_by_id(student.email, parent=current_round.key)
+                            if response:
+                                template_values['comment'] = response.comment
+                                template_values['response'] = ','.join(str(item) for item in response.response)
+                                logging.info(template_values)
                             if deadline < current_time:
                                 template_values['expired'] = True
                             template_values['deadline'] = current_round.deadline
                             template = JINJA_ENVIRONMENT.get_template('discussion.html')
                             self.response.write(template.render(template_values))
                         else:
-                            self.response.write(
-                                'Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
+                            self.response.write('Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
                     else:
                         self.response.write('Sorry rounds are not active. <a href="' + url + '"">Logout</a>')
                 else:
-                    self.response.write(
-                        'Sorry no rounds are active right now, please check back later. <a href="' + url + '"">Logout</a>')
+                    self.response.write('Sorry no rounds are active right now, please check back later. <a href="' + url + '"">Logout</a>')
             else:
-                self.response.write(
-                    'Sorry you are not yet registered with this application, please contact your professor. <a href="' + url + '"">Logout</a>')
+                self.response.write('Sorry you are not yet registered with this application, please contact your professor. <a href="' + url + '"">Logout</a>')
         else:
             self.redirect('/')
 
@@ -226,11 +235,12 @@ class Discussion(webapp2.RequestHandler):
         if user:
             student = Student.query(Student.email == user.email()).get()
             if student:
-                option = self.request.get('option').lower()
+                response = json.loads(self.request.get('response'))
                 comment = self.request.get('comm')
-                if not (option and comment):
+                if (not (response and comment)) or check_response(response):
                     self.response.write('Sorry! There was some error submitting your response please try again later.')
                 else:
+                    logging.info(response)
                     class_obj = Class.get_by_id(student.class_name)
                     current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
                     if current_round:
@@ -238,22 +248,19 @@ class Discussion(webapp2.RequestHandler):
                         logging.info(deadline)
                         current_time = datetime.datetime.now()
                         logging.info(current_time)
-                        if deadline > current_time:
-                            # response = Response(parent=quiz_key(student.class_name, 1), id=student.email)
-                            # response.option = option
-                            # response.comment = comment
-                            # response.student = student.email
-                            # response.put()
-                            logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(
-                                option) + ', comment: ' + str(comment))
-                            self.response.write(
-                                'Thank you, your response have been saved and you can edit your response any time before the deadline.')
+                        if deadline >= current_time:
+                            new_response = Response(parent=current_round.key, id=student.email)
+                            new_response.comment = comment
+                            new_response.student = student.email
+                            for i in range(1, len(response)):
+                                new_response.response.append(response[i])
+                            new_response.put()
+                            logging.info('Response saved from ' + str(student.email) + ', comment: ' + str(comment))
+                            self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
                         else:
-                            self.response.write(
-                                'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                            self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
                     else:
-                        self.response.write(
-                            'Sorry! There was some error submitting your response please try again later.')
+                        self.response.write('Sorry! There was some error submitting your response please try again later.')
             else:
                 self.response.write('Sorry! There was some error submitting your response please try again later.')
         else:
