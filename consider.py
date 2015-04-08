@@ -98,6 +98,7 @@ class HomePage(webapp2.RequestHandler):
                     if class_obj.current_round > 0:
                         if class_obj.current_round > 1:
                             self.redirect('/discussion')
+                            return
                         current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
                         if current_round:
                             deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
@@ -183,10 +184,24 @@ class Discussion(webapp2.RequestHandler):
             if student:
                 logging.info('Student redirect to discussion ' + str(student))
                 class_obj = Class.get_by_id(student.class_name)
+                current_page = self.request.get('round')
                 if class_obj.current_round > 0:
                     if class_obj.current_round == 1:
                         self.redirect('/home')
-                    current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
+                        return
+                    display_round = class_obj.current_round
+                    if current_page:
+                        try:
+                            current_page = int(current_page) + 1
+                            logging.info(current_page)
+                            if current_page > class_obj.current_round or current_page < 2:
+                                raise Exception('wrong_round')
+                            else:
+                                display_round = current_page
+                        except:
+                            self.redirect('/discussion')
+                            return
+                    current_round = Round.get_by_id(display_round, parent=class_obj.key)
                     if current_round:
                         deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
                         logging.info(deadline)
@@ -196,7 +211,7 @@ class Discussion(webapp2.RequestHandler):
                         if group:
                             comments = []
                             for stu in group.members:
-                                response = Response.get_by_id(stu, parent=Round.get_by_id(class_obj.current_round - 1, parent=class_obj.key).key)
+                                response = Response.get_by_id(stu, parent=Round.get_by_id(display_round - 1, parent=class_obj.key).key)
                                 if response:
                                     comment = {
                                         'alias': Student.get_by_id(stu, parent=student.key.parent()).alias,
@@ -213,10 +228,12 @@ class Discussion(webapp2.RequestHandler):
                             if response:
                                 template_values['comment'] = response.comment
                                 template_values['response'] = ','.join(str(item) for item in response.response)
-                                logging.info(template_values)
-                            if deadline < current_time:
+                            if deadline < current_time or display_round != class_obj.current_round:
                                 template_values['expired'] = True
                             template_values['deadline'] = current_round.deadline
+                            template_values['round'] = class_obj.current_round
+                            template_values['curr_page'] = display_round
+                            logging.info(template_values)
                             template = JINJA_ENVIRONMENT.get_template('discussion.html')
                             self.response.write(template.render(template_values))
                         else:

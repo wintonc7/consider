@@ -8,6 +8,7 @@
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/discussion.css" rel="stylesheet">
+    <link href="/css/dots.css" rel="stylesheet" type="text/css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -17,6 +18,9 @@
     <![endif]-->
   </head>
   <body>
+    <div id="spinner" class="dots">
+        Loading...
+    </div>
     <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -30,7 +34,9 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Round 1</a></li>
+              {% for i in range(0,round-1) %}
+                <li {% if i==curr_page-2 -%}class="active"><a href="#">{%- else -%}><a href="/discussion?round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
+              {% endfor %}
           </ul>
         </div>
       </div>
@@ -47,9 +53,9 @@
       <div class="jumbotron" id="jum_{{loop.index}}">
         <h2>{{comment.alias}}</h2>
         <p>{{comment.response}}</p>
-        <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support</button>
-        <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral</button>
-        <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
+        <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support</button>
+        <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral</button>
+        <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
       </div>
       {% endfor %}
         <div id="alert_comment" class="alert alert-info fade in" role="alert" style="display: none;">
@@ -75,6 +81,43 @@
     <script src="/js/countdown.min.js"></script>
     <script src="/js/bootbox.min.js"></script>
     <script type="text/javascript">
+        var l = {{comments|length}};
+        var resp = [];
+        resp[0] = null;
+
+        jQuery.ajaxSetup({
+            beforeSend: function() {
+             $('#spinner').show();
+            },
+            complete: function(){
+             $('#spinner').hide();
+            },
+            success: function() {}
+        });
+
+        $(window).load(function() {
+	        $("#spinner").fadeOut("slow");
+        });
+
+        {% if response %}
+            resp = resp.concat('{{response}}'.split(','));
+            window.onload = initComments;
+        {% endif %}
+
+            function initComments() {
+                for(var i=1; i<=l; i++) {
+                    if (resp[i] == "support") {
+                        $("#jum_"+i).removeClass().addClass('jumbotron').addClass('support');
+                    }
+                    else if(resp[i] == "neutral") {
+                        $("#jum_"+i).removeClass().addClass('jumbotron').addClass('neutral');
+                    }
+                    else {
+                        $("#jum_"+i).removeClass().addClass('jumbotron').addClass('disagree');
+                    }
+                }
+            }
+
         {%- if not expired -%}
             var clock = document.getElementById("countdown");
             targetDate = new Date("{{deadline}}");
@@ -86,15 +129,6 @@
             $('.alert .close').on('click', function(e) {
               $(this).parent().hide();
             });
-
-        var resp = [];
-        resp[0] = null;
-
-        {% if response %}
-            resp = resp.concat('{{response}}'.split(','));
-            window.onload = initComments;
-        {% endif %}
-            var l = {{comments|length}};
 
             $("#form").submit(function (event){
                 //Prevent the default behaviour
@@ -119,20 +153,6 @@
                     if(!resp[i]) return false;
                 }
                 return true;
-            }
-
-            function initComments() {
-                for(var i=1; i<=l; i++) {
-                    if (resp[i] == "support") {
-                        $("#jum_"+i).removeClass().addClass('jumbotron').addClass('support');
-                    }
-                    else if(resp[i] == "neutral") {
-                        $("#jum_"+i).removeClass().addClass('jumbotron').addClass('neutral');
-                    }
-                    else {
-                        $("#jum_"+i).removeClass().addClass('jumbotron').addClass('disagree');
-                    }
-                }
             }
 
             function updateAlert(obj) {
