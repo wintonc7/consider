@@ -6,42 +6,122 @@
 <h4 class="sub-header">Current round: {% if round -%} {{round}} {% else -%} No rounds in progress {%- endif -%}</h4>
 <form class="form-horizontal" id="form" method="post" style="text-align: center;" action="/rounds">
     <div class="form-group">
-      <label for="inputTime1" class="lead col-sm-4 control-label">Set time for round 1:</label>
-      <div class="col-sm-4">
-        <input type="datetime-local" class="form-control" id="inputTime1" name="time" required="true">
-      </div>
+        <label for="inputTime" class="lead col-sm-4 control-label">Start a new round:</label>
+        <div class="col-sm-4">
+            <input type="datetime-local" class="form-control" id="inputTime" name="time" required="true">
+        </div>
     </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-default">Start round 1</button>
-    </div>
-</form>
-<form class="form-horizontal" id="form2" method="post" style="text-align: center;" action="/rounds">
-    <div class="form-group">
-      <label for="inputTime2" class="lead col-sm-4 control-label">Set time for round 2:</label>
-      <div class="col-sm-4">
-        <input type="datetime-local" class="form-control" id="inputTime2" name="time" required="true">
-      </div>
+        <label for="inputBoolean" class="lead col-sm-4 control-label">Quiz round:</label>
+        <div class="col-sm-4">
+            <select class="form-control" id="inputBoolean" name="type" {% if not round -%} disabled="true" data-toggle="tooltip" data-placement="bottom" title="First round should be quiz."{% endif -%}>
+                <option value="false" {% if round -%} selected="selected" {% endif -%}>False</option>
+                <option value="true" {% if not round -%} selected="selected" {% endif -%}>True</option>
+            </select>
+        </div>
     </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-default">Start round 2</button>
-    </div>
-</form>
-<form class="form-horizontal" id="form3" method="post" style="text-align: center;" action="/rounds">
-    <div class="form-group">
-      <label for="inputTime2" class="lead col-sm-4 control-label">Set time for round 3:</label>
-      <div class="col-sm-4">
-        <input type="datetime-local" class="form-control" id="inputTime3" name="time" required="true">
-      </div>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-default">Start round 3</button>
+        <button type="submit" class="btn btn-default" {% if not round -%} style="margin-top: 25px;" {% endif -%}>Start round</button>
     </div>
 </form>
 <h4 class="sub-header">Previous rounds:</h4>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Please add question for the Quiz</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/rounds">
+            <div class="form-group">
+              <label for="inputQuestion" class="col-sm-2 control-label">Question</label>
+              <div class="col-sm-10">
+                <textarea class="form-control" rows="3" id="inputQuestion" name="question" placeholder="Please enter the question..." required></textarea>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputOptions" class="col-sm-2 control-label">Number of options</label>
+              <div class="col-sm-10">
+                <select class="form-control" id="inputOptions" name="options">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected="selected">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputOptions1" class="col-sm-2 control-label">Options: </label>
+              <div class="col-sm-10" id="optionsContainer">
+                <input type="text" class="form-control" id="inputOptions1" name="Options1" style="margin-bottom: 10px" required="true">
+                <input type="text" class="form-control" id="inputOptions2" name="Options2" style="margin-bottom: 10px" required="true">
+                <input type="text" class="form-control" id="inputOptions3" name="Options3" style="margin-bottom: 10px" required="true">
+                <input type="text" class="form-control" id="inputOptions4" name="Options4" style="margin-bottom: 10px" required="true">
+              </div>
+            </div>
+            <button type="submit" class="hide"></button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="submitQuestion()">Submit Question</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block script %}
 <script>
+    function submitQuestion() {
+        $("#modalForm").find('[type="submit"]').trigger('click');
+    }
+
+    $("#modalForm").submit(function (event) {
+        event.preventDefault();
+        var $form = $(this),
+            question = $form.find("textarea").val(),
+            options = $form.find("select").val(),
+            url = $form.attr("action");
+
+        var optionVals = [];
+        for(var i=1; i<=options; i++) {
+            var val = $("#inputOptions"+i).val();
+            optionVals.push(val);
+        }
+        optionVals = JSON.stringify(optionVals);
+
+        var time_val = $("#inputTime").val();
+
+        console.log(question + options + time_val + optionVals);
+
+        var round = parseInt({% if round -%} {{round}} {% else -%} 0 {%- endif -%}, 10);
+        var quiz = "T";
+
+        // do the POST and get the callback
+        $.post(url,{time:time_val, round:round+1, quiz:quiz, question:question, number:options, options:optionVals},function (data) {
+          bootbox.alert(data, function(){location.reload();});
+        });
+    });
+
+    {% if not round -%}
+        $( document ).ready(function() {
+            $("#inputBoolean").tooltip('show');
+        });
+    {% endif -%}
+
+    $("#inputOptions").change(function() {
+        var select = parseInt($('#inputOptions').val() , 10);
+        var html = '';
+        for(var i=1; i<=select; i++){
+            html += '<input type="text" class="form-control" id="inputOptions'+i+'" name="Options'+i+'" placeholder="Option '+i+'" style="margin-bottom: 10px" required="true">';
+        }
+        $('#optionsContainer').empty().html(html);
+    }).change();
+
   $("#form").submit(function (event) {
         //Prevent the default behaviour
         event.preventDefault();
@@ -50,44 +130,51 @@
         var $form = $(this),
         time_val = $form.find("input[name='time']").val(),
         class2 = "{{section}}",
+        type = $("#inputBoolean").val(),
         url = $form.attr("action");
 
+        if(type == 'true') {
+            $("#myModal").modal('show');
+        }
+        else {
+
+        }
         // do the POST and get the callback
-        $.post(url,{time:time_val, class:class2, round:1},function (data) {
-          bootbox.alert(data, function(){location.reload();});
-        });
+//        $.post(url,{time:time_val, class:class2, round:1},function (data) {
+//          bootbox.alert(data, function(){location.reload();});
+//        });
       });
 
-  $("#form2").submit(function (event) {
-        //Prevent the default behaviour
-        event.preventDefault();
-
-        //collect form elements
-        var $form = $(this),
-        time_val = $form.find("input[name='time']").val(),
-        class2 = "{{section}}",
-        url = $form.attr("action");
-
-        // do the POST and get the callback
-        $.post(url,{time:time_val, class:class2, round:2},function (data) {
-            bootbox.alert(data, function(){location.reload();});
-        });
-      });
-
-    $("#form3").submit(function (event) {
-        //Prevent the default behaviour
-        event.preventDefault();
-
-        //collect form elements
-        var $form = $(this),
-        time_val = $form.find("input[name='time']").val(),
-        class2 = "{{section}}",
-        url = $form.attr("action");
-
-        // do the POST and get the callback
-        $.post(url,{time:time_val, class:class2, round:3},function (data) {
-          bootbox.alert(data, function(){location.reload();});
-        });
-      });
+//  $("#form2").submit(function (event) {
+//        //Prevent the default behaviour
+//        event.preventDefault();
+//
+//        //collect form elements
+//        var $form = $(this),
+//        time_val = $form.find("input[name='time']").val(),
+//        class2 = "{{section}}",
+//        url = $form.attr("action");
+//
+//        // do the POST and get the callback
+//        $.post(url,{time:time_val, class:class2, round:2},function (data) {
+//            bootbox.alert(data, function(){location.reload();});
+//        });
+//      });
+//
+//    $("#form3").submit(function (event) {
+//        //Prevent the default behaviour
+//        event.preventDefault();
+//
+//        //collect form elements
+//        var $form = $(this),
+//        time_val = $form.find("input[name='time']").val(),
+//        class2 = "{{section}}",
+//        url = $form.attr("action");
+//
+//        // do the POST and get the callback
+//        $.post(url,{time:time_val, class:class2, round:3},function (data) {
+//          bootbox.alert(data, function(){location.reload();});
+//        });
+//      });
 </script>
 {% endblock %}

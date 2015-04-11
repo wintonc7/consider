@@ -42,10 +42,19 @@ class Group(ndb.Model):
     size = ndb.IntegerProperty(default=0, indexed=False)
 
 
+class Question(ndb.Model):
+    """A model to hold the question and options of each round"""
+    options_total = ndb.IntegerProperty(required=True, indexed=False)
+    question = ndb.StringProperty(required=True, indexed=False)
+    options = ndb.StringProperty(repeated=True, indexed=False)
+
+
 class Round(ndb.Model):
     """A model to hold the properties of each round"""
     deadline = ndb.StringProperty(required=True, indexed=False)
     number = ndb.IntegerProperty(required=True)
+    is_quiz = ndb.BooleanProperty(default=False, indexed=False)
+    quiz = ndb.StructuredProperty(Question, indexed=False)
 
 
 class Response(ndb.Model):
@@ -316,23 +325,28 @@ class Groups(webapp2.RequestHandler):
             if result:
                 logging.info('Admin navigated to groups ' + str(result))
                 section = str(result.key.parent().string_id())
-                response = Response.query(ancestor=Round.get_by_id(1, parent=result.key.parent()).key).fetch()
-                groups = Class.get_by_id(section).groups
-                logging.info('Groups found: ' + str(groups))
-                student = Student.query(ancestor=result.key).fetch()
-                for res in response:
-                    for stu in student:
-                        if res.student == stu.email:
-                            res.group = stu.group
-                logging.info(response)
-                template_values = {
-                    'logouturl': url,
-                    'section': section,
-                    'responses': response,
-                    'group': groups
-                }
-                template = JINJA_ENVIRONMENT.get_template('groups.html')
-                self.response.write(template.render(template_values))
+                template_values = {}
+                try:
+                    response = Response.query(ancestor=Round.get_by_id(1, parent=result.key.parent()).key).fetch()
+                    groups = Class.get_by_id(section).groups
+                    logging.info('Groups found: ' + str(groups))
+                    student = Student.query(ancestor=result.key).fetch()
+                    for res in response:
+                        for stu in student:
+                            if res.student == stu.email:
+                                res.group = stu.group
+                    logging.info(response)
+                    template_values = {
+                        'responses': response,
+                        'group': groups
+                    }
+                except:
+                    logging.info("No rounds are available.")
+                finally:
+                    template_values['logouturl'] = url
+                    template_values['section'] = section
+                    template = JINJA_ENVIRONMENT.get_template('groups.html')
+                    self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
         else:
@@ -429,18 +443,24 @@ class Rounds(webapp2.RequestHandler):
         if user:
             result = Admin.query(Admin.email == user.email()).get()
             if result:
-                class_name = self.request.get('class')
+                class_name = str(result.key.parent().string_id())
                 time = self.request.get('time')
                 round_val = int(self.request.get('round'))
+                quiz = self.request.get('quiz')
                 class_obj = Class.get_by_id(class_name)
                 if class_obj:
                     class_obj.current_round = round_val
                     class_obj.rounds = round_val
                     class_obj.put()
-
                     round_obj = Round(parent=class_obj.key, id=round_val)
                     round_obj.deadline = time
                     round_obj.number = round_val
+                    if quiz == 'T':
+                        round_obj.is_quiz = True
+                        question = self.request.get('question')
+                        number_options = int(self.request.get('number'))
+                        options = json.loads(self.request.get('options'))
+                        round_obj.quiz = Question(options_total=number_options, question=question, options=options)
                     round_obj.put()
                     logging.info(round_obj)
                     self.response.write('Success, round ' + str(round_val) + ' is now active.')

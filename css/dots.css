@@ -325,6 +325,7 @@
     position: fixed;
     top: 50%;
     left: 50%;
+    z-index: 1000;
 }
 
 /* :not(:required) hides this rule from IE9 and below */
