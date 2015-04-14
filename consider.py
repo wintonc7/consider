@@ -126,6 +126,8 @@ class HomePage(webapp2.RequestHandler):
                                     'option': response.option,
                                     'comment': response.comment
                                 }
+                                if response.summary:
+                                    template_values['summary'] = response.summary
                             else:
                                 template_values = {
                                     'url': url
@@ -134,8 +136,6 @@ class HomePage(webapp2.RequestHandler):
                                 template_values['expired'] = True
                             if class_obj.current_round == 4:                        # To be changed
                                 template_values['last_round'] = True
-                            if response.summary:
-                                template_values['summary'] = response.summary
                             template_values['deadline'] = current_round.deadline
                             template_values['question'] = current_round.quiz.question
                             template_values['options'] = current_round.quiz.options
