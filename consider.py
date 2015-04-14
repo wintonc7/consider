@@ -62,6 +62,7 @@ class Response(ndb.Model):
     option = ndb.StringProperty(default='NA', indexed=False)
     comment = ndb.StringProperty(required=True, indexed=False)
     response = ndb.StringProperty(repeated=True, indexed=False)
+    summary = ndb.StringProperty(indexed=False)
     student = ndb.StringProperty(required=True)
 
 
@@ -96,6 +97,9 @@ class HomePage(webapp2.RequestHandler):
                     'logouturl': url,
                     'section': section
                 }
+                students = Student.query(ancestor=result.key).fetch()
+                if students:
+                    template_values['students'] = students
                 template = JINJA_ENVIRONMENT.get_template('admin.html')
                 self.response.write(template.render(template_values))
             else:
@@ -105,11 +109,11 @@ class HomePage(webapp2.RequestHandler):
                     class_obj = Class.get_by_id(result.class_name)
                     logging.info(class_obj)
                     if class_obj.current_round > 0:
-                        if class_obj.current_round > 1:
-                            self.redirect('/discussion')
-                            return
                         current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
                         if current_round:
+                            if not current_round.is_quiz:
+                                self.redirect('/discussion')
+                                return
                             deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
                             logging.info(deadline)
                             current_time = datetime.datetime.now()
@@ -128,7 +132,14 @@ class HomePage(webapp2.RequestHandler):
                                 }
                             if deadline < current_time:
                                 template_values['expired'] = True
+                            if class_obj.current_round == 4:                        # To be changed
+                                template_values['last_round'] = True
+                            if response.summary:
+                                template_values['summary'] = response.summary
                             template_values['deadline'] = current_round.deadline
+                            template_values['question'] = current_round.quiz.question
+                            template_values['options'] = current_round.quiz.options
+                            template_values['number'] = current_round.quiz.options_total
                             template = JINJA_ENVIRONMENT.get_template('home.html')
                             self.response.write(template.render(template_values))
                         else:
@@ -147,6 +158,7 @@ class HomePage(webapp2.RequestHandler):
             if student:
                 option = self.request.get('option').lower()
                 comment = self.request.get('comm')
+                summary = self.request.get('summary')
                 if not (option and comment):
                     self.response.write('Sorry! There was some error submitting your response please try again later.')
                 else:
@@ -162,6 +174,8 @@ class HomePage(webapp2.RequestHandler):
                             response.option = option
                             response.comment = comment
                             response.student = student.email
+                            if summary:
+                                response.summary = summary
                             response.put()
                             logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(option) + ', comment: ' + str(comment))
                             self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
@@ -199,11 +213,13 @@ class Discussion(webapp2.RequestHandler):
                         self.redirect('/home')
                         return
                     display_round = class_obj.current_round
+                    if class_obj.current_round == 4:        # To be changed
+                        display_round = 3
                     if current_page:
                         try:
                             current_page = int(current_page) + 1
                             logging.info(current_page)
-                            if current_page > class_obj.current_round or current_page < 2:
+                            if current_page > 3 or current_page < 2:    # To be changed
                                 raise Exception('wrong_round')
                             else:
                                 display_round = current_page
@@ -216,7 +232,11 @@ class Discussion(webapp2.RequestHandler):
                         logging.info(deadline)
                         current_time = datetime.datetime.now()
                         logging.info(current_time)
-                        group = Group.get_by_id(student.group, parent=student.key.parent().parent())
+                        try:
+                            group = Group.get_by_id(student.group, parent=student.key.parent().parent())
+                        except:
+                            self.response.write('Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
+                            return
                         if group:
                             comments = []
                             for stu in group.members:
@@ -242,6 +262,8 @@ class Discussion(webapp2.RequestHandler):
                             template_values['deadline'] = current_round.deadline
                             template_values['round'] = class_obj.current_round
                             template_values['curr_page'] = display_round
+                            if class_obj.current_round == 4:        # To be changed
+                                template_values['round'] = 3
                             logging.info(template_values)
                             template = JINJA_ENVIRONMENT.get_template('discussion.html')
                             self.response.write(template.render(template_values))
@@ -302,16 +324,20 @@ class AddStudent(webapp2.RequestHandler):
             result = Admin.query(Admin.email == user.email()).get()
             if result:
                 class_name = self.request.get('class')
-                email = self.request.get('email').lower()
-                student = Student(parent=result.key, id=email)
-                student.email = email
-                student.class_name = class_name
-                student.put()
-                self.response.write(email)
+                emails = json.loads(self.request.get('emails'))
+                if emails:
+                    for email in emails:
+                        student = Student(parent=result.key, id=email)
+                        student.email = email
+                        student.class_name = class_name
+                        student.put()
+                    self.response.write(len(emails))
+                else:
+                    self.response.write("Error! invalid arguments.")
             else:
-                self.response.write('error')
+                self.response.write('Error! unauthorized user.')
         else:
-            self.response.write('error')
+            self.response.write('Error! Please log in.')
 
 
 class Groups(webapp2.RequestHandler):
@@ -431,6 +457,9 @@ class Rounds(webapp2.RequestHandler):
                     'section': section,
                     'round': class_obj.current_round
                 }
+                rounds = Round.query(ancestor=class_obj.key).fetch()
+                if rounds:
+                    template_values['rounds'] = rounds
                 template = JINJA_ENVIRONMENT.get_template('rounds.html')
                 self.response.write(template.render(template_values))
             else:
@@ -463,7 +492,7 @@ class Rounds(webapp2.RequestHandler):
                         round_obj.quiz = Question(options_total=number_options, question=question, options=options)
                     round_obj.put()
                     logging.info(round_obj)
-                    self.response.write('Success, round ' + str(round_val) + ' is now active.')
+                    self.response.write('Success, Round ' + str(round_val) + ' is now active.')
                 else:
                     self.response.write('Error, finding the given class.')
             else:

@@ -28,30 +28,21 @@
              <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
             </a>
         </div>
+        {%- if last_round -%}<div class="row"><a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion" target="_blank"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Go to Discussions</a></div> {%- endif -%}
         <div class="header">
-            <h3 class="text-muted">Question 1</h3>
+            <h3 class="text-muted">{%- if last_round -%}Post Discussion Question{%- endif -%}</h3>
         </div>
         <div class="jumbotron">
-            <p class"lead well"> What do you think about Axiomatic Semantics? </p>
+            <p> {{question}} </p>
         </div>
         <form id="form" method="post" {% if not expired -%} action="/home" {%- endif -%}>
             <div class="list-group">
-                <input type="radio" name="optionsRadios" id="option1" value="option1" {% if expired -%} disabled="true" {%- endif -%}>
-                <label class="radio list-group-item" for="option1">
-                    Option one is this and that&mdash;be sure to include why it's great
+                {% for option in options %}
+                <input type="radio" name="optionsRadios" id="option{{loop.index}}" value="option{{loop.index}}" {% if expired -%} disabled="true" {%- endif -%}>
+                <label class="radio list-group-item" for="option{{loop.index}}">
+                    {{option}}
                 </label>
-                <input type="radio" name="optionsRadios" id="option2" value="option2" {% if expired -%} disabled="true" {%- endif -%}>
-                <label class="radio list-group-item" for="option2">
-                    Option one is this and that&mdash;be sure to include why it's great
-                </label>
-                <input type="radio" name="optionsRadios" id="option3" value="option3" {% if expired -%} disabled="true" {%- endif -%}>
-                <label class="radio list-group-item" for="option3">
-                    Option one is this and that&mdash;be sure to include why it's great
-                </label>
-                <input type="radio" name="optionsRadios" id="option4" value="option4" {% if expired -%} disabled="true" {%- endif -%}>
-                <label class="radio list-group-item" for="option4">
-                    Option one is this and that&mdash;be sure to include why it's great
-                </label>
+                {% endfor %}
             </div>
             <textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required {% if expired -%} disabled="true" {%- endif -%}>
             {%- if comment -%}{{comment}}
@@ -60,6 +51,32 @@
             <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
         </form>
     </div>
+    {%- if last_round -%}
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Please provide a brief summary... </h4>
+          </div>
+          <div class="modal-body">
+            <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/home">
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <textarea class="form-control" rows="10" id="inputSummary" name="summary" placeholder="Your summary..." required>{{summary}}</textarea>
+                  </div>
+                </div>
+                <button type="submit" class="hide"></button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="submitSummary()">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/countdown.min.js"></script>
@@ -78,16 +95,40 @@
         $(window).load(function() {
 	        $("#spinner").fadeOut("slow");
         });
+
     {%- if option -%}
-    			$("#{{option}}").prop("checked",true);
-	  {%- endif -%}
+        $("#{{option}}").prop("checked",true);
+    {%- endif -%}
+
     {% if not expired -%}
-	    var clock = document.getElementById("countdown");
+
+        var clock = document.getElementById("countdown");
 	    targetDate = new Date("{{deadline}}");
 	    clock.innerHTML = countdown(targetDate).toString();
 	    setInterval(function(){
 	    		clock.innerHTML = countdown(targetDate).toString();
 	  		}, 1000);
+
+        var radio, comment;
+
+    {% if last_round %}
+        function submitSummary() {
+            $("#modalForm").find('[type="submit"]').trigger('click');
+        }
+
+        $("#modalForm").submit(function (event){
+            //Prevent the default behaviour
+            event.preventDefault();
+
+            //collect form elements
+            var $form = $(this);
+            var summary = $form.find("textarea").val();
+            var url = $form.attr("action");
+            $.post(url, {option:radio, comm:comment, summary:summary}, function (data) {
+                bootbox.alert(data);
+            });
+        });
+    {% endif %}
 
 	    $("#form").submit(function (event){
 	    	//Prevent the default behaviour
@@ -100,12 +141,16 @@
 	        	bootbox.alert("Please select one of the options");
 	        }
 	        else {
-	        	var radio = $form.find("input:radio[name='optionsRadios']:checked").val();
-	        	var comment = $form.find("textarea").val();
+	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val();
+	        	comment = $form.find("textarea").val();
 	        	var url = $form.attr("action");
+                {% if last_round %}
+                    $('#myModal').modal('show');
+                {% else %}
 	        	$.post(url,{option:radio, comm:comment},function (data) {
 		        	bootbox.alert(data);
 		        });
+                {% endif %}
 	        }
 	    });
 	   {%- endif -%}
