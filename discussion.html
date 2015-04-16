@@ -48,10 +48,14 @@
        <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
         </a>
       </div>
-      <h1 class="well lead">Welcome {{alias}}</h1>
+      <h1 class="lead">Welcome {{alias}}</h1>
+      {% if description %}<h1 class="well lead" style="font-size: 1.5em !important;">{{description}}</h1>{% endif %}
       {% for comment in comments %}
       <div class="jumbotron" id="jum_{{loop.index}}">
         <h2>{{comment.alias}}</h2>
+          {% if comment.option %}
+          <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
+          {% endif %}
         <p>{{comment.response}}</p>
         <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support</button>
         <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral</button>

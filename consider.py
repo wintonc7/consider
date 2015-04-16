@@ -53,6 +53,7 @@ class Round(ndb.Model):
     """A model to hold the properties of each round"""
     deadline = ndb.StringProperty(required=True, indexed=False)
     number = ndb.IntegerProperty(required=True)
+    description = ndb.StringProperty(indexed=False)
     is_quiz = ndb.BooleanProperty(default=False, indexed=False)
     quiz = ndb.StructuredProperty(Question, indexed=False)
 
@@ -246,6 +247,8 @@ class Discussion(webapp2.RequestHandler):
                                         'alias': Student.get_by_id(stu, parent=student.key.parent()).alias,
                                         'response': response.comment
                                     }
+                                    if response.option != 'NA':
+                                        comment['option'] = Round.get_by_id(display_round - 1, parent=class_obj.key).quiz.options[int(response.option[-1]) - 1]
                                     comments.append(comment)
                             logging.info(comments)
                             template_values = {
@@ -262,6 +265,7 @@ class Discussion(webapp2.RequestHandler):
                             template_values['deadline'] = current_round.deadline
                             template_values['round'] = class_obj.current_round
                             template_values['curr_page'] = display_round
+                            template_values['description'] = current_round.description
                             if class_obj.current_round == 4:        # To be changed
                                 template_values['round'] = 3
                             logging.info(template_values)
@@ -490,6 +494,9 @@ class Rounds(webapp2.RequestHandler):
                         number_options = int(self.request.get('number'))
                         options = json.loads(self.request.get('options'))
                         round_obj.quiz = Question(options_total=number_options, question=question, options=options)
+                    else:
+                        description = self.request.get('description')
+                        round_obj.description = description
                     round_obj.put()
                     logging.info(round_obj)
                     self.response.write('Success, Round ' + str(round_val) + ' is now active.')
