@@ -245,7 +245,8 @@ class Discussion(webapp2.RequestHandler):
                                 if response:
                                     comment = {
                                         'alias': Student.get_by_id(stu, parent=student.key.parent()).alias,
-                                        'response': response.comment
+                                        'response': response.comment,
+                                        'opinion': response.response
                                     }
                                     if response.option != 'NA':
                                         comment['option'] = Round.get_by_id(display_round - 1, parent=class_obj.key).quiz.options[int(response.option[-1]) - 1]
