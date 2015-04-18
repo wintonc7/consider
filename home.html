@@ -153,6 +153,11 @@
                 {% endif %}
 	        }
 	    });
+
+        $(window).bind('beforeunload', function(){
+            if( $('#comment').val() != '{%- if comment -%}{{comment}}{%- endif -%}'){
+                return "It looks like you have input you haven't submitted.";
+        }
 	   {%- endif -%}
     </script>
   </body>
