@@ -178,7 +178,7 @@ class HomePage(webapp2.RequestHandler):
                             if summary:
                                 response.summary = summary
                             response.put()
-                            logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(option) + ', comment: ' + str(comment))
+                            # logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(option) + ', comment: ' + str(comment))
                             self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
                         else:
                             self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
@@ -308,7 +308,7 @@ class Discussion(webapp2.RequestHandler):
                             for i in range(1, len(response)):
                                 new_response.response.append(response[i])
                             new_response.put()
-                            logging.info('Response saved from ' + str(student.email) + ', comment: ' + str(comment))
+                            # logging.info('Response saved from ' + str(student.email) + ', comment: ' + str(comment))
                             self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
                         else:
                             self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')

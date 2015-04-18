@@ -57,9 +57,9 @@
           <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
           {% endif %}
           {% for opinion in comment.opinion %}
-          <span class="badge" style="font-weight: 100; background-color: #110F80;">S{{loop.index}}: <span class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}" aria-hidden="true"></span></span>
+          <span class="badge" style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}: <span class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}" aria-hidden="true"></span></span>
           {% endfor %}
-        <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">{{comment.response}}</div>
+        <div class="well" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">{{comment.response}}</div>
         <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support</button>
         <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral</button>
         <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
