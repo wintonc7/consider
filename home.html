@@ -125,7 +125,9 @@
             var summary = $form.find("textarea").val();
             var url = $form.attr("action");
             $.post(url, {option:radio, comm:comment, summary:summary}, function (data) {
-                bootbox.alert(data);
+                bootbox.alert(data,function(){
+                    location.reload();
+                });
             });
         });
     {% endif %}
@@ -148,16 +150,21 @@
                     $('#myModal').modal('show');
                 {% else %}
 	        	$.post(url,{option:radio, comm:comment},function (data) {
-		        	bootbox.alert(data);
+		        	bootbox.alert(data,function(){
+                        ocomment = comment;
+                    });
 		        });
                 {% endif %}
 	        }
 	    });
 
-        $(window).bind('beforeunload', function(){
-            if( $('#comment').val() != '{%- if comment -%}{{comment}}{%- endif -%}'){
+        var ocomment = $("#comment").val();
+
+        $(window).bind('beforeunload', function() {
+            if ($('#comment').val() !== ocomment) {
                 return "It looks like you have input you haven't submitted.";
-        }
+            }
+        });
 	   {%- endif -%}
     </script>
   </body>

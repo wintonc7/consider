@@ -149,7 +149,9 @@
                     var comment = $form.find("textarea").val();
                     var url = $form.attr("action");
                     $.post(url,{comm:comment,response:JSON.stringify(resp)},function (data) {
-                        bootbox.alert(data);
+                        bootbox.alert(data,function(){
+                            ocomment = comment;
+                        });
                     });
                 }
             });
@@ -184,11 +186,13 @@
               }
             }
 
+            var ocomment = $('#comment').val();
+
             $(window).bind('beforeunload', function(){
-                if( $('#comment').val() != '{%- if comment -%}{{comment}}{%- endif -%}'){
+                if( $('#comment').val() !== ocomment){
                     return "It looks like you have input you haven't submitted.";
-            }
-});
+                }
+            });
         {% endif %}
     </script>   
   </body>
