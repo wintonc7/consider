@@ -156,7 +156,7 @@
         var val = $('#inputBoolean').val();
         var html = '';
         if(val == 'false') {
-            html = '<label for="inputDescription" class="lead col-sm-4 control-label">Description:</label><div class="col-sm-4"><input type="text" class="form-control" id="inputDescription" name="description" placeholder="Please enter description for round..." required="true"></div>';
+            html = '<label for="inputDescription" class="lead col-sm-4 control-label">Description:</label><div class="col-sm-4"><textarea type="text" class="form-control" id="inputDescription" name="description" placeholder="Please enter description for round..." required="true"></textarea></div>';
         }
         $('#descriptionContainer').empty().html(html);
     }).change();
@@ -174,7 +174,7 @@
             //collect form elements
             var $form = $(this),
             time_val = $form.find("input[name='time']").val(),
-            description = $form.find("input[name='description']").val(),
+            description = $form.find("textarea[name='description']").val(),
             url = $form.attr("action");
 
             var round = parseInt({% if round -%} {{round}} {% else -%} 0 {%- endif -%}, 10);

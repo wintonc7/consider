@@ -103,7 +103,7 @@
     {% if not expired -%}
 
         var clock = document.getElementById("countdown");
-	    targetDate = new Date("{{deadline}}");
+	    targetDate = new Date("{{deadline}}Z");
 	    clock.innerHTML = countdown(targetDate).toString();
 	    setInterval(function(){
 	    		clock.innerHTML = countdown(targetDate).toString();

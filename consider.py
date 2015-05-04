@@ -135,7 +135,7 @@ class HomePage(webapp2.RequestHandler):
                                 }
                             if deadline < current_time:
                                 template_values['expired'] = True
-                            if class_obj.current_round == 4:                        # To be changed
+                            if class_obj.current_round == 5:                        # To be changed
                                 template_values['last_round'] = True
                             template_values['deadline'] = current_round.deadline
                             template_values['question'] = current_round.quiz.question
@@ -214,13 +214,13 @@ class Discussion(webapp2.RequestHandler):
                         self.redirect('/home')
                         return
                     display_round = class_obj.current_round
-                    if class_obj.current_round == 4:        # To be changed
-                        display_round = 3
+                    if class_obj.current_round == 5:        # To be changed
+                        display_round = 5
                     if current_page:
                         try:
                             current_page = int(current_page) + 1
                             logging.info(current_page)
-                            if current_page > 3 or current_page < 2:    # To be changed
+                            if current_page > 4 or current_page < 2:    # To be changed
                                 raise Exception('wrong_round')
                             else:
                                 display_round = current_page
@@ -248,8 +248,8 @@ class Discussion(webapp2.RequestHandler):
                                         'response': response.comment,
                                         'opinion': response.response
                                     }
-                                    if response.option != 'NA':
-                                        comment['option'] = Round.get_by_id(display_round - 1, parent=class_obj.key).quiz.options[int(response.option[-1]) - 1]
+                                    # if response.option != 'NA':
+                                    #     comment['option'] = Round.get_by_id(display_round - 1, parent=class_obj.key).quiz.options[int(response.option[-1]) - 1]
                                     comments.append(comment)
                             logging.info(comments)
                             template_values = {
@@ -267,8 +267,9 @@ class Discussion(webapp2.RequestHandler):
                             template_values['round'] = class_obj.current_round
                             template_values['curr_page'] = display_round
                             template_values['description'] = current_round.description
-                            if class_obj.current_round == 4:        # To be changed
-                                template_values['round'] = 3
+                            if class_obj.current_round == 5:        # To be changed
+                                template_values['round'] = 5
+                                template_values['expired'] = True
                             logging.info(template_values)
                             template = JINJA_ENVIRONMENT.get_template('discussion.html')
                             self.response.write(template.render(template_values))
@@ -295,6 +296,9 @@ class Discussion(webapp2.RequestHandler):
                 else:
                     logging.info(response)
                     class_obj = Class.get_by_id(student.class_name)
+                    if class_obj.current_round == 5:                                            # To be changed
+                        self.response.write('Sorry! you cannot submit to this round.')
+                        return
                     current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
                     if current_round:
                         deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
@@ -509,10 +513,43 @@ class Rounds(webapp2.RequestHandler):
             self.response.write('Error, please log in to post.')
 
 
+class Responses(webapp2.RequestHandler):
+    """Handling responses page for admin console"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            result = Admin.query(Admin.email == user.email()).get()
+            url = users.create_logout_url(self.request.uri)
+            if result:
+                logging.info('Admin navigated to responses ' + str(result))
+                section = str(result.key.parent().string_id())
+                class_obj = Class.get_by_id(section)
+                template_values = {
+                    'logouturl': url,
+                    'section': section,
+                    'round': class_obj.rounds
+                }
+                resp = {}
+                for i in range(1, class_obj.rounds + 1):
+                    response = Response.query(ancestor=Round.get_by_id(i, parent=result.key.parent()).key).fetch()
+                    if response:
+                        resp[str(i)] = response
+                template_values['responses'] = resp
+                logging.info('Resp'+str(template_values))
+                template = JINJA_ENVIRONMENT.get_template('responses.html')
+                self.response.write(template.render(template_values))
+            else:
+                self.redirect('/')
+        else:
+            self.redirect('/')
+
+
 application = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/home', HomePage),
     ('/discussion', Discussion),
+    ('/responses', Responses),
     ('/addStudent', AddStudent),
     ('/groups', Groups),
     ('/rounds', Rounds),

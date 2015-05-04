@@ -1,0 +1,58 @@
+{% extends "admin_base.html" %}
+{% block title %}Responses{% endblock %}
+
+{% block content %}
+<h1 class="page-header">Responses - {{section}}</h1>
+{% if round %}
+<div role="tabpanel">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        {% for r in range(round) %}
+        <li role="presentation" {% if loop.first -%}class="active"{%- endif -%}><a href="#round_{{loop.index}}" aria-controls="home" role="tab" data-toggle="tab">Round-{{loop.index}}</a></li>
+        {% endfor %}
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        {% for r in range(1, round+1) %}
+        <div role="tabpanel" class="tab-pane fade {% if loop.first -%}in active{%- endif -%}" id="round_{{loop.index}}">
+            <table class="table table-striped" id="table_{{loop.index}}">
+                {% if responses[r|string] %}
+                <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Student</th>
+                      <th>Option</th>
+                      <th>Comment</th>
+                      <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in responses[r|string] %}
+                      <tr>
+                        <td>{{loop.index}}</td>
+                        <td>{{response.student}}</td>
+                        <td>{{response.option}}</td>
+                        <td>{{response.comment}}</td>
+                        <td>{{response.summary}}</td>
+                      </tr>
+                    {% else %}
+                      No responses submitted yet.
+                    {% endfor %}
+                  </tbody>
+                {% else %}
+                <br>No responses yet.
+                {% endif %}
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+
+</script>
+{% endblock %}
