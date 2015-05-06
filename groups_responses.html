@@ -1,0 +1,68 @@
+{% extends "admin_base.html" %}
+{% block title %}Group Responses{% endblock %}
+
+{% block content %}
+<h1 class="page-header">Groups Responses - {{section}}</h1>
+{% if round and groups %}
+<div role="tabpanel">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        {% for g in range(1,groups+1) %}
+        <li role="presentation" class="dropdown {% if loop.first -%}active{%- endif -%}">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Group {{g}}<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+                {% for r in range(1,round+1) %}
+                <li><a href="#group_{{g}}_{{r}}" aria-controls="group_{{g}}_{{r}}" role="tab" data-toggle="tab">Round {{r}}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        {% for g in range(1, groups+1) %}
+            {% set outloop = loop %}
+            {% for r in range(1, round+1) %}
+            <div role="tabpanel" class="tab-pane fade {% if outloop.first and loop.first -%}in active{%- endif -%}" id="group_{{g}}_{{r}}">
+                <table class="table table-striped" id="table_{{loop.index}}">
+                    {% if responses['group_'+g|string+'_'+r|string] %}
+                    <thead>
+                        <tr>
+                          <th>Alias</th>
+                          <th>Student</th>
+                          <th>Option</th>
+                          <th>Comment</th>
+                          <th>Summary</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in responses['group_'+g|string+'_'+r|string] %}
+                          <tr>
+                            <td>{{response.alias}}</td>
+                            <td>{{response.student}}</td>
+                            <td>{{response.option}}</td>
+                            <td>{{response.comment}}</td>
+                            <td>{{response.summary}}</td>
+                          </tr>
+                        {% else %}
+                          No responses submitted yet.
+                        {% endfor %}
+                      </tbody>
+                    {% else %}
+                    <br>No responses yet.
+                    {% endif %}
+                </table>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+
+</script>
+{% endblock %}

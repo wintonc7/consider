@@ -8,7 +8,7 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
         {% for r in range(round) %}
-        <li role="presentation" {% if loop.first -%}class="active"{%- endif -%}><a href="#round_{{loop.index}}" aria-controls="home" role="tab" data-toggle="tab">Round-{{loop.index}}</a></li>
+        <li role="presentation" {% if loop.first -%}class="active"{%- endif -%}><a href="#round_{{loop.index}}" aria-controls="round_{{loop.index}}" role="tab" data-toggle="tab">Round-{{loop.index}}</a></li>
         {% endfor %}
     </ul>
 

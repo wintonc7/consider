@@ -536,7 +536,6 @@ class Responses(webapp2.RequestHandler):
                     if response:
                         resp[str(i)] = response
                 template_values['responses'] = resp
-                logging.info('Resp'+str(template_values))
                 template = JINJA_ENVIRONMENT.get_template('responses.html')
                 self.response.write(template.render(template_values))
             else:
@@ -545,11 +544,50 @@ class Responses(webapp2.RequestHandler):
             self.redirect('/')
 
 
+class GroupResponses(webapp2.RequestHandler):
+    """Handling groups_responses page for admin console"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            result = Admin.query(Admin.email == user.email()).get()
+            url = users.create_logout_url(self.request.uri)
+            if result:
+                logging.info('Admin navigated to groups_responses ' + str(result))
+                section = str(result.key.parent().string_id())
+                class_obj = Class.get_by_id(section)
+                template_values = {
+                    'logouturl': url,
+                    'section': section,
+                    'round': class_obj.rounds,
+                    'groups': class_obj.groups
+                }
+                resp = {}
+                for g in range(1, class_obj.groups + 1):
+                    for r in range(1, class_obj.rounds + 1):
+                        resp['group_' + str(g) + '_' + str(r)] = []
+                for r in range(1, class_obj.rounds + 1):
+                    response = Response.query(ancestor=Round.get_by_id(r, parent=result.key.parent()).key).fetch()
+                    if response:
+                        for res in response:
+                            stu = Student.query(Student.email == res.student).get()
+                            res.alias = stu.alias
+                            resp['group_' + str(stu.group) + '_' + str(r)].append(res)
+                template_values['responses'] = resp
+                logging.info('Resp' + str(template_values))
+                template = JINJA_ENVIRONMENT.get_template('groups_responses.html')
+                self.response.write(template.render(template_values))
+            else:
+                self.redirect('/')
+        else:
+            self.redirect('/')
+
 application = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/home', HomePage),
     ('/discussion', Discussion),
     ('/responses', Responses),
+    ('/group_responses', GroupResponses),
     ('/addStudent', AddStudent),
     ('/groups', Groups),
     ('/rounds', Rounds),
