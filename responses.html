@@ -8,7 +8,10 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
         {% for r in range(round) %}
-        <li role="presentation" {% if loop.first -%}class="active"{%- endif -%}><a href="#round_{{loop.index}}" aria-controls="round_{{loop.index}}" role="tab" data-toggle="tab">Round-{{loop.index}}</a></li>
+        <li role="presentation" {% if loop.first -%}class="active" {%- endif -%}><a href="#round_{{loop.index}}"
+                                                                                    aria-controls="round_{{loop.index}}"
+                                                                                    role="tab" data-toggle="tab">Round-{{loop.index}}</a>
+        </li>
         {% endfor %}
     </ul>
 
@@ -19,27 +22,35 @@
             <table class="table table-striped" id="table_{{loop.index}}">
                 {% if responses[r|string] %}
                 <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Student</th>
-                      <th>Option</th>
-                      <th>Comment</th>
-                      <th>Summary</th>
-                    </tr>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Option</th>
+                    <th>Comment</th>
+                    <th>Response</th>
+                    <th>Summary</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for response in responses[r|string] %}
-                      <tr>
-                        <td>{{loop.index}}</td>
-                        <td>{{response.student}}</td>
-                        <td>{{response.option}}</td>
-                        <td>{{response.comment}}</td>
-                        <td>{{response.summary}}</td>
-                      </tr>
-                    {% else %}
-                      No responses submitted yet.
-                    {% endfor %}
-                  </tbody>
+                {% for response in responses[r|string] %}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{response.student}}</td>
+                    <td>{{response.option}}</td>
+                    <td>{{response.comment}}</td>
+                    <td>
+                        {%- for resp in response.response -%}
+                            S{{loop.index}}: {{resp}}
+                        {% else -%}
+                        NA
+                        {%- endfor -%}
+                    </td>
+                    <td>{{response.summary}}</td>
+                </tr>
+                {% else %}
+                No responses submitted yet.
+                {% endfor %}
+                </tbody>
                 {% else %}
                 <br>No responses yet.
                 {% endif %}

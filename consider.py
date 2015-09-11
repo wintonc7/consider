@@ -533,6 +533,7 @@ class Responses(webapp2.RequestHandler):
                 resp = {}
                 for i in range(1, class_obj.rounds + 1):
                     response = Response.query(ancestor=Round.get_by_id(i, parent=result.key.parent()).key).fetch()
+                    # response is a list of all the responses for the round i
                     if response:
                         resp[str(i)] = response
                 template_values['responses'] = resp
