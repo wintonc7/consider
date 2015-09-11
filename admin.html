@@ -37,7 +37,7 @@
                 <td>{{student.email}}</td>
                 <td>{{student.alias}}</td>
                 <td>{% if student.group == 0 %} NA {% else %} {{student.group}} {% endif %}</td>
-                <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteStudent('{{student.email}}')">Delete</button></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -73,5 +73,18 @@
             }
         });
       });
+
+    function deleteStudent(student) {
+        bootbox.confirm("Are you sure, you want to remove student: "+student+"?", function (result) {
+           if (result) {
+                // do the POST and get the callback
+                $.post("/removeStudent",{email:student},function (data) {
+                    bootbox.alert(data, function() {
+                        location.reload();
+                    });
+                });
+           }
+        });
+    }
 </script>
 {% endblock %}

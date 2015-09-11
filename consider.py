@@ -349,6 +349,31 @@ class AddStudent(webapp2.RequestHandler):
             self.response.write('Error! Please log in.')
 
 
+class RemoveStudent(webapp2.RequestHandler):
+    """Removing students to the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = Admin.query(Admin.email == user.email()).get()
+            if result:
+                email = self.request.get('email')
+                logging.info("Deleting student " + email)
+                if email:
+                    student = Student.query(Student.email == email).get()
+                    if student:
+                        student.key.delete()
+                        self.response.write("Student has been removed from the class.")
+                    else:
+                        self.response.write("Student not find in the database.")
+                else:
+                    self.response.write("Error! invalid arguments.")
+            else:
+                self.response.write('Error! unauthorized user.')
+        else:
+            self.response.write('Error! Please log in.')
+
+
 class Groups(webapp2.RequestHandler):
     """Handling groups page for admin console"""
 
@@ -590,6 +615,7 @@ application = webapp2.WSGIApplication([
     ('/responses', Responses),
     ('/group_responses', GroupResponses),
     ('/addStudent', AddStudent),
+    ('/removeStudent', RemoveStudent),
     ('/groups', Groups),
     ('/rounds', Rounds),
     ('/addGroups', AddGroups),
