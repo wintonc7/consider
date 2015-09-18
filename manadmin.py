@@ -12,14 +12,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
-class Class(ndb.Model):
-    """A main model for a particular class and root of the application"""
-    name = ndb.StringProperty(required="True")
-    groups = ndb.IntegerProperty(default=0, indexed=False)
-    current_round = ndb.IntegerProperty(default=0, indexed=False)
-    rounds = ndb.IntegerProperty(default=0, indexed=False)
-
-
 class Instructor(ndb.Model):
     """A main model for representing admins"""
     email = ndb.StringProperty(required="True")
@@ -63,7 +55,7 @@ class MainPage(webapp2.RequestHandler):
                 instructor.put()
                 self.response.write(email + " has been added as an Instructor")
             else:
-                self.response.write("Invalid parameter: email")
+                self.response.write("Error! invalid arguments.")
 
 
 class ToggleInstructor(webapp2.RequestHandler):

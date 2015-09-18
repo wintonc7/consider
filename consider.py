@@ -22,6 +22,19 @@ class Class(ndb.Model):
     rounds = ndb.IntegerProperty(default=0, indexed=False)
 
 
+class Course(ndb.Model):
+    """A model for holding different sections inside a particular Instructor"""
+    name = ndb.StringProperty(required=True)
+    is_active = ndb.BooleanProperty(default=True, indexed=False)
+
+
+class Instructor(ndb.Model):
+    """A main model for representing admins"""
+    email = ndb.StringProperty(required="True")
+    is_active = ndb.BooleanProperty(default=True, indexed=False)
+
+
+# TODO remove this data model
 class Admin(ndb.Model):
     """A main model for representing admins"""
     email = ndb.StringProperty(required=True)
@@ -67,6 +80,57 @@ class Response(ndb.Model):
     student = ndb.StringProperty(required=True)
 
 
+def get_role(user):
+    if user:
+        result = Instructor.query(Instructor.email == user.email()).get()
+        if result:
+            return result
+        else:
+            result = Student.query(Student.email == user.email()).get()
+            if result:
+                return result
+    return False
+
+
+class ErrorPage(webapp2.RequestHandler):
+    """Page to display errors"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            role = get_role(user)
+            if not role:
+                url = users.create_login_url(self.request.uri)
+                template_values = {
+                    'url': url,
+                    'text': 'Sorry you are not registered with this Application, please contact your Instructor.'
+                }
+                template = JINJA_ENVIRONMENT.get_template('error.html')
+                self.response.write(template.render(template_values))
+            else:
+                self.redirect('/home')
+        else:
+            self.redirect('/')
+
+
+class AddCourse(webapp2.RequestHandler):
+    """Adding course to the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('name')
+                if course_name:
+                    course = Course(parent=result.key, id=course_name)
+                    course.name = course_name
+                    course.put()
+                    self.response.write(course_name + " added.")
+                else:
+                    self.response.write("Error! invalid arguments.")
+
+
 class MainPage(webapp2.RequestHandler):
     """Main function that will handle the first request"""
 
@@ -89,66 +153,81 @@ class HomePage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-            result = Admin.query(Admin.email == user.email()).get()
-            url = users.create_logout_url(self.request.uri)
+            result = get_role(user)
             if result:
-                logging.info('Admin logged in ' + str(result))
-                section = str(result.key.parent().string_id())
-                template_values = {
-                    'logouturl': url,
-                    'section': section
-                }
-                students = Student.query(ancestor=result.key).fetch()
-                if students:
-                    template_values['students'] = students
-                template = JINJA_ENVIRONMENT.get_template('admin.html')
-                self.response.write(template.render(template_values))
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is Instructor:
+                    # Show instructor console
+                    logging.info('Instructor logged in ' + str(result))
+                    template_values = {'logouturl': url}
+                    courses = Course.query(ancestor=result.key).fetch()
+                    if courses:
+                        template_values['courses'] = courses
+                    template = JINJA_ENVIRONMENT.get_template('course.html')
+                    self.response.write(template.render(template_values))
             else:
-                result = Student.query(Student.email == user.email()).get()
-                if result:
-                    logging.info('Student logged in ' + str(result))
-                    class_obj = Class.get_by_id(result.class_name)
-                    logging.info(class_obj)
-                    if class_obj.current_round > 0:
-                        current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
-                        if current_round:
-                            if not current_round.is_quiz:
-                                self.redirect('/discussion')
-                                return
-                            deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                            logging.info(deadline)
-                            current_time = datetime.datetime.now()
-                            logging.info(current_time)
-                            response = Response.get_by_id(result.email, parent=current_round.key)
-                            logging.info(str(response))
-                            if response:
-                                template_values = {
-                                    'url': url,
-                                    'option': response.option,
-                                    'comment': response.comment
-                                }
-                                if response.summary:
-                                    template_values['summary'] = response.summary
-                            else:
-                                template_values = {
-                                    'url': url
-                                }
-                            if deadline < current_time:
-                                template_values['expired'] = True
-                            if class_obj.current_round == 5:                        # To be changed
-                                template_values['last_round'] = True
-                            template_values['deadline'] = current_round.deadline
-                            template_values['question'] = current_round.quiz.question
-                            template_values['options'] = current_round.quiz.options
-                            template_values['number'] = current_round.quiz.options_total
-                            template = JINJA_ENVIRONMENT.get_template('home.html')
-                            self.response.write(template.render(template_values))
-                        else:
-                            self.response.write("Sorry rounds are not active. <a href='" + url + "'>Logout</a>")
-                    else:
-                        self.response.write("Sorry no rounds are active right now, please check back later. <a href='" + url + "'>Logout</a>")
-                else:
-                    self.response.write("Sorry you are not yet registered with this application, please contact your professor. <a href='" + url + "'>Logout</a>")
+                self.redirect('/error')
+                # result = Admin.query(Admin.email == user.email()).get()
+                # url = users.create_logout_url(self.request.uri)
+                # if result:
+                #     logging.info('Admin logged in ' + str(result))
+                #     section = str(result.key.parent().string_id())
+                #     template_values = {
+                #         'logouturl': url,
+                #         'section': section
+                #     }
+                #     students = Student.query(ancestor=result.key).fetch()
+                #     if students:
+                #         template_values['students'] = students
+                #     template = JINJA_ENVIRONMENT.get_template('admin.html')
+                #     self.response.write(template.render(template_values))
+                # else:
+                #     result = Student.query(Student.email == user.email()).get()
+                #     if result:
+                #         logging.info('Student logged in ' + str(result))
+                #         class_obj = Class.get_by_id(result.class_name)
+                #         logging.info(class_obj)
+                #         if class_obj.current_round > 0:
+                #             current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
+                #             if current_round:
+                #                 if not current_round.is_quiz:
+                #                     self.redirect('/discussion')
+                #                     return
+                #                 deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
+                #                 logging.info(deadline)
+                #                 current_time = datetime.datetime.now()
+                #                 logging.info(current_time)
+                #                 response = Response.get_by_id(result.email, parent=current_round.key)
+                #                 logging.info(str(response))
+                #                 if response:
+                #                     template_values = {
+                #                         'url': url,
+                #                         'option': response.option,
+                #                         'comment': response.comment
+                #                     }
+                #                     if response.summary:
+                #                         template_values['summary'] = response.summary
+                #                 else:
+                #                     template_values = {
+                #                         'url': url
+                #                     }
+                #                 if deadline < current_time:
+                #                     template_values['expired'] = True
+                #                 if class_obj.current_round == 5:                        # To be changed
+                #                     template_values['last_round'] = True
+                #                 template_values['deadline'] = current_round.deadline
+                #                 template_values['question'] = current_round.quiz.question
+                #                 template_values['options'] = current_round.quiz.options
+                #                 template_values['number'] = current_round.quiz.options_total
+                #                 template = JINJA_ENVIRONMENT.get_template('home.html')
+                #                 self.response.write(template.render(template_values))
+                #             else:
+                #                 self.response.write("Sorry rounds are not active. <a href='" + url + "'>Logout</a>")
+                #         else:
+                #             self.response.write("Sorry no rounds are active right now, please check back later. <a href='" + url + "'>Logout</a>")
+                #     else:
+                #         self.response.write("Sorry you are not yet registered with this application, please contact your professor. <a href='" + url + "'>Logout</a>")
         else:
             self.redirect('/')
 
@@ -179,11 +258,14 @@ class HomePage(webapp2.RequestHandler):
                                 response.summary = summary
                             response.put()
                             # logging.info('Response saved from ' + str(student.email) + ', opt: ' + str(option) + ', comment: ' + str(comment))
-                            self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
+                            self.response.write(
+                                'Thank you, your response have been saved and you can edit your response any time before the deadline.')
                         else:
-                            self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                            self.response.write(
+                                'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
                     else:
-                        self.response.write('Sorry! There was some error submitting your response please try again later.')
+                        self.response.write(
+                            'Sorry! There was some error submitting your response please try again later.')
             else:
                 self.response.write('Sorry! There was some error submitting your response please try again later.')
         else:
@@ -214,13 +296,13 @@ class Discussion(webapp2.RequestHandler):
                         self.redirect('/home')
                         return
                     display_round = class_obj.current_round
-                    if class_obj.current_round == 5:        # To be changed
+                    if class_obj.current_round == 5:  # To be changed
                         display_round = 5
                     if current_page:
                         try:
                             current_page = int(current_page) + 1
                             logging.info(current_page)
-                            if current_page > 4 or current_page < 2:    # To be changed
+                            if current_page > 4 or current_page < 2:  # To be changed
                                 raise Exception('wrong_round')
                             else:
                                 display_round = current_page
@@ -236,12 +318,14 @@ class Discussion(webapp2.RequestHandler):
                         try:
                             group = Group.get_by_id(student.group, parent=student.key.parent().parent())
                         except:
-                            self.response.write('Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
+                            self.response.write(
+                                'Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
                             return
                         if group:
                             comments = []
                             for stu in group.members:
-                                response = Response.get_by_id(stu, parent=Round.get_by_id(display_round - 1, parent=class_obj.key).key)
+                                response = Response.get_by_id(stu, parent=Round.get_by_id(display_round - 1,
+                                                                                          parent=class_obj.key).key)
                                 if response:
                                     comment = {
                                         'alias': Student.get_by_id(stu, parent=student.key.parent()).alias,
@@ -267,20 +351,23 @@ class Discussion(webapp2.RequestHandler):
                             template_values['round'] = class_obj.current_round
                             template_values['curr_page'] = display_round
                             template_values['description'] = current_round.description
-                            if class_obj.current_round == 5:        # To be changed
+                            if class_obj.current_round == 5:  # To be changed
                                 template_values['round'] = 5
                                 template_values['expired'] = True
                             logging.info(template_values)
                             template = JINJA_ENVIRONMENT.get_template('discussion.html')
                             self.response.write(template.render(template_values))
                         else:
-                            self.response.write('Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
+                            self.response.write(
+                                'Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
                     else:
                         self.response.write('Sorry rounds are not active. <a href="' + url + '"">Logout</a>')
                 else:
-                    self.response.write('Sorry no rounds are active right now, please check back later. <a href="' + url + '"">Logout</a>')
+                    self.response.write(
+                        'Sorry no rounds are active right now, please check back later. <a href="' + url + '"">Logout</a>')
             else:
-                self.response.write('Sorry you are not yet registered with this application, please contact your professor. <a href="' + url + '"">Logout</a>')
+                self.response.write(
+                    'Sorry you are not yet registered with this application, please contact your professor. <a href="' + url + '"">Logout</a>')
         else:
             self.redirect('/')
 
@@ -296,7 +383,7 @@ class Discussion(webapp2.RequestHandler):
                 else:
                     logging.info(response)
                     class_obj = Class.get_by_id(student.class_name)
-                    if class_obj.current_round == 5:                                            # To be changed
+                    if class_obj.current_round == 5:  # To be changed
                         self.response.write('Sorry! you cannot submit to this round.')
                         return
                     current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
@@ -313,11 +400,14 @@ class Discussion(webapp2.RequestHandler):
                                 new_response.response.append(response[i])
                             new_response.put()
                             # logging.info('Response saved from ' + str(student.email) + ', comment: ' + str(comment))
-                            self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
+                            self.response.write(
+                                'Thank you, your response have been saved and you can edit your response any time before the deadline.')
                         else:
-                            self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                            self.response.write(
+                                'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
                     else:
-                        self.response.write('Sorry! There was some error submitting your response please try again later.')
+                        self.response.write(
+                            'Sorry! There was some error submitting your response please try again later.')
             else:
                 self.response.write('Sorry! There was some error submitting your response please try again later.')
         else:
@@ -608,9 +698,12 @@ class GroupResponses(webapp2.RequestHandler):
         else:
             self.redirect('/')
 
+
 application = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/error', ErrorPage),
     ('/home', HomePage),
+    ('/add_course', AddCourse),
     ('/discussion', Discussion),
     ('/responses', Responses),
     ('/group_responses', GroupResponses),
