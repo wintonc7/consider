@@ -1,7 +1,7 @@
 application: rich-brace-854
-version: 1
+version: 2
 runtime: python27
-api_version: 1
+api_version: 2
 threadsafe: true
 
 handlers:
@@ -15,6 +15,9 @@ handlers:
   static_dir: fonts
 
 - url: /secretlandingpage
+  script: manadmin.application
+
+- url: /toggleInstructor
   script: manadmin.application
 
 - url: /.*
