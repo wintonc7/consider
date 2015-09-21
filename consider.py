@@ -26,6 +26,7 @@ class Section(ndb.Model):
     groups = ndb.IntegerProperty(default=0, indexed=False)
     current_round = ndb.IntegerProperty(default=0, indexed=False)
     rounds = ndb.IntegerProperty(default=0, indexed=False)
+    is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
 class Instructor(ndb.Model):
@@ -132,6 +133,28 @@ class AddCourse(webapp2.RequestHandler):
                         course.name = course_name
                         course.put()
                         self.response.write("S" + course_name + " added.")
+                else:
+                    self.response.write("Error! invalid arguments.")
+
+
+class ToggleCourse(webapp2.RequestHandler):
+    """Changing status of Course in the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('course')
+                if course_name:
+                    logging.info("Changing status of " + course_name)
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        course.is_active = not course.is_active
+                        course.put()
+                        self.response.write("Status changed for " + course_name)
+                    else:
+                        self.response.write("Course not found in the database.")
                 else:
                     self.response.write("Error! invalid arguments.")
 
@@ -744,6 +767,7 @@ application = webapp2.WSGIApplication([
     ('/error', ErrorPage),
     ('/home', HomePage),
     ('/add_course', AddCourse),
+    ('/toggleCourse', ToggleCourse),
     ('/add_section', AddSection),
     ('/discussion', Discussion),
     ('/responses', Responses),
