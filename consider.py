@@ -14,18 +14,18 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
-class Class(ndb.Model):
-    """A main model for a particular class and root of the application"""
-    name = ndb.StringProperty(required="True")
-    groups = ndb.IntegerProperty(default=0, indexed=False)
-    current_round = ndb.IntegerProperty(default=0, indexed=False)
-    rounds = ndb.IntegerProperty(default=0, indexed=False)
-
-
 class Course(ndb.Model):
     """A model for holding different sections inside a particular Instructor"""
     name = ndb.StringProperty(required=True)
     is_active = ndb.BooleanProperty(default=True, indexed=False)
+
+
+class Section(ndb.Model):
+    """A main model for a particular section which will be child of course"""
+    name = ndb.StringProperty(required="True")
+    groups = ndb.IntegerProperty(default=0, indexed=False)
+    current_round = ndb.IntegerProperty(default=0, indexed=False)
+    rounds = ndb.IntegerProperty(default=0, indexed=False)
 
 
 class Instructor(ndb.Model):
@@ -123,10 +123,44 @@ class AddCourse(webapp2.RequestHandler):
             if result and type(result) is Instructor:
                 course_name = self.request.get('name')
                 if course_name:
-                    course = Course(parent=result.key, id=course_name)
-                    course.name = course_name
-                    course.put()
-                    self.response.write(course_name + " added.")
+                    course_name = course_name.upper()
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        self.response.write("E" + course_name + " already exist!")
+                    else:
+                        course = Course(parent=result.key, id=course_name)
+                        course.name = course_name
+                        course.put()
+                        self.response.write("S" + course_name + " added.")
+                else:
+                    self.response.write("Error! invalid arguments.")
+
+
+class AddSection(webapp2.RequestHandler):
+    """Adding section to a course in the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                section_name = self.request.get('name')
+                course_name = self.request.get('course')
+                if course_name and section_name:
+                    course_name = course_name.upper()
+                    section_name = section_name.upper()
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        section = Section.get_by_id(section_name, parent=course.key)
+                        if section:
+                            self.response.write("E" + section_name + " already exist!")
+                        else:
+                            section = Section(parent=course.key, id=section_name)
+                            section.name = section_name
+                            section.put()
+                            self.response.write("S" + section_name + " added.")
+                    else:
+                        self.response.write("E" + course_name + " course does not exist!")
                 else:
                     self.response.write("Error! invalid arguments.")
 
@@ -160,12 +194,18 @@ class HomePage(webapp2.RequestHandler):
                 if type(result) is Instructor:
                     # Show instructor console
                     logging.info('Instructor logged in ' + str(result))
-                    template_values = {'logouturl': url}
+                    template_values = {'logouturl': url, 'expand': self.request.get('course')}
                     courses = Course.query(ancestor=result.key).fetch()
                     if courses:
+                        for course in courses:
+                            course.sections_all = Section.query(ancestor=course.key).fetch()
+                            course.sections = len(course.sections_all)
                         template_values['courses'] = courses
                     template = JINJA_ENVIRONMENT.get_template('course.html')
+                    logging.info(template_values)
                     self.response.write(template.render(template_values))
+                else:
+                    self.redirect('/error')
             else:
                 self.redirect('/error')
                 # result = Admin.query(Admin.email == user.email()).get()
@@ -704,6 +744,7 @@ application = webapp2.WSGIApplication([
     ('/error', ErrorPage),
     ('/home', HomePage),
     ('/add_course', AddCourse),
+    ('/add_section', AddSection),
     ('/discussion', Discussion),
     ('/responses', Responses),
     ('/group_responses', GroupResponses),
