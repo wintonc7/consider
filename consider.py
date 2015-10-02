@@ -26,6 +26,7 @@ class Section(ndb.Model):
     groups = ndb.IntegerProperty(default=0, indexed=False)
     current_round = ndb.IntegerProperty(default=0, indexed=False)
     rounds = ndb.IntegerProperty(default=0, indexed=False)
+    students = ndb.StringProperty(repeated=True, indexed=False)
     is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
@@ -45,8 +46,8 @@ class Student(ndb.Model):
     """A student model for all the students"""
     email = ndb.StringProperty(required=True)
     alias = ndb.StringProperty(default='NA')
-    class_name = ndb.StringProperty(required=True)
     group = ndb.IntegerProperty(default=0, indexed=False)
+    sections = ndb.KeyProperty(kind=Section, repeated=True, indexed=False)
 
 
 class Group(ndb.Model):
@@ -81,6 +82,13 @@ class Response(ndb.Model):
     student = ndb.StringProperty(required=True)
 
 
+errorCodes = {
+    '100': "Oops! Something went wrong please try again.",
+    '101': "Sorry you are not registered with this Application, please contact your Instructor.",
+    '102': "Sorry you are not an instructor."
+}
+
+
 def get_role(user):
     if user:
         result = Instructor.query(Instructor.email == user.email()).get()
@@ -99,17 +107,20 @@ class ErrorPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-            role = get_role(user)
-            if not role:
-                url = users.create_login_url(self.request.uri)
-                template_values = {
-                    'url': url,
-                    'text': 'Sorry you are not registered with this Application, please contact your Instructor.'
-                }
-                template = JINJA_ENVIRONMENT.get_template('error.html')
-                self.response.write(template.render(template_values))
-            else:
-                self.redirect('/home')
+            url = users.create_login_url(self.request.uri)
+            template_values = {
+                'url': url
+            }
+            error = self.request.get('code')
+            message = None
+            if error:
+                if error in errorCodes:
+                    message = errorCodes[error]
+            if not message:
+                message = errorCodes['100']
+            template_values['text'] = message
+            template = JINJA_ENVIRONMENT.get_template('error.html')
+            self.response.write(template.render(template_values))
         else:
             self.redirect('/')
 
@@ -188,6 +199,36 @@ class AddSection(webapp2.RequestHandler):
                     self.response.write("Error! invalid arguments.")
 
 
+class ToggleSection(webapp2.RequestHandler):
+    """Changing status of Section for a Course in the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('course')
+                section_name = self.request.get('section')
+                if course_name and section_name:
+                    logging.info("Changing status of " + section_name + " for course " + course_name)
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        if course.is_active:
+                            section = Section.get_by_id(section_name, parent=course.key)
+                            if section:
+                                section.is_active = not section.is_active
+                                section.put()
+                                self.response.write("Status changed for " + section_name)
+                            else:
+                                self.response.write("E" + "Section not found in the database.")
+                        else:
+                            self.response.write("E" + "Status cannot be changed, please activate " + course_name)
+                    else:
+                        self.response.write("E" + "Course not found in the database.")
+                else:
+                    self.response.write("E" + "Error! invalid arguments.")
+
+
 class MainPage(webapp2.RequestHandler):
     """Main function that will handle the first request"""
 
@@ -228,9 +269,10 @@ class HomePage(webapp2.RequestHandler):
                     logging.info(template_values)
                     self.response.write(template.render(template_values))
                 else:
-                    self.redirect('/error')
+                    logging.info(str(result) + ' navigated to Error')
+                    self.redirect('/error?code=102')
             else:
-                self.redirect('/error')
+                self.redirect('/error?code=101')
                 # result = Admin.query(Admin.email == user.email()).get()
                 # url = users.create_logout_url(self.request.uri)
                 # if result:
@@ -333,6 +375,132 @@ class HomePage(webapp2.RequestHandler):
                 self.response.write('Sorry! There was some error submitting your response please try again later.')
         else:
             self.response.write('Sorry! There was some error submitting your response please try again later.')
+
+
+class StudentsPage(webapp2.RequestHandler):
+    """Page for instructor to add students to a particular section"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result:
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is Instructor:
+                    logging.info('Instructor navigated to Students ' + str(result))
+                    template_values = {'logouturl': url}
+                    courses = Course.query(ancestor=result.key).fetch()
+                    if courses:
+                        course = None
+                        template_values['courses'] = courses
+                        course_name = self.request.get('course')
+                        if course_name:
+                            course_name = course_name.upper()
+                            course = Course.get_by_id(course_name, parent=result.key)
+                        if not course:
+                            course = courses[0]
+                        sections = Section.query(ancestor=course.key).fetch()
+                        template_values['selectedCourse'] = course.name
+                        if not sections and not course_name:
+                            sections = Section.query(ancestor=courses[0].key).fetch()
+                        template_values['sections'] = sections
+                        if sections:
+                            selected_section = self.request.get('section')
+                            section = None
+                            if selected_section:
+                                selected_section = selected_section.upper()
+                                section = Section.get_by_id(selected_section, parent=course.key)
+                            if not section:
+                                section = sections[0]
+                            template_values['selectedSection'] = section.name
+                            template_values['students'] = section.students
+                    template = JINJA_ENVIRONMENT.get_template('students.html')
+                    self.response.write(template.render(template_values))
+                else:
+                    self.redirect('/home"')
+            else:
+                self.redirect('/home"')
+
+
+class AddStudent(webapp2.RequestHandler):
+    """Adding students to the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('course')
+                section_name = self.request.get('section')
+                emails = json.loads(self.request.get('emails'))
+                if course_name and section_name and emails:
+                    course_name = course_name.upper()
+                    section_name = section_name.upper()
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        section = Section.get_by_id(section_name, parent=course.key)
+                        if section:
+                            for email in emails:
+                                email = email.lower()
+                                if email not in section.students:
+                                    section.students.append(email)
+                                student = Student.get_by_id(email)
+                                if not student:
+                                    student = Student(id=email)
+                                    student.email = email
+                                if section.key not in student.sections:
+                                    student.sections.append(section.key)
+                                student.put()
+                            section.put()
+                            logging.info("Students added to Section " + str(section))
+                            self.response.write("S" + "Students added to section.")
+                        else:
+                            self.response.write("E" + section_name + " section does not exist!")
+                    else:
+                        self.response.write("E" + course_name + " course does not exist!")
+                else:
+                    self.response.write("E" + "Error! invalid arguments.")
+
+
+class RemoveStudent(webapp2.RequestHandler):
+    """Removing students to the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('course')
+                section_name = self.request.get('section')
+                email = self.request.get('email')
+                if course_name and section_name and email:
+                    course_name = course_name.upper()
+                    section_name = section_name.upper()
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        section = Section.get_by_id(section_name, parent=course.key)
+                        if section:
+                            email = email.lower()
+                            student = Student.get_by_id(email)
+                            if student:
+                                if email in section.students:
+                                    section.students.remove(email)
+                                if section.key in student.sections:
+                                    student.sections.remove(section.key)
+                                student.put()
+                                section.put()
+                                logging.info(
+                                    "Student" + str(student) + " has been removed from Section " + str(section))
+                                self.response.write("S" + "Student removed from section.")
+                            else:
+                                self.response.write("E" + student + " does not exist!")
+                        else:
+                            self.response.write("E" + section_name + " section does not exist!")
+                    else:
+                        self.response.write("E" + course_name + " course does not exist!")
+                else:
+                    self.response.write("E" + "Error! invalid arguments.")
 
 
 def check_response(response):
@@ -475,56 +643,6 @@ class Discussion(webapp2.RequestHandler):
                 self.response.write('Sorry! There was some error submitting your response please try again later.')
         else:
             self.response.write('Sorry! There was some error submitting your response please try again later.')
-
-
-class AddStudent(webapp2.RequestHandler):
-    """Adding students to the database"""
-
-    def post(self):
-        user = users.get_current_user()
-        if user:
-            result = Admin.query(Admin.email == user.email()).get()
-            if result:
-                class_name = self.request.get('class')
-                emails = json.loads(self.request.get('emails'))
-                if emails:
-                    for email in emails:
-                        student = Student(parent=result.key, id=email)
-                        student.email = email
-                        student.class_name = class_name
-                        student.put()
-                    self.response.write(len(emails))
-                else:
-                    self.response.write("Error! invalid arguments.")
-            else:
-                self.response.write('Error! unauthorized user.')
-        else:
-            self.response.write('Error! Please log in.')
-
-
-class RemoveStudent(webapp2.RequestHandler):
-    """Removing students to the database"""
-
-    def post(self):
-        user = users.get_current_user()
-        if user:
-            result = Admin.query(Admin.email == user.email()).get()
-            if result:
-                email = self.request.get('email')
-                logging.info("Deleting student " + email)
-                if email:
-                    student = Student.query(Student.email == email).get()
-                    if student:
-                        student.key.delete()
-                        self.response.write("Student has been removed from the class.")
-                    else:
-                        self.response.write("Student not find in the database.")
-                else:
-                    self.response.write("Error! invalid arguments.")
-            else:
-                self.response.write('Error! unauthorized user.')
-        else:
-            self.response.write('Error! Please log in.')
 
 
 class Groups(webapp2.RequestHandler):
@@ -769,6 +887,8 @@ application = webapp2.WSGIApplication([
     ('/add_course', AddCourse),
     ('/toggleCourse', ToggleCourse),
     ('/add_section', AddSection),
+    ('/toggleSection', ToggleSection),
+    ('/students', StudentsPage),
     ('/discussion', Discussion),
     ('/responses', Responses),
     ('/group_responses', GroupResponses),

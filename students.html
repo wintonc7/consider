@@ -1,0 +1,168 @@
+{% extends "admin_base.html" %}
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+<h1 class="page-header">Students</h1>
+<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h4>Course</h4>
+        {% if courses %}
+        <select id="courseSelector" class="form-control">
+            {% for course in courses %}
+            <option {% if selectedCourse== course.name %}selected="selected" {% endif %}>{{course.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        Please add a course to add Students
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h4>Section</h4>
+        {% if sections %}
+        <select id="sectionSelector" class="form-control">
+            {% for section in sections %}
+            <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        {% if courses %}
+        There are no sections in this Course
+        {% else %}
+        Please select a course to see sections
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+<h4 class="sub-header">Students already enrolled {% if selectedCourse and selectedSection -%} in Section
+    {{selectedSection}} of Course {{selectedCourse}} {%- endif %} {% if students -%}
+    ({{students|length}}) {%- endif -%}:</h4>
+{% if sections %}
+<button type="button" class="btn btn-default" onclick="addStudents()" style="margin-bottom: 10px;"
+        aria-label="Add Students">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Students
+</button>
+{% endif %}
+{% if students %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{loop.index}}</td>
+            <td>{{student}}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteStudent('{{student}}')">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No students enrolled.</p>
+{% endif %}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add Students for {{selectedSection}} of
+                    {{selectedCourse}}</h4>
+            </div>
+            <div class="modal-body">
+                <h5>Add emails of students separated by commas:</h5>
+
+                <form class="form-horizontal" id="modalForm" method="post" style="margin-top: 20px;text-align: center;"
+                      action="/addStudent">
+                    <div class="form-group">
+                        <label for="inputEmail" class="col-sm-2 control-label">Email(s)</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inputEmail" placeholder="Email(s)" name="email"
+                                   required="true">
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitStudents()">Add Students</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $('#courseSelector').on('change', function () {
+        location.href = "/students?course=" + this.value;
+    });
+
+    $('#sectionSelector').on('change', function () {
+        location.href = "/students?course={{selectedCourse}}&section=" + this.value;
+    });
+
+    function addStudents() {
+        $("#myModal").modal('show');
+    }
+
+    function submitStudents() {
+        $("#modalForm").find('[type="submit"]').trigger('click');
+    }
+
+    $("#modalForm").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+
+        //collect form elements
+        var $form = $(this),
+                email = $form.find("input[name='email']").val(),
+                course = "{{selectedCourse}}",
+                section = "{{selectedSection}}",
+                url = $form.attr("action");
+
+        var emails = email.replace(/ /g, '').split(',');
+
+        bootbox.confirm("Are you sure, you want to add " + emails.length + " student(s)?", function (result) {
+            if (result) {
+                // do the POST and get the callback
+                $.post(url, {emails: JSON.stringify(emails), course: course, section: section}, function (data) {
+                    if (data.charAt(0) == 'E') {
+                        bootbox.alert(data.substring(1));
+                    }
+                    else {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+
+    function deleteStudent(student) {
+        bootbox.confirm("Are you sure, you want to remove student: " + student + "?", function (result) {
+            if (result) {
+                // do the POST and get the callback
+                $.post("/removeStudent", {email: student, course: "{{selectedCourse}}", section: "{{selectedSection}}"}, function (data) {
+                    if (data.charAt(0) == 'E') {
+                        bootbox.alert(data.substring(1));
+                    }
+                    else {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

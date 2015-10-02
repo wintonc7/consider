@@ -26,7 +26,12 @@
             <td>{{loop.index}}</td>
             <td>{{course.name}}</td>
             <td>{{course.sections}}</td>
-            <td>{%- if course.is_active -%}Active{%- else -%}Inactive{%- endif -%}</td>
+            <td>{%- if course.is_active -%}
+                <span class="label label-success">Active</span>
+                {%- else -%}
+                <span class="label label-warning">Inactive</span>
+                {%- endif -%}
+            </td>
             <td>{% if course.is_active %}
                 <button class="btn btn-danger btn-sm" onclick="toggleCourseStatus('{{course.name}}')">Inactivate
                 </button>
@@ -43,12 +48,13 @@
                 </button>
             </td>
         </tr>
-        <tr>
+        <tr {% if not course.is_active %}class="disabled"{% endif %}>
             <td colspan="6">
                 <div class="collapse{%- if expand==course.name %} in{%- endif -%}" id="collapse{{loop.index}}">
                     <button type="button" class="btn btn-default btn-sm" onclick="addSection('{{course.name}}')"
                             aria-label="Add Section" style="margin-bottom: 8px;">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add a section to {{course.name}}
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add a section to
+                        {{course.name}}
                     </button>
                     <div class="well well-sm">
                         {% if course.sections_all %}
@@ -67,14 +73,20 @@
                                 <tr>
                                     <td>{{loop.index}}</td>
                                     <td>{{section.name}}</td>
-                                    <td>{%- if section.is_active -%}Active{%- else -%}Inactive{%- endif -%}</td>
+                                    <td>{%- if section.is_active -%}
+                                        <span class="label label-success">Active</span>
+                                        {%- else -%}
+                                        <span class="label label-warning">Inactive</span>
+                                        {%- endif -%}
+                                    </td>
                                     <td>{% if section.is_active %}
                                         <button class="btn btn-danger btn-sm"
-                                                onclick="toggleSectionStatus()">Inactivate
+                                                onclick="toggleSectionStatus('{{course.name}}','{{section.name}}')">
+                                            Inactivate
                                         </button>
                                         {% else %}
                                         <button class="btn btn-success btn-sm"
-                                                onclick="toggleSectionStatus()">Activate
+                                                onclick="toggleSectionStatus('{{course.name}}','{{section.name}}')">Activate
                                         </button>
                                         {% endif %}
                                     </td>
@@ -247,11 +259,27 @@
     }
 
     function toggleCourseStatus(course) {
-        bootbox.confirm("Toggle status of : " + course + "?", function (result) {
+        bootbox.confirm("Toggle status of course: " + course + "?", function (result) {
             if (result) {
                 // do the POST and get the callback
                 $.post("/toggleCourse", {course: course}, function () {
-                    location.reload();
+                    location.href = "/home?course=" + course;
+                });
+            }
+        });
+    }
+
+    function toggleSectionStatus(course, section) {
+        bootbox.confirm("Toggle status of: " + section + " in course: " + course + "?", function (result) {
+            if (result) {
+                // do the POST and get the callback
+                $.post("/toggleSection", {course: course, section: section}, function (data) {
+                    if (data.charAt(0) == 'E') {
+                        bootbox.alert(data.substring(1));
+                    }
+                    else {
+                        location.href = "/home?course=" + course;
+                    }
                 });
             }
         });
