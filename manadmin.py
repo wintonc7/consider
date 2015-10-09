@@ -4,18 +4,13 @@ import jinja2
 import logging
 
 from google.appengine.api import users
-from google.appengine.ext import ndb
+
+from models import *
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
-
-
-class Instructor(ndb.Model):
-    """A main model for representing admins"""
-    email = ndb.StringProperty(required="True")
-    is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
 class MainPage(webapp2.RequestHandler):
