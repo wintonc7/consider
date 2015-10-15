@@ -187,7 +187,6 @@ class HomePage(webapp2.RequestHandler):
             if result:
                 # User is either Instructor or Student
                 url = users.create_logout_url(self.request.uri)
-                logging.info(str(type(result)) + "TYPE-->" + str(isinstance(result, Instructor)))
                 if type(result) is Instructor:
                     # Show instructor console
                     logging.info('Instructor logged in ' + str(result))
@@ -199,11 +198,29 @@ class HomePage(webapp2.RequestHandler):
                             course.sections = len(course.sections_all)
                         template_values['courses'] = courses
                     template = JINJA_ENVIRONMENT.get_template('course.html')
-                    logging.info(template_values)
+                    self.response.write(template.render(template_values))
+                elif type(result) is Student:
+                    logging.info('Student logged in ' + str(result))
+                    template_values = {'logouturl': url, 'nickname': user.nickname()}
+                    sections = result.sections
+                    section_list = []
+                    if sections:
+                        for section in sections:
+                            section_obj = section.get()
+                            course_obj = section.parent().get()
+                            if section_obj and course_obj:
+                                sec = {
+                                    'key': section.urlsafe(),
+                                    'name': section_obj.name,
+                                    'course': course_obj.name
+                                }
+                                section_list.append(sec)
+                    template_values['sections'] = section_list
+                    template = JINJA_ENVIRONMENT.get_template('student_home.html')
                     self.response.write(template.render(template_values))
                 else:
                     logging.info(str(result) + ' navigated to Error')
-                    self.redirect('/error?code=102')
+                    self.redirect('/error?code=101')
             else:
                 self.redirect('/error?code=101')
                 # result = Admin.query(Admin.email == user.email()).get()
@@ -351,9 +368,11 @@ class StudentsPage(webapp2.RequestHandler):
                     template = JINJA_ENVIRONMENT.get_template('students.html')
                     self.response.write(template.render(template_values))
                 else:
-                    self.redirect('/home"')
+                    self.redirect('/')
             else:
-                self.redirect('/home"')
+                self.redirect('/')
+        else:
+            self.redirect('/')
 
 
 class AddStudent(webapp2.RequestHandler):
@@ -434,6 +453,41 @@ class RemoveStudent(webapp2.RequestHandler):
                         self.response.write("E" + course_name + " course does not exist!")
                 else:
                     self.response.write("E" + "Error! invalid arguments.")
+
+
+class SectionPage(webapp2.RequestHandler):
+    """Redirecting student based on the section they selected"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result:
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is Student:
+                    logging.info('Student logged in ' + str(result))
+                    section_key = self.request.get('section')
+                    if section_key:
+                        try:
+                            section = ndb.Key(urlsafe=section_key).get()
+                            if section:
+                                template_values = {'logouturl': url, 'nickname': user.nickname()}
+                                logging.info(str(template_values))
+                                template = JINJA_ENVIRONMENT.get_template('student_home.html')
+                                self.response.write("Got the section")
+                            else:
+                                self.redirect('/home')
+                        except:
+                            self.redirect('/home')
+                    else:
+                        self.redirect('/home')
+                else:
+                    self.redirect('/')
+            else:
+                self.redirect('/')
+        else:
+            self.redirect('/')
 
 
 def check_response(response):
@@ -827,6 +881,7 @@ application = webapp2.WSGIApplication([
     ('/group_responses', GroupResponses),
     ('/addStudent', AddStudent),
     ('/removeStudent', RemoveStudent),
+    ('/section', SectionPage),
     ('/groups', Groups),
     ('/rounds', Rounds),
     ('/addGroups', AddGroups),

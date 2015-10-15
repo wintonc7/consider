@@ -9,7 +9,7 @@ class Course(ndb.Model):
 
 class Section(ndb.Model):
     """A main model for a particular section which will be child of course"""
-    name = ndb.StringProperty(required="True")
+    name = ndb.StringProperty(required=True)
     groups = ndb.IntegerProperty(default=0, indexed=False)
     current_round = ndb.IntegerProperty(default=0, indexed=False)
     rounds = ndb.IntegerProperty(default=0, indexed=False)
@@ -19,7 +19,7 @@ class Section(ndb.Model):
 
 class Instructor(ndb.Model):
     """A main model for representing admins"""
-    email = ndb.StringProperty(required="True")
+    email = ndb.StringProperty(required=True)
     is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
