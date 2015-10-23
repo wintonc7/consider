@@ -327,6 +327,35 @@ class HomePage(webapp2.RequestHandler):
             self.response.write('Sorry! There was some error submitting your response please try again later.')
 
 
+def get_courses_and_sections(result, course_name, selected_section):
+    template_values = {}
+    courses = Course.query(ancestor=result.key).fetch()
+    if courses:
+        course = None
+        template_values['courses'] = courses
+        if course_name:
+            course_name = course_name.upper()
+            course = Course.get_by_id(course_name, parent=result.key)
+        if not course:
+            course = courses[0]
+        sections = Section.query(ancestor=course.key).fetch()
+        template_values['selectedCourse'] = course.name
+        if not sections and not course_name:
+            sections = Section.query(ancestor=courses[0].key).fetch()
+        template_values['sections'] = sections
+        if sections:
+            section = None
+            if selected_section:
+                selected_section = selected_section.upper()
+                section = Section.get_by_id(selected_section, parent=course.key)
+            if not section:
+                section = sections[0]
+            template_values['selectedSection'] = section.name
+            template_values['selectedSectionObject'] = section
+            template_values['students'] = section.students
+    return template_values
+
+
 class StudentsPage(webapp2.RequestHandler):
     """Page for instructor to add students to a particular section"""
 
@@ -339,32 +368,10 @@ class StudentsPage(webapp2.RequestHandler):
                 url = users.create_logout_url(self.request.uri)
                 if type(result) is Instructor:
                     logging.info('Instructor navigated to Students ' + str(result))
-                    template_values = {'logouturl': url}
-                    courses = Course.query(ancestor=result.key).fetch()
-                    if courses:
-                        course = None
-                        template_values['courses'] = courses
-                        course_name = self.request.get('course')
-                        if course_name:
-                            course_name = course_name.upper()
-                            course = Course.get_by_id(course_name, parent=result.key)
-                        if not course:
-                            course = courses[0]
-                        sections = Section.query(ancestor=course.key).fetch()
-                        template_values['selectedCourse'] = course.name
-                        if not sections and not course_name:
-                            sections = Section.query(ancestor=courses[0].key).fetch()
-                        template_values['sections'] = sections
-                        if sections:
-                            selected_section = self.request.get('section')
-                            section = None
-                            if selected_section:
-                                selected_section = selected_section.upper()
-                                section = Section.get_by_id(selected_section, parent=course.key)
-                            if not section:
-                                section = sections[0]
-                            template_values['selectedSection'] = section.name
-                            template_values['students'] = section.students
+                    course_name = self.request.get('course')
+                    selected_section = self.request.get('section')
+                    template_values = get_courses_and_sections(result, course_name, selected_section)
+                    template_values['logouturl'] = url
                     template = JINJA_ENVIRONMENT.get_template('students.html')
                     self.response.write(template.render(template_values))
                 else:
@@ -447,6 +454,106 @@ class RemoveStudent(webapp2.RequestHandler):
                                 self.response.write("S" + "Student removed from section.")
                             else:
                                 self.response.write("E" + student + " does not exist!")
+                        else:
+                            self.response.write("E" + section_name + " section does not exist!")
+                    else:
+                        self.response.write("E" + course_name + " course does not exist!")
+                else:
+                    self.response.write("E" + "Error! invalid arguments.")
+
+
+class Rounds(webapp2.RequestHandler):
+    """Handling rounds page for admin console"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result:
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is Instructor:
+                    logging.info('Instructor navigated to Students ' + str(result))
+                    course_name = self.request.get('course')
+                    selected_section = self.request.get('section')
+                    template_values = get_courses_and_sections(result, course_name, selected_section)
+                    if 'selectedSectionObject' in template_values:
+                        current_section = template_values['selectedSectionObject']
+                        if current_section:
+                            lead_in = Round.get_by_id(1, parent=current_section.key)
+                            if lead_in:
+                                template_values['leadInQuestion'] = lead_in
+                    template_values['logouturl'] = url
+                    template = JINJA_ENVIRONMENT.get_template('rounds.html')
+                    self.response.write(template.render(template_values))
+                else:
+                    self.redirect('/')
+            else:
+                self.redirect('/')
+        else:
+            self.redirect('/')
+            # def get(self):
+            #     user = users.get_current_user()
+            #     if user:
+            #         result = Admin.query(Admin.email == user.email()).get()
+            #         url = users.create_logout_url(self.request.uri)
+            #         if result:
+            #             logging.info('Admin navigated to rounds ' + str(result))
+            #             section = str(result.key.parent().string_id())
+            #             class_obj = Class.get_by_id(section)
+            #             template_values = {
+            #                 'logouturl': url,
+            #                 'section': section,
+            #                 'round': class_obj.current_round
+            #             }
+            #             rounds = Round.query(ancestor=class_obj.key).fetch()
+            #             if rounds:
+            #                 template_values['rounds'] = rounds
+            #             template = JINJA_ENVIRONMENT.get_template('rounds.html')
+            #             self.response.write(template.render(template_values))
+            #         else:
+            #             self.redirect('/')
+            #     else:
+            #         self.redirect('/')
+
+
+class AddRound(webapp2.RequestHandler):
+    """Adding Lead-in and summary question in the database"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('course')
+                section_name = self.request.get('section')
+                time = self.request.get('time')
+                question = self.request.get('question')
+                number_options = int(self.request.get('number'))
+                options = json.loads(self.request.get('options'))
+                curr_round = int(self.request.get('round'))
+                is_last_round = self.request.get('isLastRound')
+                if course_name and section_name and time and question and number_options and options and curr_round and str(is_last_round):
+                    course_name = course_name.upper()
+                    section_name = section_name.upper()
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        section = Section.get_by_id(section_name, parent=course.key)
+                        if section:
+                            round_obj = Round(parent=section.key, id=curr_round)
+                            round_obj.deadline = time
+                            round_obj.number = curr_round
+                            if curr_round == 0 or is_last_round:
+                                # It is either Lead-in question or summary question
+                                round_obj.is_quiz = True
+                                round_obj.quiz = Question(options_total=number_options, question=question,
+                                                          options=options)
+                            else:
+                                description = self.request.get('description')
+                                round_obj.description = description
+                            round_obj.put()
+                            logging.info(round_obj)
+                            self.response.write("S" + "Success, round added.")
                         else:
                             self.response.write("E" + section_name + " section does not exist!")
                     else:
@@ -732,70 +839,6 @@ class UpdateGroups(webapp2.RequestHandler):
             self.response.write('error')
 
 
-class Rounds(webapp2.RequestHandler):
-    """Handling rounds page for admin console"""
-
-    def get(self):
-        user = users.get_current_user()
-        if user:
-            result = Admin.query(Admin.email == user.email()).get()
-            url = users.create_logout_url(self.request.uri)
-            if result:
-                logging.info('Admin navigated to rounds ' + str(result))
-                section = str(result.key.parent().string_id())
-                class_obj = Class.get_by_id(section)
-                template_values = {
-                    'logouturl': url,
-                    'section': section,
-                    'round': class_obj.current_round
-                }
-                rounds = Round.query(ancestor=class_obj.key).fetch()
-                if rounds:
-                    template_values['rounds'] = rounds
-                template = JINJA_ENVIRONMENT.get_template('rounds.html')
-                self.response.write(template.render(template_values))
-            else:
-                self.redirect('/')
-        else:
-            self.redirect('/')
-
-    def post(self):
-        user = users.get_current_user()
-        if user:
-            result = Admin.query(Admin.email == user.email()).get()
-            if result:
-                class_name = str(result.key.parent().string_id())
-                time = self.request.get('time')
-                round_val = int(self.request.get('round'))
-                quiz = self.request.get('quiz')
-                class_obj = Class.get_by_id(class_name)
-                if class_obj:
-                    class_obj.current_round = round_val
-                    class_obj.rounds = round_val
-                    class_obj.put()
-                    round_obj = Round(parent=class_obj.key, id=round_val)
-                    round_obj.deadline = time
-                    round_obj.number = round_val
-                    if quiz == 'T':
-                        round_obj.is_quiz = True
-                        question = self.request.get('question')
-                        number_options = int(self.request.get('number'))
-                        options = json.loads(self.request.get('options'))
-                        round_obj.quiz = Question(options_total=number_options, question=question, options=options)
-                    else:
-                        description = self.request.get('description')
-                        round_obj.description = description
-                    round_obj.put()
-                    logging.info(round_obj)
-                    self.response.write('Success, Round ' + str(round_val) + ' is now active.')
-                else:
-                    self.response.write('Error, finding the given class.')
-            else:
-                self.response.write('Error, Admin not found.')
-        else:
-            self.response.write('Error, please log in to post.')
-
-
 class Responses(webapp2.RequestHandler):
     """Handling responses page for admin console"""
 
@@ -876,6 +919,7 @@ application = webapp2.WSGIApplication([
     ('/add_section', AddSection),
     ('/toggleSection', ToggleSection),
     ('/students', StudentsPage),
+    ('/addRound', AddRound),
     ('/discussion', Discussion),
     ('/responses', Responses),
     ('/group_responses', GroupResponses),
