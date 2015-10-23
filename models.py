@@ -23,12 +23,6 @@ class Instructor(ndb.Model):
     is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
-# TODO remove this data model
-class Admin(ndb.Model):
-    """A main model for representing admins"""
-    email = ndb.StringProperty(required=True)
-
-
 class Student(ndb.Model):
     """A student model for all the students"""
     email = ndb.StringProperty(required=True)

@@ -6,8 +6,13 @@ import json
 import datetime
 
 from google.appengine.api import users
+from google.appengine.ext import vendor
 
 from models import *
+
+vendor.add('libs')
+
+import markdown
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -479,10 +484,10 @@ class Rounds(webapp2.RequestHandler):
                     template_values = get_courses_and_sections(result, course_name, selected_section)
                     if 'selectedSectionObject' in template_values:
                         current_section = template_values['selectedSectionObject']
-                        if current_section:
-                            lead_in = Round.get_by_id(1, parent=current_section.key)
-                            if lead_in:
-                                template_values['leadInQuestion'] = lead_in
+                        template_values['nextRound'] = current_section.rounds + 1
+                        lead_in = Round.get_by_id(1, parent=current_section.key)
+                        if lead_in:
+                            template_values['leadInQuestion'] = lead_in
                     template_values['logouturl'] = url
                     template = JINJA_ENVIRONMENT.get_template('rounds.html')
                     self.response.write(template.render(template_values))
@@ -532,7 +537,7 @@ class AddRound(webapp2.RequestHandler):
                 number_options = int(self.request.get('number'))
                 options = json.loads(self.request.get('options'))
                 curr_round = int(self.request.get('round'))
-                is_last_round = self.request.get('isLastRound')
+                is_last_round = bool(self.request.get('isLastRound'))
                 if course_name and section_name and time and question and number_options and options and curr_round and str(is_last_round):
                     course_name = course_name.upper()
                     section_name = section_name.upper()
@@ -540,6 +545,11 @@ class AddRound(webapp2.RequestHandler):
                     if course:
                         section = Section.get_by_id(section_name, parent=course.key)
                         if section:
+                            # Only update the value of total rounds if a new round is created,
+                            # not when we edit an old round is edited
+                            if curr_round > section.rounds:
+                                section.rounds = curr_round
+                                section.put()
                             round_obj = Round(parent=section.key, id=curr_round)
                             round_obj.deadline = time
                             round_obj.number = curr_round

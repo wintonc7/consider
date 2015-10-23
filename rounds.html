@@ -101,7 +101,8 @@
 <p>Select a section to continue.</p>
 {% endif %}
 <h4 class="sub-header">Discussions:</h4>
-{% if rounds %}
+{% if leadInQuestion %}
+{% if discussionRounds %}
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -126,6 +127,12 @@
         </tbody>
     </table>
 </div>
+{% else %}
+<button type="button" class="btn btn-default" onclick="addDiscussion()" style=""
+        aria-label="Start Discussion">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Start Discussion
+</button>
+{% endif %}
 {% else %}
 <p>Not started.</p>
 {% endif %}
@@ -168,9 +175,9 @@
       <div class="modal-body">
         <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/addRound">
             <div class="form-group">
-              <label for="startTime" class="col-sm-2 control-label">Start time</label>
+              <label for="endTime" class="col-sm-2 control-label">End time</label>
               <div class="col-sm-10">
-                  <input id="startTime" type="datetime-local" class="form-control" id="inputTime" name="time" required="true">
+                  <input id="endTime" type="datetime-local" class="form-control" name="time" required="true">
               </div>
             </div>
             <div class="form-group">
@@ -211,6 +218,37 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="discussionModal" tabindex="-1" role="dialog" aria-labelledby="discussionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="discussionModalLabel">Please add a description</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" id="discussionForm" method="post" style="text-align: center;" action="/addRound">
+            <div class="form-group">
+              <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
+              <div class="col-sm-10">
+                  <input id="discussionEndTime" type="datetime-local" class="form-control" name="discussionTime" required="true">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputDiscussionQuestion" class="col-sm-2 control-label">Description</label>
+              <div class="col-sm-10">
+                <textarea class="form-control" rows="3" id="inputDiscussionQuestion" name="discussionQuestion" placeholder="Please enter a description..." required></textarea>
+              </div>
+            </div>
+            <button type="submit" class="hide"></button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="submitDiscussion()">Submit Round</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block script %}
@@ -227,8 +265,16 @@
         $("#myModal").modal('show');
     }
 
+    function addDiscussion() {
+        $("#discussionModal").modal('show');
+    }
+
     function submitQuestion() {
         $("#modalForm").find('[type="submit"]').trigger('click');
+    }
+
+    function submitDiscussion() {
+        $("#discussionForm").find('[type="submit"]').trigger('click');
     }
 
     $("#modalForm").submit(function (event) {
@@ -245,13 +291,13 @@
         }
         optionVals = JSON.stringify(optionVals);
 
-        var time_val = $("#startTime").val();
+        var time_val = $("#endTime").val();
 
         console.log(question + options + time_val + optionVals);
 
         // do the POST and get the callback
         $.post(url,{time:time_val, question:question, number:options, options:optionVals, course:"{{selectedCourse}}",
-            section:"{{selectedSection}}", round:'1', isLastRound:'false'},function (data) {
+            section:"{{selectedSection}}", round:1, isLastRound:'false'},function (data) {
               if (data.charAt(0) == 'E') {
                   bootbox.alert(data.substring(1));
               }
@@ -263,11 +309,23 @@
         });
     });
 
-    {% if not round -%}
-        $( document ).ready(function() {
-            $("#inputBoolean").tooltip('show');
+    $("#discussinForm").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+
+        //collect form elements
+        var $form = $(this),
+        time_val = $("#discussionEndTime").val(),
+        description = $form.find("textarea").val(),
+        url = $form.attr("action");
+
+        // do the POST and get the callback
+        $.post(url, {time: time_val, round:{{nextRound}}, description:description}, function (data) {
+            bootbox.alert(data, function () {
+                location.reload();
+            });
         });
-    {% endif -%}
+    });
 
     $("#inputOptions").change(function() {
         var select = parseInt($('#inputOptions').val() , 10);
@@ -278,40 +336,5 @@
         $('#optionsContainer').empty().html(html);
     }).change();
 
-    $("#inputBoolean").change(function() {
-        var val = $('#inputBoolean').val();
-        var html = '';
-        if(val == 'false') {
-            html = '<label for="inputDescription" class="lead col-sm-4 control-label">Description:</label><div class="col-sm-4"><textarea type="text" class="form-control" id="inputDescription" name="description" placeholder="Please enter description for round..." required="true"></textarea></div>';
-        }
-        $('#descriptionContainer').empty().html(html);
-    }).change();
-
-  $("#form").submit(function (event) {
-        //Prevent the default behaviour
-        event.preventDefault();
-
-        var type = $("#inputBoolean").val();
-
-        if(type == 'true') {
-            $("#myModal").modal('show');
-        }
-        else {
-            //collect form elements
-            var $form = $(this),
-            time_val = $form.find("input[name='time']").val(),
-            description = $form.find("textarea[name='description']").val(),
-            url = $form.attr("action");
-
-            var round = parseInt({% if round -%} {{round}} {% else -%} 0 {%- endif -%}, 10);
-
-            // do the POST and get the callback
-            $.post(url, {time: time_val, round:round+1, description:description}, function (data) {
-                bootbox.alert(data, function () {
-                    location.reload();
-                });
-            });
-        }
-      });
 </script>
 {% endblock %}
