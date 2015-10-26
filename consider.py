@@ -485,9 +485,17 @@ class Rounds(webapp2.RequestHandler):
                     if 'selectedSectionObject' in template_values:
                         current_section = template_values['selectedSectionObject']
                         template_values['nextRound'] = current_section.rounds + 1
-                        lead_in = Round.get_by_id(1, parent=current_section.key)
-                        if lead_in:
-                            template_values['leadInQuestion'] = lead_in
+                        rounds = Round.query(ancestor=current_section.key).fetch()
+                        if rounds:
+                            discussion_rounds = []
+                            for r in rounds:
+                                if r.number == 1:
+                                    template_values['leadInQuestion'] = r
+                                elif r.is_quiz:
+                                    template_values['summaryQuestion'] = r
+                                else:
+                                    discussion_rounds.append(r)
+                            template_values['discussionRounds'] = discussion_rounds
                     template_values['logouturl'] = url
                     template = JINJA_ENVIRONMENT.get_template('rounds.html')
                     self.response.write(template.render(template_values))
@@ -534,35 +542,34 @@ class AddRound(webapp2.RequestHandler):
                 section_name = self.request.get('section')
                 time = self.request.get('time')
                 question = self.request.get('question')
-                number_options = int(self.request.get('number'))
-                options = json.loads(self.request.get('options'))
+                description = self.request.get('description')
                 curr_round = int(self.request.get('round'))
                 is_last_round = bool(self.request.get('isLastRound'))
-                if course_name and section_name and time and question and number_options and options and curr_round and str(is_last_round):
+                if course_name and section_name and time and (question or description) and curr_round and str(is_last_round):
                     course_name = course_name.upper()
                     section_name = section_name.upper()
                     course = Course.get_by_id(course_name, parent=result.key)
                     if course:
                         section = Section.get_by_id(section_name, parent=course.key)
                         if section:
+                            round_obj = Round(parent=section.key, id=curr_round)
+                            round_obj.deadline = time
+                            round_obj.number = curr_round
+                            if curr_round == 1 or is_last_round:
+                                # It is either Lead-in question or summary question
+                                round_obj.is_quiz = True
+                                number_options = int(self.request.get('number'))
+                                options = json.loads(self.request.get('options'))
+                                round_obj.quiz = Question(options_total=number_options, question=question,
+                                                          options=options)
+                            else:
+                                round_obj.description = description
+                            round_obj.put()
                             # Only update the value of total rounds if a new round is created,
                             # not when we edit an old round is edited
                             if curr_round > section.rounds:
                                 section.rounds = curr_round
                                 section.put()
-                            round_obj = Round(parent=section.key, id=curr_round)
-                            round_obj.deadline = time
-                            round_obj.number = curr_round
-                            if curr_round == 0 or is_last_round:
-                                # It is either Lead-in question or summary question
-                                round_obj.is_quiz = True
-                                round_obj.quiz = Question(options_total=number_options, question=question,
-                                                          options=options)
-                            else:
-                                description = self.request.get('description')
-                                round_obj.description = description
-                            round_obj.put()
-                            logging.info(round_obj)
                             self.response.write("S" + "Success, round added.")
                         else:
                             self.response.write("E" + section_name + " section does not exist!")
