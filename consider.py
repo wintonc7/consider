@@ -484,9 +484,10 @@ class Rounds(webapp2.RequestHandler):
                     template_values = get_courses_and_sections(result, course_name, selected_section)
                     if 'selectedSectionObject' in template_values:
                         current_section = template_values['selectedSectionObject']
-                        template_values['nextRound'] = current_section.rounds + 1
+                        template_values['activeRound'] = current_section.current_round
                         rounds = Round.query(ancestor=current_section.key).fetch()
                         if rounds:
+                            template_values['rounds'] = rounds
                             discussion_rounds = []
                             for r in rounds:
                                 if r.number == 1:
@@ -496,6 +497,10 @@ class Rounds(webapp2.RequestHandler):
                                 else:
                                     discussion_rounds.append(r)
                             template_values['discussionRounds'] = discussion_rounds
+                        if 'summaryQuestion' in template_values:
+                            template_values['nextRound'] = current_section.rounds
+                        else:
+                            template_values['nextRound'] = current_section.rounds + 1
                     template_values['logouturl'] = url
                     template = JINJA_ENVIRONMENT.get_template('rounds.html')
                     self.response.write(template.render(template_values))
@@ -531,7 +536,7 @@ class Rounds(webapp2.RequestHandler):
 
 
 class AddRound(webapp2.RequestHandler):
-    """Adding Lead-in and summary question in the database"""
+    """Adding rounds in the database for a particular section"""
 
     def post(self):
         user = users.get_current_user()
@@ -571,6 +576,37 @@ class AddRound(webapp2.RequestHandler):
                                 section.rounds = curr_round
                                 section.put()
                             self.response.write("S" + "Success, round added.")
+                        else:
+                            self.response.write("E" + section_name + " section does not exist!")
+                    else:
+                        self.response.write("E" + course_name + " course does not exist!")
+                else:
+                    self.response.write("E" + "Error! invalid arguments.")
+
+
+class ActivateRound(webapp2.RequestHandler):
+    """Activating a particular round for a section"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user:
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                course_name = self.request.get('course')
+                section_name = self.request.get('section')
+                next_round = int(self.request.get('round'))
+                if course_name and section_name and next_round:
+                    course_name = course_name.upper()
+                    section_name = section_name.upper()
+                    course = Course.get_by_id(course_name, parent=result.key)
+                    if course:
+                        section = Section.get_by_id(section_name, parent=course.key)
+                        if section:
+                            if section.current_round != next_round:
+                                # If the selected round is not currently active make it active
+                                section.current_round = next_round
+                                section.put()
+                            self.response.write("S" + "Success, round active.")
                         else:
                             self.response.write("E" + section_name + " section does not exist!")
                     else:
@@ -937,6 +973,7 @@ application = webapp2.WSGIApplication([
     ('/toggleSection', ToggleSection),
     ('/students', StudentsPage),
     ('/addRound', AddRound),
+    ('/activateRound', ActivateRound),
     ('/discussion', Discussion),
     ('/responses', Responses),
     ('/group_responses', GroupResponses),

@@ -35,29 +35,24 @@
     </div>
 </div>
 <h4 class="sub-header">Current round</h4>
-<h5 class="well well-sm">{% if round -%} {{round}} {% else -%} No rounds in progress {%- endif -%}</h5>
-<!--<form class="form-horizontal" id="form" method="post" style="text-align: center;" action="/rounds">-->
-    <!--<div class="form-group">-->
-        <!--<label for="inputTime" class="lead col-sm-4 control-label">Start a new round:</label>-->
-        <!--<div class="col-sm-4">-->
-            <!--<input type="datetime-local" class="form-control" id="inputTime" name="time" required="true">-->
-        <!--</div>-->
-    <!--</div>-->
-    <!--<div class="form-group">-->
-        <!--<label for="inputBoolean" class="lead col-sm-4 control-label">Quiz round:</label>-->
-        <!--<div class="col-sm-4">-->
-            <!--<select class="form-control" id="inputBoolean" name="type" {% if not round -%} disabled="true" data-toggle="tooltip" data-placement="bottom" title="First round should be quiz."{% endif -%}>-->
-                <!--<option value="false" {% if round -%} selected="selected" {% endif -%}>False</option>-->
-                <!--<option value="true" {% if not round -%} selected="selected" {% endif -%}>True</option>-->
-            <!--</select>-->
-        <!--</div>-->
-    <!--</div>-->
-    <!--<div class="form-group" id="descriptionContainer">-->
-    <!--</div>-->
-    <!--<div class="form-group">-->
-        <!--<button type="submit" class="btn btn-default" {% if not round -%} style="margin-top: 25px;" {% endif -%}>Start round</button>-->
-    <!--</div>-->
-<!--</form>-->
+{% if rounds %}
+<h5 class="well well-sm">{% if not activeRound %}No round {% else %} Round {{activeRound}} is {% endif %}in progress</h5>
+<div class="row">
+    <div class="col-md-2">
+        <select id="roundSelector" class="form-control">
+            {% for round in rounds %}
+            <option {% if activeRound == round.number %}selected="selected" {% endif %}>{{round.number}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="button" class="btn btn-default" onclick="makeActive()"
+                aria-label="Activate Round">
+            <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> Make Active
+        </button>
+    </div>
+</div>
+{% endif %}
 <h4 class="sub-header">Lead-in Question:</h4>
 {% if selectedSection %}
 {% if leadInQuestion %}
@@ -103,10 +98,12 @@
 <h4 class="sub-header">Discussions:</h4>
 {% if leadInQuestion %}
 {% if discussionRounds %}
+{% if not summaryQuestion %}
 <button type="button" class="btn btn-default" onclick="addDiscussion()"
         aria-label="Add Discussion">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
 </button>
+{% endif %}
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -234,6 +231,7 @@
     </div>
   </div>
 </div>
+{% if not summaryQuestion %}
 <div class="modal fade" id="discussionModal" tabindex="-1" role="dialog" aria-labelledby="discussionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -265,6 +263,7 @@
     </div>
   </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block script %}
@@ -289,16 +288,25 @@
         $("#myModal").modal('show');
     }
 
-    function addDiscussion() {
-        $("#discussionModal").modal('show');
-    }
-
     function submitQuestion() {
         $("#modalForm").find('[type="submit"]').trigger('click');
     }
 
-    function submitDiscussion() {
-        $("#discussionForm").find('[type="submit"]').trigger('click');
+    function makeActive() {
+        r = $("#roundSelector").val();
+
+        $.post("/activateRound", {
+            course: "{{selectedCourse}}", section: "{{selectedSection}}", round: r
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
+            }
+        });
     }
 
     $("#modalForm").submit(function (event) {
@@ -353,6 +361,15 @@
         }
     });
 
+    {% if not summaryQuestion %}
+    function addDiscussion() {
+        $("#discussionModal").modal('show');
+    }
+
+    function submitDiscussion() {
+        $("#discussionForm").find('[type="submit"]').trigger('click');
+    }
+
     $("#discussionForm").submit(function (event) {
         //Prevent the default behaviour
         event.preventDefault();
@@ -376,6 +393,7 @@
             }
         });
     });
+    {% endif %}
 
     $("#inputOptions").change(function() {
         var select = parseInt($('#inputOptions').val() , 10);
