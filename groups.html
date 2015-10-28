@@ -2,7 +2,38 @@
 {% block title %}Groups{% endblock %}
 
 {% block content %}
-<h1 class="page-header">Groups - {{section}}</h1>
+<h1 class="page-header">Groups</h1>
+<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h4>Course</h4>
+        {% if courses %}
+        <select id="courseSelector" class="form-control">
+            {% for course in courses %}
+            <option {% if selectedCourse== course.name %}selected="selected" {% endif %}>{{course.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        Please add a course to add Students
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h4>Section</h4>
+        {% if sections %}
+        <select id="sectionSelector" class="form-control">
+            {% for section in sections %}
+            <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        {% if courses %}
+        There are no sections in this Course
+        {% else %}
+        Please select a course to see sections
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
 <h4 class="sub-header">Total groups: {% if group -%} {{group}} {% else -%} 0{%- endif -%}</h4>
   <form class="form-horizontal" id="form" method="post" style="text-align: center;" action="/addGroups">
     <div class="form-group">
@@ -17,7 +48,7 @@
       </div>
     </div>
   </form>
-<h4 class="sub-header">Following are the responses from students of {{section}}:</h4>
+<h4 class="sub-header">Following are the responses from students of {{selectedSection}}:</h4>
 <div class="table-responsive">
   <form id="form_table" method="post" action="/updateGroups">
     <table class="table table-striped" id="group_table">
@@ -64,6 +95,14 @@
 
 {% block script %}
 <script>
+    $('#courseSelector').on('change', function () {
+        location.href = "/groups?course=" + this.value;
+    });
+
+    $('#sectionSelector').on('change', function () {
+        location.href = "/groups?course={{selectedCourse}}&section=" + this.value;
+    });
+
   $("#form").submit(function (event) {
         //Prevent the default behaviour
         event.preventDefault();
@@ -71,12 +110,16 @@
         //collect form elements
         var $form = $(this),
         groups = $form.find("input[name='groups']").val(),
-        class2 = "{{section}}",
         url = $form.attr("action");
 
         // do the POST and get the callback
-        $.post(url,{group:groups, class:class2},function (data) {
-          location.reload();
+        $.post(url,{groups:groups, course:'{{selectedCourse}}', section:'{{selectedSection}}'},function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                location.reload();
+            }
         });
       });
 
@@ -86,16 +129,13 @@
 
         //collect form elements
         var $form = $(this),
-        class2 = "{{section}}",
         url = $form.attr("action");
 
         var data = {};
 
         $("#group_table > tbody tr").each(function () {
           var stud = $(this).find("td").eq(1).html();
-          console.log(stud);
           var group = $("#select_"+$(this).find("td").eq(0).html()).val();
-          console.log(group);
           data[stud] = group;
         });
 
@@ -103,8 +143,13 @@
         console.log(data);
 
         // do the POST and get the callback
-        $.post(url,{groups:data, class:class2},function (data) {
-          location.reload();
+        $.post(url,{groups:data, course:'{{selectedCourse}}', section:'{{selectedSection}}'},function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                location.reload();
+            }
         });
       }); 
 </script>

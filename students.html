@@ -57,9 +57,9 @@
         {% for student in students %}
         <tr>
             <td>{{loop.index}}</td>
-            <td>{{student}}</td>
+            <td>{{student.email}}</td>
             <td>
-                <button class="btn btn-danger btn-sm" onclick="deleteStudent('{{student}}')">Delete</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteStudent('{{student.email}}')">Delete</button>
             </td>
         </tr>
         {% endfor %}

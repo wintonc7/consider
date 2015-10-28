@@ -35,7 +35,7 @@
         <div class="jumbotron">
             <p> {{question}} </p>
         </div>
-        <form id="form" method="post" {% if not expired -%} action="/home" {%- endif -%}>
+        <form id="form" method="post" {% if not expired -%} action="/submitResponse" {%- endif -%}>
             <div class="list-group">
                 {% for option in options %}
                 <input type="radio" name="optionsRadios" id="option{{loop.index}}" value="option{{loop.index}}" {% if expired -%} disabled="true" {%- endif -%}>
@@ -149,7 +149,7 @@
                 {% if last_round %}
                     $('#myModal').modal('show');
                 {% else %}
-	        	$.post(url,{option:radio, comm:comment},function (data) {
+	        	$.post(url,{option:radio, comm:comment, section:'{{sectionKey}}'},function (data) {
 		        	bootbox.alert(data,function(){
                         ocomment = comment;
                     });

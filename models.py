@@ -7,13 +7,20 @@ class Course(ndb.Model):
     is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
+class StudentInfo(ndb.Model):
+    """A model for holding student's info per section"""
+    email = ndb.StringProperty(required=True)
+    alias = ndb.StringProperty(default='NA', indexed=False)
+    group = ndb.IntegerProperty(default=0)
+
+
 class Section(ndb.Model):
     """A main model for a particular section which will be child of course"""
     name = ndb.StringProperty(required=True)
     groups = ndb.IntegerProperty(default=0, indexed=False)
     current_round = ndb.IntegerProperty(default=0, indexed=False)
     rounds = ndb.IntegerProperty(default=0, indexed=False)
-    students = ndb.StringProperty(repeated=True, indexed=False)
+    students = ndb.StructuredProperty(StudentInfo, repeated=True)
     is_active = ndb.BooleanProperty(default=True, indexed=False)
 
 
@@ -26,8 +33,6 @@ class Instructor(ndb.Model):
 class Student(ndb.Model):
     """A student model for all the students"""
     email = ndb.StringProperty(required=True)
-    alias = ndb.StringProperty(default='NA')
-    group = ndb.IntegerProperty(default=0, indexed=False)
     sections = ndb.KeyProperty(kind=Section, repeated=True, indexed=False)
 
 
