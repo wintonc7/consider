@@ -24,7 +24,8 @@ errorCodes = {
     '101': "Sorry you are not registered with this Application, please contact your Instructor.",
     '102': "Sorry you are not an instructor.",
     '103': "Sorry no rounds are active for this section, please try again later.",
-    '104': "Sorry the round was not found, please contact your Instructor."
+    '104': "Sorry the round was not found, please contact your Instructor.",
+    '105': "Sorry, your group was not found, please contact your Instructor."
 }
 
 
@@ -563,6 +564,9 @@ class SectionPage(webapp2.RequestHandler):
                                 else:
                                     curr_round = Round.get_by_id(section.current_round, parent=section.key)
                                     if curr_round:
+                                        if not curr_round.is_quiz:
+                                            self.redirect('/discussion?section=' + section_key)
+                                            return
                                         deadline = datetime.datetime.strptime(curr_round.deadline, '%Y-%m-%dT%H:%M')
                                         current_time = datetime.datetime.now()
                                         template_values = {
@@ -597,6 +601,13 @@ class SectionPage(webapp2.RequestHandler):
             self.redirect('/')
 
 
+def check_response(response):
+    for i in range(1, len(response)):
+        if response[i] not in ['support', 'neutral', 'disagree']:
+            return True
+    return False
+
+
 class SubmitResponse(webapp2.RequestHandler):
     """Accept responses from students and save them in the database"""
 
@@ -608,31 +619,43 @@ class SubmitResponse(webapp2.RequestHandler):
                 option = self.request.get('option').lower()
                 comment = self.request.get('comm')
                 summary = self.request.get('summary')
+                res = self.request.get('response')
                 section_key = self.request.get('section')
                 if section_key:
                     try:
                         section = ndb.Key(urlsafe=section_key).get()
                         if section:
-                            if not (option and comment):
-                                self.response.write('Invalid Parameters!')
-                            else:
-                                current_round = Round.get_by_id(section.current_round, parent=section.key)
-                                if current_round:
-                                    deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                                    current_time = datetime.datetime.now()
-                                    if deadline >= current_time:
-                                        response = Response(parent=current_round.key, id=student.email)
-                                        response.option = option
-                                        response.comment = comment
-                                        response.student = student.email
-                                        if summary:
-                                            response.summary = summary
-                                        response.put()
-                                        self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
-                                    else:
-                                        self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                            current_round = Round.get_by_id(section.current_round, parent=section.key)
+                            if current_round:
+                                response = Response(parent=current_round.key, id=student.email)
+                                if current_round.is_quiz:
+                                    if not (option and comment):
+                                        self.response.write('Invalid Parameters!')
+                                        return
+                                    if current_round.number != 0 and not summary:
+                                        self.response.write('Invalid Parameters!')
+                                        return
+                                    response.option = option
+                                    if summary:
+                                        response.summary = summary
                                 else:
-                                    self.response.write('Sorry! The round is not visible, please try again later.')
+                                    res = json.loads(res)
+                                    if not (res and comment) or check_response(res):
+                                        self.response.write('Invalid Parameters!')
+                                        return
+                                    for i in range(1, len(res)):
+                                        response.response.append(res[i])
+                                deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
+                                current_time = datetime.datetime.now()
+                                if deadline >= current_time:
+                                    response.comment = comment
+                                    response.student = student.email
+                                    response.put()
+                                    self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
+                                else:
+                                    self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                            else:
+                                self.response.write('Sorry! The round is not visible, please try again later.')
                         else:
                             self.response.write('Sorry! The section is not visible, please try again later.')
                     except:
@@ -645,146 +668,105 @@ class SubmitResponse(webapp2.RequestHandler):
             self.response.write('Sorry! User is not recognized, please try again later.')
 
 
-def check_response(response):
-    for i in range(1, len(response)):
-        if response[i] not in ['support', 'neutral', 'disagree']:
-            return True
-    return False
-
-
 class Discussion(webapp2.RequestHandler):
     """Redirecting accordingly based on email"""
 
     def get(self):
         user = users.get_current_user()
         if user:
-            student = Student.query(Student.email == user.email()).get()
-            url = users.create_logout_url(self.request.uri)
-            if student:
-                logging.info('Student redirect to discussion ' + str(student))
-                class_obj = Class.get_by_id(student.class_name)
-                current_page = self.request.get('round')
-                if class_obj.current_round > 0:
-                    if class_obj.current_round == 1:
-                        self.redirect('/home')
-                        return
-                    display_round = class_obj.current_round
-                    if class_obj.current_round == 5:  # To be changed
-                        display_round = 5
-                    if current_page:
+            result = get_role(user)
+            if result:
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is Student:
+                    logging.info('Student navigated to discussion ' + str(result))
+                    section_key = self.request.get('section')
+                    if section_key:
                         try:
-                            current_page = int(current_page) + 1
-                            logging.info(current_page)
-                            if current_page > 4 or current_page < 2:  # To be changed
-                                raise Exception('wrong_round')
+                            section = ndb.Key(urlsafe=section_key).get()
+                            if section:
+                                if section.current_round == 0:
+                                    self.redirect('/error?code=103')
+                                else:
+                                    if section.current_round == 1:
+                                        self.redirect('/home')
+                                        return
+                                    requested_round = self.request.get('round')
+                                    if requested_round:
+                                        requested_round = int(requested_round)
+                                    else:
+                                        requested_round = section.current_round
+                                    d_round = Round.get_by_id(requested_round, parent=section.key)
+                                    if d_round:
+                                        group = 0
+                                        alias = None
+                                        for stu in section.students:
+                                            if stu.email == result.email:
+                                                group = stu.group
+                                                alias = stu.alias
+                                                break
+                                        if group != 0 and alias:
+                                            group = Group.get_by_id(group, parent=section.key)
+                                            if group:
+                                                comments = []
+                                                previous_round = Round.get_by_id(requested_round - 1, parent=section.key)
+                                                for stu in group.members:
+                                                    response = Response.get_by_id(stu, parent=previous_round.key)
+                                                    if response:
+                                                        for s in section.students:
+                                                            if s.email == stu:
+                                                                comment = {
+                                                                    'alias': s.alias,
+                                                                    'response': response.comment,
+                                                                    'opinion': response.response
+                                                                }
+                                                                if response.option != 'NA':
+                                                                    comment['option'] = previous_round.quiz.options[int(response.option[-1]) - 1]
+                                                                comments.append(comment)
+                                                                break
+                                                template_values = {
+                                                    'url': url,
+                                                    'alias': alias,
+                                                    'comments': comments
+                                                }
+                                                stu_response = Response.get_by_id(result.email, parent=d_round.key)
+                                                if stu_response:
+                                                    template_values['comment'] = stu_response.comment
+                                                    template_values['response'] = ','.join(str(item) for item in stu_response.response)
+                                                deadline = datetime.datetime.strptime(d_round.deadline, '%Y-%m-%dT%H:%M')
+                                                current_time = datetime.datetime.now()
+                                                if deadline < current_time or requested_round != section.current_round:
+                                                    template_values['expired'] = True
+                                                template_values['deadline'] = d_round.deadline
+                                                template_values['rounds'] = section.current_round
+                                                template_values['curr_page'] = requested_round
+                                                template_values['description'] = d_round.description
+                                                template_values['sectionKey'] = section_key
+                                                template = JINJA_ENVIRONMENT.get_template('discussion.html')
+                                                self.response.write(template.render(template_values))
+                                            else:
+                                                logging.error("Group not found for " + str(result) + " Section: " + str(section))
+                                                self.redirect('/error?code=105')
+                                        else:
+                                            logging.error("Group not found for " + str(result) + " Section: " + str(section))
+                                            self.redirect('/error?code=105')
+                                    else:
+                                        logging.info("Requested round not found for " + str(result) + " Section: " + str(section))
+                                        self.redirect('/home')
                             else:
-                                display_round = current_page
-                        except:
-                            self.redirect('/discussion')
-                            return
-                    current_round = Round.get_by_id(display_round, parent=class_obj.key)
-                    if current_round:
-                        deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                        logging.info(deadline)
-                        current_time = datetime.datetime.now()
-                        logging.info(current_time)
-                        try:
-                            group = Group.get_by_id(student.group, parent=student.key.parent().parent())
-                        except:
-                            self.response.write(
-                                'Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
-                            return
-                        if group:
-                            comments = []
-                            for stu in group.members:
-                                response = Response.get_by_id(stu, parent=Round.get_by_id(display_round - 1,
-                                                                                          parent=class_obj.key).key)
-                                if response:
-                                    comment = {
-                                        'alias': Student.get_by_id(stu, parent=student.key.parent()).alias,
-                                        'response': response.comment,
-                                        'opinion': response.response
-                                    }
-                                    # if response.option != 'NA':
-                                    #     comment['option'] = Round.get_by_id(display_round - 1, parent=class_obj.key).quiz.options[int(response.option[-1]) - 1]
-                                    comments.append(comment)
-                            logging.info(comments)
-                            template_values = {
-                                'url': url,
-                                'alias': student.alias,
-                                'comments': comments
-                            }
-                            response = Response.get_by_id(student.email, parent=current_round.key)
-                            if response:
-                                template_values['comment'] = response.comment
-                                template_values['response'] = ','.join(str(item) for item in response.response)
-                            if deadline < current_time or display_round != class_obj.current_round:
-                                template_values['expired'] = True
-                            template_values['deadline'] = current_round.deadline
-                            template_values['round'] = class_obj.current_round
-                            template_values['curr_page'] = display_round
-                            template_values['description'] = current_round.description
-                            if class_obj.current_round == 5:  # To be changed
-                                template_values['round'] = 5
-                                template_values['expired'] = True
-                            logging.info(template_values)
-                            template = JINJA_ENVIRONMENT.get_template('discussion.html')
-                            self.response.write(template.render(template_values))
-                        else:
-                            self.response.write(
-                                'Sorry, your group was not found. Please contact your professor. <a href="' + url + '"">Logout</a>')
+                                logging.info("Section not found for key: " + section_key)
+                                self.redirect('/home')
+                        except Exception as e:
+                            logging.info("Found exception " + e.message)
+                            self.redirect('/home')
                     else:
-                        self.response.write('Sorry rounds are not active. <a href="' + url + '"">Logout</a>')
+                        self.redirect('/home')
                 else:
-                    self.response.write(
-                        'Sorry no rounds are active right now, please check back later. <a href="' + url + '"">Logout</a>')
+                    self.redirect('/')
             else:
-                self.response.write(
-                    'Sorry you are not yet registered with this application, please contact your professor. <a href="' + url + '"">Logout</a>')
+                self.redirect('/')
         else:
             self.redirect('/')
-
-    def post(self):
-        user = users.get_current_user()
-        if user:
-            student = Student.query(Student.email == user.email()).get()
-            if student:
-                response = json.loads(self.request.get('response'))
-                comment = self.request.get('comm')
-                if (not (response and comment)) or check_response(response):
-                    self.response.write('Sorry! There was some error submitting your response please try again later.')
-                else:
-                    logging.info(response)
-                    class_obj = Class.get_by_id(student.class_name)
-                    if class_obj.current_round == 5:  # To be changed
-                        self.response.write('Sorry! you cannot submit to this round.')
-                        return
-                    current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
-                    if current_round:
-                        deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                        logging.info(deadline)
-                        current_time = datetime.datetime.now()
-                        logging.info(current_time)
-                        if deadline >= current_time:
-                            new_response = Response(parent=current_round.key, id=student.email)
-                            new_response.comment = comment
-                            new_response.student = student.email
-                            for i in range(1, len(response)):
-                                new_response.response.append(response[i])
-                            new_response.put()
-                            # logging.info('Response saved from ' + str(student.email) + ', comment: ' + str(comment))
-                            self.response.write(
-                                'Thank you, your response have been saved and you can edit your response any time before the deadline.')
-                        else:
-                            self.response.write(
-                                'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
-                    else:
-                        self.response.write(
-                            'Sorry! There was some error submitting your response please try again later.')
-            else:
-                self.response.write('Sorry! There was some error submitting your response please try again later.')
-        else:
-            self.response.write('Sorry! There was some error submitting your response please try again later.')
 
 
 class Groups(webapp2.RequestHandler):

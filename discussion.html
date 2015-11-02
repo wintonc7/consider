@@ -34,8 +34,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
           <ul class="nav navbar-nav">
-              {% for i in range(0,round-1) %}
-                <li {% if i==curr_page-2 -%}class="active"><a href="#">{%- else -%}><a href="/discussion?round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
+              {% for i in range(1,rounds) %}
+                <li {% if i==curr_page-1 -%}class="active"><a href="#">{%- else -%}><a href="/discussion?section={{sectionKey}}&round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
               {% endfor %}
           </ul>
         </div>
@@ -65,6 +65,7 @@
         <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree</button>
       </div>
       {% endfor %}
+        {% if not expired -%}
         <div id="alert_comment" class="alert alert-info fade in" role="alert" style="display: none;">
             <button type="button" class="close" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -74,9 +75,11 @@
             <p id="alert_{{loop.index}}"></p>
             {% endfor %}
         </div>
-      <form id="form" method="post" {% if not expired -%} action="/discussion" {%- endif -%}>
+        {% endif %}
+      <form id="form" method="post" {% if not expired -%} action="/submitResponse" {%- endif -%}>
         <textarea class="form-control" rows="5" id="comment" placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%} disabled="true" {%- endif -%}>
-        {%- if comment -%}{{comment}}
+        {%- if comment -%}
+            {{comment}}
         {%- endif -%}
         </textarea>
         <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
@@ -148,7 +151,7 @@
                     var $form = $(this);
                     var comment = $form.find("textarea").val();
                     var url = $form.attr("action");
-                    $.post(url,{comm:comment,response:JSON.stringify(resp)},function (data) {
+                    $.post(url,{comm:comment, response:JSON.stringify(resp), section:'{{sectionKey}}'},function (data) {
                         bootbox.alert(data,function(){
                             ocomment = comment;
                         });
