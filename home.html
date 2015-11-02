@@ -28,7 +28,7 @@
              <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
             </a>
         </div>
-        {%- if last_round -%}<div class="row"><a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion" target="_blank"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Go to Discussions</a></div> {%- endif -%}
+        {%- if last_round -%}<div class="row"><a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion?section={{sectionKey}}" target="_blank"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Go to Discussions</a></div> {%- endif -%}
         <div class="header">
             <h3 class="text-muted">{%- if last_round -%}Post Discussion Question{%- endif -%}</h3>
         </div>
@@ -60,7 +60,7 @@
             <h4 class="modal-title" id="myModalLabel">Please provide a brief summary... </h4>
           </div>
           <div class="modal-body">
-            <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/home">
+            <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/submitResponse">
                 <div class="form-group">
                   <div class="col-sm-12">
                     <textarea class="form-control" rows="10" id="inputSummary" name="summary" placeholder="Your summary..." required>{{summary}}</textarea>
@@ -124,8 +124,9 @@
             var $form = $(this);
             var summary = $form.find("textarea").val();
             var url = $form.attr("action");
-            $.post(url, {option:radio, comm:comment, summary:summary}, function (data) {
+            $.post(url, {option:radio, comm:comment, summary:summary, section:'{{sectionKey}}'}, function (data) {
                 bootbox.alert(data,function(){
+                    ocomment = comment;
                     location.reload();
                 });
             });

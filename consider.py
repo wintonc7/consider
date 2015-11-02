@@ -231,52 +231,6 @@ class HomePage(webapp2.RequestHandler):
                     self.redirect('/error?code=101')
             else:
                 self.redirect('/error?code=101')
-
-                #     result = Student.query(Student.email == user.email()).get()
-                #     if result:
-                #         logging.info('Student logged in ' + str(result))
-                #         class_obj = Class.get_by_id(result.class_name)
-                #         logging.info(class_obj)
-                #         if class_obj.current_round > 0:
-                #             current_round = Round.get_by_id(class_obj.current_round, parent=class_obj.key)
-                #             if current_round:
-                #                 if not current_round.is_quiz:
-                #                     self.redirect('/discussion')
-                #                     return
-                #                 deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                #                 logging.info(deadline)
-                #                 current_time = datetime.datetime.now()
-                #                 logging.info(current_time)
-                #                 response = Response.get_by_id(result.email, parent=current_round.key)
-                #                 logging.info(str(response))
-                #                 if response:
-                #                     template_values = {
-                #                         'url': url,
-                #                         'option': response.option,
-                #                         'comment': response.comment
-                #                     }
-                #                     if response.summary:
-                #                         template_values['summary'] = response.summary
-                #                 else:
-                #                     template_values = {
-                #                         'url': url
-                #                     }
-                #                 if deadline < current_time:
-                #                     template_values['expired'] = True
-                #                 if class_obj.current_round == 5:                        # To be changed
-                #                     template_values['last_round'] = True
-                #                 template_values['deadline'] = current_round.deadline
-                #                 template_values['question'] = current_round.quiz.question
-                #                 template_values['options'] = current_round.quiz.options
-                #                 template_values['number'] = current_round.quiz.options_total
-                #                 template = JINJA_ENVIRONMENT.get_template('home.html')
-                #                 self.response.write(template.render(template_values))
-                #             else:
-                #                 self.response.write("Sorry rounds are not active. <a href='" + url + "'>Logout</a>")
-                #         else:
-                #             self.response.write("Sorry no rounds are active right now, please check back later. <a href='" + url + "'>Logout</a>")
-                #     else:
-                #         self.response.write("Sorry you are not yet registered with this application, please contact your professor. <a href='" + url + "'>Logout</a>")
         else:
             self.redirect('/')
 
@@ -576,6 +530,8 @@ class SectionPage(webapp2.RequestHandler):
                                         if response:
                                             template_values['option'] = response.option
                                             template_values['comment'] = response.comment
+                                            if response.summary:
+                                                template_values['summary'] = response.summary
                                         if deadline < current_time:
                                             template_values['expired'] = True
                                         template_values['deadline'] = curr_round.deadline
@@ -583,13 +539,16 @@ class SectionPage(webapp2.RequestHandler):
                                         template_values['options'] = curr_round.quiz.options
                                         template_values['number'] = curr_round.quiz.options_total
                                         template_values['sectionKey'] = section_key
+                                        if curr_round.number != 1:
+                                            template_values['last_round'] = True
                                         template = JINJA_ENVIRONMENT.get_template('home.html')
                                         self.response.write(template.render(template_values))
                                     else:
                                         self.redirect('/error?code=104')
                             else:
                                 self.redirect('/home')
-                        except:
+                        except Exception as e:
+                            logging.error('Got exception: ' + e.message)
                             self.redirect('/home')
                     else:
                         self.redirect('/home')
@@ -736,6 +695,8 @@ class Discussion(webapp2.RequestHandler):
                                                 deadline = datetime.datetime.strptime(d_round.deadline, '%Y-%m-%dT%H:%M')
                                                 current_time = datetime.datetime.now()
                                                 if deadline < current_time or requested_round != section.current_round:
+                                                    template_values['expired'] = True
+                                                if d_round.is_quiz:
                                                     template_values['expired'] = True
                                                 template_values['deadline'] = d_round.deadline
                                                 template_values['rounds'] = section.current_round
