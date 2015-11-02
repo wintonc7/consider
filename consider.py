@@ -910,31 +910,31 @@ class GroupResponses(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-            result = Admin.query(Admin.email == user.email()).get()
-            url = users.create_logout_url(self.request.uri)
-            if result:
-                logging.info('Admin navigated to groups_responses ' + str(result))
-                section = str(result.key.parent().string_id())
-                class_obj = Class.get_by_id(section)
-                template_values = {
-                    'logouturl': url,
-                    'section': section,
-                    'round': class_obj.rounds,
-                    'groups': class_obj.groups
-                }
-                resp = {}
-                for g in range(1, class_obj.groups + 1):
-                    for r in range(1, class_obj.rounds + 1):
-                        resp['group_' + str(g) + '_' + str(r)] = []
-                for r in range(1, class_obj.rounds + 1):
-                    response = Response.query(ancestor=Round.get_by_id(r, parent=result.key.parent()).key).fetch()
-                    if response:
-                        for res in response:
-                            stu = Student.query(Student.email == res.student).get()
-                            res.alias = stu.alias
-                            resp['group_' + str(stu.group) + '_' + str(r)].append(res)
-                template_values['responses'] = resp
-                logging.info('Resp' + str(template_values))
+            result = get_role(user)
+            if result and type(result) is Instructor:
+                url = users.create_logout_url(self.request.uri)
+                course_name = self.request.get('course')
+                selected_section = self.request.get('section')
+                template_values = get_courses_and_sections(result, course_name, selected_section)
+                if 'selectedSectionObject' in template_values:
+                    current_section = template_values['selectedSectionObject']
+                    template_values['round'] = current_section.rounds
+                    template_values['groups'] = current_section.groups
+                    resp = {}
+                    for g in range(1, current_section.groups + 1):
+                        for r in range(1, current_section.rounds + 1):
+                            resp['group_' + str(g) + '_' + str(r)] = []
+                    for r in range(1, current_section.rounds + 1):
+                        responses = Response.query(ancestor=Round.get_by_id(r, parent=current_section.key).key).fetch()
+                        if responses:
+                            for res in responses:
+                                for s in current_section.students:
+                                    if s.email == res.student:
+                                        res.alias = s.alias
+                                        resp['group_' + str(s.group) + '_' + str(r)].append(res)
+                                        break
+                    template_values['responses'] = resp
+                template_values['logouturl'] = url
                 template = JINJA_ENVIRONMENT.get_template('groups_responses.html')
                 self.response.write(template.render(template_values))
             else:
