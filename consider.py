@@ -881,20 +881,21 @@ class GroupResponses(webapp2.RequestHandler):
                     current_section = template_values['selectedSectionObject']
                     template_values['round'] = current_section.rounds
                     template_values['groups'] = current_section.groups
-                    resp = {}
-                    for g in range(1, current_section.groups + 1):
+                    if current_section.groups > 0:
+                        resp = {}
+                        for g in range(1, current_section.groups + 1):
+                            for r in range(1, current_section.rounds + 1):
+                                resp['group_' + str(g) + '_' + str(r)] = []
                         for r in range(1, current_section.rounds + 1):
-                            resp['group_' + str(g) + '_' + str(r)] = []
-                    for r in range(1, current_section.rounds + 1):
-                        responses = Response.query(ancestor=Round.get_by_id(r, parent=current_section.key).key).fetch()
-                        if responses:
-                            for res in responses:
-                                for s in current_section.students:
-                                    if s.email == res.student:
-                                        res.alias = s.alias
-                                        resp['group_' + str(s.group) + '_' + str(r)].append(res)
-                                        break
-                    template_values['responses'] = resp
+                            responses = Response.query(ancestor=Round.get_by_id(r, parent=current_section.key).key).fetch()
+                            if responses:
+                                for res in responses:
+                                    for s in current_section.students:
+                                        if s.email == res.student and s.group != 0:
+                                            res.alias = s.alias
+                                            resp['group_' + str(s.group) + '_' + str(r)].append(res)
+                                            break
+                        template_values['responses'] = resp
                 template_values['logouturl'] = url
                 template = JINJA_ENVIRONMENT.get_template('groups_responses.html')
                 self.response.write(template.render(template_values))
