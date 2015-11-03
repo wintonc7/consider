@@ -591,7 +591,7 @@ class SubmitResponse(webapp2.RequestHandler):
                                     if not (option and comment):
                                         self.response.write('Invalid Parameters!')
                                         return
-                                    if current_round.number != 0 and not summary:
+                                    if current_round.number != 1 and not summary:
                                         self.response.write('Invalid Parameters!')
                                         return
                                     response.option = option
