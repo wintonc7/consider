@@ -21,7 +21,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 errorCodes = {
     '100': "Oops! Something went wrong please try again.",
-    '101': "Sorry you are not registered with this Application, please contact your Instructor.",
+    '101': "Sorry you are not registered with this application, please contact your Instructor.",
     '102': "Sorry you are not an instructor.",
     '103': "Sorry no rounds are active for this section, please try again later.",
     '104': "Sorry the round was not found, please contact your Instructor.",
