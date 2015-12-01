@@ -31,11 +31,11 @@ errorCodes = {
 
 def get_role(user):
     if user:
-        result = Instructor.query(Instructor.email == user.email()).get()
+        result = Instructor.query(Instructor.email == user.email().lower()).get()
         if result:
             return result
         else:
-            result = Student.query(Student.email == user.email()).get()
+            result = Student.query(Student.email == user.email().lower()).get()
             if result:
                 return result
     return False
@@ -927,4 +927,4 @@ application = webapp2.WSGIApplication([
     ('/rounds', Rounds),
     ('/addGroups', AddGroups),
     ('/updateGroups', UpdateGroups)
-], debug=True)
+])
