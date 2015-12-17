@@ -14,14 +14,18 @@ handlers:
 - url: /fonts
   static_dir: fonts
 
-- url: /secretlandingpage
-  script: manadmin.application
+- url: /admin
+  script: consider.application
+  login: admin
+  auth_fail_action: redirect
 
 - url: /toggleInstructor
-  script: manadmin.application
+  script: consider.application
+  login: admin
 
 - url: /.*
   script: consider.application
+  login: required
 
 libraries:
 - name: webapp2

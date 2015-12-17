@@ -15,9 +15,9 @@ vendor.add('libs')
 import markdown
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
+        loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+        extensions=['jinja2.ext.autoescape'],
+        autoescape=True)
 
 errorCodes = {
     '100': "Oops! Something went wrong please try again.",
@@ -360,7 +360,7 @@ class RemoveStudent(webapp2.RequestHandler):
                                 student.put()
                                 section.put()
                                 logging.info(
-                                    "Student" + str(student) + " has been removed from Section " + str(section))
+                                        "Student" + str(student) + " has been removed from Section " + str(section))
                                 self.response.write("S" + "Student removed from section.")
                             else:
                                 self.response.write("E" + student + " does not exist!")
@@ -431,7 +431,8 @@ class AddRound(webapp2.RequestHandler):
                 description = self.request.get('description')
                 curr_round = int(self.request.get('round'))
                 is_last_round = bool(self.request.get('isLastRound'))
-                if course_name and section_name and time and (question or description) and curr_round and str(is_last_round):
+                if course_name and section_name and time and (question or description) and curr_round and str(
+                        is_last_round):
                     course_name = course_name.upper()
                     section_name = section_name.upper()
                     course = Course.get_by_id(course_name, parent=result.key)
@@ -610,15 +611,18 @@ class SubmitResponse(webapp2.RequestHandler):
                                     response.comment = comment
                                     response.student = student.email
                                     response.put()
-                                    self.response.write('Thank you, your response have been saved and you can edit your response any time before the deadline.')
+                                    self.response.write(
+                                        'Thank you, your response have been saved and you can edit your response any time before the deadline.')
                                 else:
-                                    self.response.write('Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                                    self.response.write(
+                                        'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
                             else:
                                 self.response.write('Sorry! The round is not visible, please try again later.')
                         else:
                             self.response.write('Sorry! The section is not visible, please try again later.')
                     except:
-                        self.response.write('Sorry! There was some error submitting your response please try again later.')
+                        self.response.write(
+                            'Sorry! There was some error submitting your response please try again later.')
                 else:
                     self.response.write('Invalid Parameters!')
             else:
@@ -668,7 +672,8 @@ class Discussion(webapp2.RequestHandler):
                                             group = Group.get_by_id(group, parent=section.key)
                                             if group:
                                                 comments = []
-                                                previous_round = Round.get_by_id(requested_round - 1, parent=section.key)
+                                                previous_round = Round.get_by_id(requested_round - 1,
+                                                                                 parent=section.key)
                                                 for stu in group.members:
                                                     response = Response.get_by_id(stu, parent=previous_round.key)
                                                     if response:
@@ -680,7 +685,8 @@ class Discussion(webapp2.RequestHandler):
                                                                     'opinion': response.response
                                                                 }
                                                                 if response.option != 'NA':
-                                                                    comment['option'] = previous_round.quiz.options[int(response.option[-1]) - 1]
+                                                                    comment['option'] = previous_round.quiz.options[
+                                                                        int(response.option[-1]) - 1]
                                                                 comments.append(comment)
                                                                 break
                                                 template_values = {
@@ -691,8 +697,10 @@ class Discussion(webapp2.RequestHandler):
                                                 stu_response = Response.get_by_id(result.email, parent=d_round.key)
                                                 if stu_response:
                                                     template_values['comment'] = stu_response.comment
-                                                    template_values['response'] = ','.join(str(item) for item in stu_response.response)
-                                                deadline = datetime.datetime.strptime(d_round.deadline, '%Y-%m-%dT%H:%M')
+                                                    template_values['response'] = ','.join(
+                                                            str(item) for item in stu_response.response)
+                                                deadline = datetime.datetime.strptime(d_round.deadline,
+                                                                                      '%Y-%m-%dT%H:%M')
                                                 current_time = datetime.datetime.now()
                                                 if deadline < current_time or requested_round != section.current_round:
                                                     template_values['expired'] = True
@@ -706,13 +714,17 @@ class Discussion(webapp2.RequestHandler):
                                                 template = JINJA_ENVIRONMENT.get_template('discussion.html')
                                                 self.response.write(template.render(template_values))
                                             else:
-                                                logging.error("Group not found for " + str(result) + " Section: " + str(section))
+                                                logging.error(
+                                                    "Group not found for " + str(result) + " Section: " + str(section))
                                                 self.redirect('/error?code=105')
                                         else:
-                                            logging.error("Group not found for " + str(result) + " Section: " + str(section))
+                                            logging.error(
+                                                "Group not found for " + str(result) + " Section: " + str(section))
                                             self.redirect('/error?code=105')
                                     else:
-                                        logging.info("Requested round not found for " + str(result) + " Section: " + str(section))
+                                        logging.info(
+                                            "Requested round not found for " + str(result) + " Section: " + str(
+                                                section))
                                         self.redirect('/home')
                             else:
                                 logging.info("Section not found for key: " + section_key)
@@ -887,7 +899,8 @@ class GroupResponses(webapp2.RequestHandler):
                             for r in range(1, current_section.rounds + 1):
                                 resp['group_' + str(g) + '_' + str(r)] = []
                         for r in range(1, current_section.rounds + 1):
-                            responses = Response.query(ancestor=Round.get_by_id(r, parent=current_section.key).key).fetch()
+                            responses = Response.query(
+                                ancestor=Round.get_by_id(r, parent=current_section.key).key).fetch()
                             if responses:
                                 for res in responses:
                                     for s in current_section.students:
@@ -903,6 +916,65 @@ class GroupResponses(webapp2.RequestHandler):
                 self.redirect('/')
         else:
             self.redirect('/')
+
+
+class AdminPage(webapp2.RequestHandler):
+    """Main function that will handle the first request"""
+
+    def get(self):
+        user = users.get_current_user()
+
+        if user:
+            # if users.is_current_user_admin():
+            url = users.create_logout_url(self.request.uri)
+            template_values = {
+                'url': url
+            }
+            instructors = Instructor.query().fetch()
+            if instructors:
+                template_values['instructors'] = instructors
+            template = JINJA_ENVIRONMENT.get_template('developer.html')
+            self.response.write(template.render(template_values))
+            # else:
+            #     self.response.write("You are not Rohit :p")
+        else:
+            url = users.create_login_url(self.request.uri)
+            template_values = {
+                'url': url
+            }
+            template = JINJA_ENVIRONMENT.get_template('login.html')
+            self.response.write(template.render(template_values))
+
+    def post(self):
+        email = self.request.get('email').lower()
+
+        # if users.is_current_user_admin():
+        if email:
+            instructor = Instructor(id=email)
+            instructor.email = email
+            instructor.put()
+            self.response.write(email + " has been added as an Instructor")
+        else:
+            self.response.write("Error! invalid arguments.")
+
+
+class AdminToggleInstructor(webapp2.RequestHandler):
+    """Changing status of Instructor in the database"""
+
+    def post(self):
+        # if users.is_current_user_admin():
+        email = self.request.get('email')
+        if email:
+            logging.info("Changing status of " + email)
+            instructor = Instructor.query(Instructor.email == email).get()
+            if instructor:
+                instructor.is_active = not instructor.is_active
+                instructor.put()
+                self.response.write("Status changed for " + email)
+            else:
+                self.response.write("Instructor not found in the database.")
+        else:
+            self.response.write("Error! invalid arguments.")
 
 
 application = webapp2.WSGIApplication([
@@ -926,5 +998,7 @@ application = webapp2.WSGIApplication([
     ('/groups', Groups),
     ('/rounds', Rounds),
     ('/addGroups', AddGroups),
-    ('/updateGroups', UpdateGroups)
+    ('/updateGroups', UpdateGroups),
+    ('/admin', AdminPage),
+    ('/toggleInstructor', AdminToggleInstructor)
 ])
