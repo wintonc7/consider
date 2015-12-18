@@ -1,4 +1,4 @@
-{% extends "admin_base.html" %}
+{% extends "instructor_base.html" %}
 {% block title %}Rounds{% endblock %}
 
 {% block content %}
@@ -378,9 +378,7 @@
         }
     });
 
-    {%
-        if not summaryQuestion %
-    }
+    {%if not summaryQuestion %}
     function addDiscussion() {
         $("#discussionModal").modal('show');
     }
@@ -414,9 +412,7 @@
             }
         });
     });
-    {%
-        endif %
-    }
+    {%endif %}
 
     $("#inputOptions").change(function () {
         var select = parseInt($('#inputOptions').val(), 10);

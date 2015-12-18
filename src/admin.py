@@ -22,7 +22,7 @@ class AdminPage(webapp2.RequestHandler):
             instructors = Instructor.query().fetch()
             if instructors:
                 template_values['instructors'] = instructors
-            template = consider.JINJA_ENVIRONMENT.get_template('developer.html')
+            template = consider.JINJA_ENVIRONMENT.get_template('admin.html')
             self.response.write(template.render(template_values))
             # else:
             #     self.response.write("You are not Rohit :p")

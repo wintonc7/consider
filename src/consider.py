@@ -87,7 +87,7 @@ class HomePage(webapp2.RequestHandler):
                             course.sections_all = model.Section.query(ancestor=course.key).fetch()
                             course.sections = len(course.sections_all)
                         template_values['courses'] = courses
-                    template = JINJA_ENVIRONMENT.get_template('course.html')
+                    template = JINJA_ENVIRONMENT.get_template('courses_and_sections.html')
                     self.response.write(template.render(template_values))
                 elif type(result) is model.Student:
                     logging.info('Student logged in ' + str(result))

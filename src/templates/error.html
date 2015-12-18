@@ -8,7 +8,7 @@
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/home.css" rel="stylesheet">
-    <link href="/css/dots.css" rel="stylesheet" type="text/css">
+    <link href="/css/dots.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -19,12 +19,17 @@
 </head>
 <body>
 
-<div class="container jumbotron well">
-    <h3>{{text}}</h3>
-    <a class="btn btn-warning sign-out-btn" href="{{url}}">
-        <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
-    </a>
+<div class="alert alert-danger" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>{{text}}
 </div>
+<a class="btn btn-default" href="/home">
+<span class="glyphicon glyphicon-home" aria-hidden="true"></span> Back to Home Page
+</a>
+<a class="btn btn-warning sign-out-btn" href="{{url}}">
+    <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
+</a>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/countdown.min.js"></script>
