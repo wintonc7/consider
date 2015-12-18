@@ -9,10 +9,12 @@ Welcome to Consider's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
 
-`API <./api.html>`_ docs.
+   API Documentation <api>
+
+
 
 Indices and tables
 ==================

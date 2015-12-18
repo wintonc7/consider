@@ -1,8 +1,16 @@
-API
-=====
+==================
+API Documentation
+==================
 
 
 .. automodule:: src
+   :members:
+
+
+.. automodule:: model
+   :members:
+
+.. automodule:: consider
    :members:
 
 
@@ -21,6 +29,3 @@ API
 .. automodule:: utils
    :members:
 
-
-.. automodule:: consider
-   :members:

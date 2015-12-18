@@ -1,4 +1,35 @@
+"""
+utils.py
+~~~~~~~~~~~~~~~~~
+Defines the functions and constants which are accessed by different modules of this application.
+
+- Author(s): Rohit Kapoor, Swaroop Joshi
+- Last Modified: Dec. 18, 2015
+
+--------------------
+
+
+"""
+
+import os
+
+import jinja2
+
 import model
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(
+                '{basedir}/{srcdir}/{tempdir}'.format(basedir=os.getcwd(), srcdir='src', tempdir='templates')),
+        extensions=['jinja2.ext.autoescape'],
+        autoescape=True)
+errorCodes = {
+    '100': "Oops! Something went wrong please try again.",
+    '101': "Sorry you are not registered with this application, please contact your Instructor.",
+    '102': "Sorry you are not an instructor.",
+    '103': "Sorry no rounds are active for this section, please try again later.",
+    '104': "Sorry the round was not found, please contact your Instructor.",
+    '105': "Sorry, your group was not found, please contact your Instructor."
+}
 
 
 def get_role(user):
@@ -8,7 +39,8 @@ def get_role(user):
     Args:
         user: The user whose role is to be retrieved.
 
-    Returns: Instructor or Student or False.
+    Returns:
+        object: Instructor or Student or False.
 
     """
     if user:
@@ -22,26 +54,27 @@ def get_role(user):
     return False
 
 
-def get_courses_and_sections(result, course_name, selected_section):
+def get_courses_and_sections(instructor, course_name, selected_section):
     """
+    Fetches the courses and sections for the given instructor.
 
     Args:
-        result:
-        course_name:
-        selected_section:
+        instructor (object): Instructor whose courses are to be retrieved
+        course_name (str): Name of the course whose sections are to be retrieved (optional)
+        selected_section (str): Name of the selected section (optional)
 
     Returns:
-        object:
+        template_values (dict): Courses and sections to be rendered.
 
     """
     template_values = {}
-    courses = model.Course.query(ancestor=result.key).fetch()
+    courses = model.Course.query(ancestor=instructor.key).fetch()
     if courses:
         course = None
         template_values['courses'] = courses
         if course_name:
             course_name = course_name.upper()
-            course = model.Course.get_by_id(course_name, parent=result.key)
+            course = model.Course.get_by_id(course_name, parent=instructor.key)
         if not course:
             course = courses[0]
         sections = model.Section.query(ancestor=course.key).fetch()
@@ -62,16 +95,23 @@ def get_courses_and_sections(result, course_name, selected_section):
     return template_values
 
 
-def check_response(response):
+def is_valid_response(response):
     """
+    Checks if any of the responses is one of the three valid options: support, neutral or disagree.
 
     Args:
-        response:
+        response (list): A list of responses to be checked.
 
     Returns:
+        bool: ``True`` if all of the responses are valid. ``False`` if any is invalid.
 
     """
     for i in range(1, len(response)):
         if response[i] not in ['support', 'neutral', 'disagree']:
-            return True
-    return False
+            return False
+    return True
+    # SJ: 12/18/2015: Changed to make a better func. name
+    # for i in range(1, len(response)):
+    #     if response[i] not in ['support', 'neutral', 'disagree']:
+    #         return True
+    # return False

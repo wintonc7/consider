@@ -1,20 +1,37 @@
-import datetime
+"""
+instructor.py
+~~~~~~~~~~~~~~~~~
+Implements the APIs for Instructor role in the app.
+
+- Author(s): Rohit Kapoor, Swaroop Joshi
+- Last Modified: Dec. 18, 2015
+
+--------------------
+
+
+"""
 import json
 import logging
 
 import webapp2
 from google.appengine.api import users
-from google.appengine.ext import ndb
 
-import consider
 import model
 import utils
 
 
 class AddCourse(webapp2.RequestHandler):
-    """Adding course to the database"""
+    """
+    Adds a new course with the given name to the database.
+
+    Course names must be unique.
+    If the user tries to add a course with a previously used name again, it flags a message.
+    """
 
     def post(self):
+        """
+        HTTP POST method to add the course.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -35,9 +52,14 @@ class AddCourse(webapp2.RequestHandler):
 
 
 class ToggleCourse(webapp2.RequestHandler):
-    """Changing status of Course in the database"""
+    """
+    API to toggle between ``active`` and ``inactive`` course status. An instructor can call this API.
+    """
 
     def post(self):
+        """
+        HTTP POST method to toggle the course status.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -57,9 +79,17 @@ class ToggleCourse(webapp2.RequestHandler):
 
 
 class AddSection(webapp2.RequestHandler):
-    """Adding section to a course in the database"""
+    """
+    Adds a new section to the given course.
+
+    Section names must be unique within a course.
+    If a user tries to add a section with a previously used name, it flags a message.
+    """
 
     def post(self):
+        """
+        HTTP POST method to add a section to a course.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -86,9 +116,14 @@ class AddSection(webapp2.RequestHandler):
 
 
 class ToggleSection(webapp2.RequestHandler):
-    """Changing status of Section for a Course in the database"""
+    """
+    API to toggle between ``active`` and ``inactive`` section status. An instructor can call this API.
+    """
 
     def post(self):
+        """
+        HTTP POST method to toggle the section status.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -116,9 +151,14 @@ class ToggleSection(webapp2.RequestHandler):
 
 
 class AddStudent(webapp2.RequestHandler):
-    """Adding students to the database"""
+    """
+    API to add a student to the given section and course.
+    """
 
     def post(self):
+        """
+        HTTP POST method to add the student.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -159,9 +199,16 @@ class AddStudent(webapp2.RequestHandler):
 
 
 class RemoveStudent(webapp2.RequestHandler):
-    """Removing students to the database"""
+    """
+    API to remove a student from a section of the course.
+
+    The student still continues to be part of other sections of this course and other courses in the app.
+    """
 
     def post(self):
+        """
+        HTTP POST method to remove the student.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -199,9 +246,17 @@ class RemoveStudent(webapp2.RequestHandler):
 
 
 class Rounds(webapp2.RequestHandler):
-    """Handling rounds page for admin console"""
+    """
+    API to retrieve and display the information of *rounds* for the selected course and section.
+
+    By default, the alphabetically first course and first section is selected.
+    To look at the rounds for other course/sections, the user can select from the given drop down list.
+    """
 
     def get(self):
+        """
+        HTTP GET method to retrieve the rounds.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -232,7 +287,7 @@ class Rounds(webapp2.RequestHandler):
                         else:
                             template_values['nextRound'] = current_section.rounds + 1
                     template_values['logouturl'] = url
-                    template = consider.JINJA_ENVIRONMENT.get_template('rounds.html')
+                    template = utils.JINJA_ENVIRONMENT.get_template('rounds.html')
                     self.response.write(template.render(template_values))
                 else:
                     self.redirect('/')
@@ -243,9 +298,22 @@ class Rounds(webapp2.RequestHandler):
 
 
 class AddRound(webapp2.RequestHandler):
-    """Adding rounds in the database for a particular section"""
+    """
+    API to add a round to the section.
+
+    Pops open a new ``modal`` which asks for the details of the round, including deadline and question.
+
+    """
 
     def post(self):
+        """
+        HTTP POST method to add the round.
+        """
+
+        # TODO Markdown support
+        # TODO Time picker suitable to all browsers (currently works only on Chrome)
+        # TODO Timezone support in deadlines
+
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -293,9 +361,16 @@ class AddRound(webapp2.RequestHandler):
 
 
 class ActivateRound(webapp2.RequestHandler):
-    """Activating a particular round for a section"""
+    """
+    API to activate a particular round for this section.
+
+    The instructor can add rounds in advance, but has to activate each round when it is supposed to start.
+    """
 
     def post(self):
+        """
+        HTTP POST method to activate the round.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -323,185 +398,11 @@ class ActivateRound(webapp2.RequestHandler):
                     self.response.write("E" + "Error! invalid arguments.")
 
 
-class SectionPage(webapp2.RequestHandler):
-    """Redirecting student based on the section they selected"""
-
-    def get(self):
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result:
-                # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Student:
-                    logging.info('Student logged in ' + str(result))
-                    section_key = self.request.get('section')
-                    if section_key:
-                        try:
-                            section = ndb.Key(urlsafe=section_key).get()
-                            if section:
-                                if section.current_round == 0:
-                                    self.redirect('/error?code=103')
-                                else:
-                                    curr_round = model.Round.get_by_id(section.current_round, parent=section.key)
-                                    if curr_round:
-                                        if not curr_round.is_quiz:
-                                            self.redirect('/discussion?section=' + section_key)
-                                            return
-                                        deadline = datetime.datetime.strptime(curr_round.deadline, '%Y-%m-%dT%H:%M')
-                                        current_time = datetime.datetime.now()
-                                        template_values = {
-                                            'url': url
-                                        }
-                                        response = model.Response.get_by_id(result.email, parent=curr_round.key)
-                                        if response:
-                                            template_values['option'] = response.option
-                                            template_values['comment'] = response.comment
-                                            if response.summary:
-                                                template_values['summary'] = response.summary
-                                        if deadline < current_time:
-                                            template_values['expired'] = True
-                                        template_values['deadline'] = curr_round.deadline
-                                        template_values['question'] = curr_round.quiz.question
-                                        template_values['options'] = curr_round.quiz.options
-                                        template_values['number'] = curr_round.quiz.options_total
-                                        template_values['sectionKey'] = section_key
-                                        if curr_round.number != 1:
-                                            template_values['last_round'] = True
-                                        template = consider.JINJA_ENVIRONMENT.get_template('home.html')
-                                        self.response.write(template.render(template_values))
-                                    else:
-                                        self.redirect('/error?code=104')
-                            else:
-                                self.redirect('/home')
-                        except Exception as e:
-                            logging.error('Got exception: ' + e.message)
-                            self.redirect('/home')
-                    else:
-                        self.redirect('/home')
-                else:
-                    self.redirect('/')
-            else:
-                self.redirect('/')
-        else:
-            self.redirect('/')
-
-
-class Discussion(webapp2.RequestHandler):
-    """Redirecting accordingly based on email"""
-
-    def get(self):
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result:
-                # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Student:
-                    logging.info('Student navigated to discussion ' + str(result))
-                    section_key = self.request.get('section')
-                    if section_key:
-                        try:
-                            section = ndb.Key(urlsafe=section_key).get()
-                            if section:
-                                if section.current_round == 0:
-                                    self.redirect('/error?code=103')
-                                else:
-                                    if section.current_round == 1:
-                                        self.redirect('/home')
-                                        return
-                                    requested_round = self.request.get('round')
-                                    if requested_round:
-                                        requested_round = int(requested_round)
-                                    else:
-                                        requested_round = section.current_round
-                                    d_round = model.Round.get_by_id(requested_round, parent=section.key)
-                                    if d_round:
-                                        group = 0
-                                        alias = None
-                                        for stu in section.students:
-                                            if stu.email == result.email:
-                                                group = stu.group
-                                                alias = stu.alias
-                                                break
-                                        if group != 0 and alias:
-                                            group = model.Group.get_by_id(group, parent=section.key)
-                                            if group:
-                                                comments = []
-                                                previous_round = model.Round.get_by_id(requested_round - 1,
-                                                                                       parent=section.key)
-                                                for stu in group.members:
-                                                    response = model.Response.get_by_id(stu, parent=previous_round.key)
-                                                    if response:
-                                                        for s in section.students:
-                                                            if s.email == stu:
-                                                                comment = {
-                                                                    'alias': s.alias,
-                                                                    'response': response.comment,
-                                                                    'opinion': response.response
-                                                                }
-                                                                if response.option != 'NA':
-                                                                    comment['option'] = previous_round.quiz.options[
-                                                                        int(response.option[-1]) - 1]
-                                                                comments.append(comment)
-                                                                break
-                                                template_values = {
-                                                    'url': url,
-                                                    'alias': alias,
-                                                    'comments': comments
-                                                }
-                                                stu_response = model.Response.get_by_id(result.email,
-                                                                                        parent=d_round.key)
-                                                if stu_response:
-                                                    template_values['comment'] = stu_response.comment
-                                                    template_values['response'] = ','.join(
-                                                            str(item) for item in stu_response.response)
-                                                deadline = datetime.datetime.strptime(d_round.deadline,
-                                                                                      '%Y-%m-%dT%H:%M')
-                                                current_time = datetime.datetime.now()
-                                                if deadline < current_time or requested_round != section.current_round:
-                                                    template_values['expired'] = True
-                                                if d_round.is_quiz:
-                                                    template_values['expired'] = True
-                                                template_values['deadline'] = d_round.deadline
-                                                template_values['rounds'] = section.current_round
-                                                template_values['curr_page'] = requested_round
-                                                template_values['description'] = d_round.description
-                                                template_values['sectionKey'] = section_key
-                                                template = consider.JINJA_ENVIRONMENT.get_template('discussion.html')
-                                                self.response.write(template.render(template_values))
-                                            else:
-                                                logging.error(
-                                                        "Group not found for " + str(result) + " Section: " + str(
-                                                                section))
-                                                self.redirect('/error?code=105')
-                                        else:
-                                            logging.error(
-                                                    "Group not found for " + str(result) + " Section: " + str(section))
-                                            self.redirect('/error?code=105')
-                                    else:
-                                        logging.info(
-                                                "Requested round not found for " + str(result) + " Section: " + str(
-                                                        section))
-                                        self.redirect('/home')
-                            else:
-                                logging.info("Section not found for key: " + section_key)
-                                self.redirect('/home')
-                        except Exception as e:
-                            logging.info("Found exception " + e.message)
-                            self.redirect('/home')
-                    else:
-                        self.redirect('/home')
-                else:
-                    self.redirect('/')
-            else:
-                self.redirect('/')
-        else:
-            self.redirect('/')
-
-
 class Groups(webapp2.RequestHandler):
-    """Handling groups page for admin console"""
+    """
+    API to retrieve and display the information of groups formed for the selected course and section.
+
+    """
 
     def get(self):
         user = users.get_current_user()
@@ -526,7 +427,7 @@ class Groups(webapp2.RequestHandler):
                         template_values['responses'] = response
                         template_values['group'] = groups
                 template_values['logouturl'] = url
-                template = consider.JINJA_ENVIRONMENT.get_template('groups.html')
+                template = utils.JINJA_ENVIRONMENT.get_template('groups.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
@@ -535,9 +436,15 @@ class Groups(webapp2.RequestHandler):
 
 
 class AddGroups(webapp2.RequestHandler):
-    """Adding students to the database"""
+    """
+    API to organize students in to groups.
 
+    The user (instructor) can modify the number of groups and then assign each student to one of the groups.
+    """
     def post(self):
+        """
+        HTTP POST method to create groups.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -566,9 +473,15 @@ class AddGroups(webapp2.RequestHandler):
 
 
 class UpdateGroups(webapp2.RequestHandler):
-    """Updating groups of students"""
+    """
+    API to update the group assignments.
 
+    The user (instructor) can reassign groups using this API.
+    """
     def post(self):
+        """
+        HTTP POST method to update the groups.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -606,9 +519,13 @@ class UpdateGroups(webapp2.RequestHandler):
 
 
 class Responses(webapp2.RequestHandler):
-    """Handling responses page for admin console"""
-
+    """
+    API to retrieve and display responses for each section, tabbed into different rounds.
+    """
     def get(self):
+        """
+        HTTP GET method to retrieve the responses.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -629,7 +546,7 @@ class Responses(webapp2.RequestHandler):
                             resp[str(i)] = response
                     template_values['responses'] = resp
                 template_values['logouturl'] = url
-                template = consider.JINJA_ENVIRONMENT.get_template('responses.html')
+                template = utils.JINJA_ENVIRONMENT.get_template('responses.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
@@ -638,9 +555,13 @@ class Responses(webapp2.RequestHandler):
 
 
 class GroupResponses(webapp2.RequestHandler):
-    """Handling groups_responses page for admin console"""
-
+    """
+    API to retrieve and display responses for each section, organized into groups.
+    """
     def get(self):
+        """
+        HTTP GET method to retrieve the group responses.
+        """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
@@ -670,8 +591,38 @@ class GroupResponses(webapp2.RequestHandler):
                                             break
                         template_values['responses'] = resp
                 template_values['logouturl'] = url
-                template = consider.JINJA_ENVIRONMENT.get_template('groups_responses.html')
+                template = utils.JINJA_ENVIRONMENT.get_template('groups_responses.html')
                 self.response.write(template.render(template_values))
+            else:
+                self.redirect('/')
+        else:
+            self.redirect('/')
+
+
+class StudentsPage(webapp2.RequestHandler):
+    """
+    API to display the list of students in the selected section.
+    """
+    def get(self):
+        """
+        HTTP GET method to retrieve the students.
+        """
+        user = users.get_current_user()
+        if user:
+            result = utils.get_role(user)
+            if result:
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is model.Instructor:
+                    logging.info('Instructor navigated to Students ' + str(result))
+                    course_name = self.request.get('course')
+                    selected_section = self.request.get('section')
+                    template_values = utils.get_courses_and_sections(result, course_name, selected_section)
+                    template_values['logouturl'] = url
+                    template = utils.JINJA_ENVIRONMENT.get_template('students.html')
+                    self.response.write(template.render(template_values))
+                else:
+                    self.redirect('/')
             else:
                 self.redirect('/')
         else:

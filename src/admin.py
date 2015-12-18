@@ -1,16 +1,33 @@
+"""
+admin.py
+~~~~~~~~~~~~~~~~~
+APIs for handling admin specific tasks of the app, like adding an instructor.
+
+- Author(s): Rohit Kapoor, Swaroop Joshi
+- Last Modified: Dec. 18, 2015
+
+--------------------
+
+
+"""
 import logging
 
 import webapp2
 from google.appengine.api import users
 
-import consider
+import src.utils
 from model import Instructor
 
 
 class AdminPage(webapp2.RequestHandler):
-    """Main function that will handle the first request"""
+    """
+    API for the main page (``/admin``) for the admin/developer.
+    """
 
     def get(self):
+        """
+        HTTP GET method to retrieve the list of instructors currently added to the app.
+        """
         user = users.get_current_user()
 
         if user:
@@ -22,7 +39,7 @@ class AdminPage(webapp2.RequestHandler):
             instructors = Instructor.query().fetch()
             if instructors:
                 template_values['instructors'] = instructors
-            template = consider.JINJA_ENVIRONMENT.get_template('admin.html')
+            template = src.utils.JINJA_ENVIRONMENT.get_template('admin.html')
             self.response.write(template.render(template_values))
             # else:
             #     self.response.write("You are not Rohit :p")
@@ -31,10 +48,13 @@ class AdminPage(webapp2.RequestHandler):
             template_values = {
                 'url': url
             }
-            template = consider.JINJA_ENVIRONMENT.get_template('login.html')
+            template = src.utils.JINJA_ENVIRONMENT.get_template('login.html')
             self.response.write(template.render(template_values))
 
     def post(self):
+        """
+        HTTP POST method to add an instructor.
+        """
         email = self.request.get('email').lower()
 
         # if users.is_current_user_admin():
@@ -48,9 +68,14 @@ class AdminPage(webapp2.RequestHandler):
 
 
 class AdminToggleInstructor(webapp2.RequestHandler):
-    """Changing status of Instructor in the database"""
+    """
+    API to activate or deactivate an instructor.
+    """
 
     def post(self):
+        """
+        HTTP POST method to toggle the instructor's status.
+        """
         # if users.is_current_user_admin():
         email = self.request.get('email')
         if email:
