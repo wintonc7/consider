@@ -13,7 +13,7 @@ from utils import get_role
 
 JINJA_ENVIRONMENT = jinja2.Environment(
         # loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-        loader=jinja2.FileSystemLoader('{basedir}/{tempdir}'.format(basedir=os.getcwd(), tempdir='templates')),
+        loader=jinja2.FileSystemLoader('{basedir}/{srcdir}/{tempdir}'.format(basedir=os.getcwd(), srcdir='src', tempdir='templates')),
         extensions=['jinja2.ext.autoescape'],
         autoescape=True)
 
