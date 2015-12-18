@@ -153,7 +153,11 @@
         bootbox.confirm("Are you sure, you want to remove student: " + student + "?", function (result) {
             if (result) {
                 // do the POST and get the callback
-                $.post("/removeStudent", {email: student, course: "{{selectedCourse}}", section: "{{selectedSection}}"}, function (data) {
+                $.post("/removeStudent", {
+                    email: student,
+                    course: "{{selectedCourse}}",
+                    section: "{{selectedSection}}"
+                }, function (data) {
                     if (data.charAt(0) == 'E') {
                         bootbox.alert(data.substring(1));
                     }

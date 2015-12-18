@@ -15,16 +15,16 @@ handlers:
   static_dir: fonts
 
 - url: /admin
-  script: consider.application
+  script: src.consider.application
   login: admin
   auth_fail_action: redirect
 
 - url: /toggleInstructor
-  script: consider.application
+  script: src.consider.application
   login: admin
 
 - url: /.*
-  script: consider.application
+  script: src.consider.application
   login: required
 
 libraries:

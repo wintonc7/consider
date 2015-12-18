@@ -12,7 +12,8 @@ import student
 from utils import get_role
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+        # loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+        loader=jinja2.FileSystemLoader('{basedir}/{tempdir}'.format(basedir=os.getcwd(), tempdir='templates')),
         extensions=['jinja2.ext.autoescape'],
         autoescape=True)
 

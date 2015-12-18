@@ -473,7 +473,7 @@ class Discussion(webapp2.RequestHandler):
                                             else:
                                                 logging.error(
                                                         "Group not found for " + str(result) + " Section: " + str(
-                                                            section))
+                                                                section))
                                                 self.redirect('/error?code=105')
                                         else:
                                             logging.error(
@@ -516,7 +516,7 @@ class Groups(webapp2.RequestHandler):
                     current_section = template_values['selectedSectionObject']
                     if current_section.rounds > 0:
                         response = model.Response.query(
-                            ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                                ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
                         groups = current_section.groups
                         student = current_section.students
                         for res in response:
@@ -623,7 +623,7 @@ class Responses(webapp2.RequestHandler):
                     resp = {}
                     for i in range(1, current_section.rounds + 1):
                         response = model.Response.query(
-                            ancestor=model.Round.get_by_id(i, parent=current_section.key).key).fetch()
+                                ancestor=model.Round.get_by_id(i, parent=current_section.key).key).fetch()
                         # response is a list of all the responses for the round i
                         if response:
                             resp[str(i)] = response

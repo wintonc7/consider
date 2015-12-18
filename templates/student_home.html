@@ -10,7 +10,9 @@
     {% if sections %}
     <div class="list-group">
         {% for section in sections %}
-        <button type="button" onclick="redirect('{{section.key}}')" class="list-group-item btn-block">{{section.course}} - {{section.name}}</button>
+        <button type="button" onclick="redirect('{{section.key}}')" class="list-group-item btn-block">{{section.course}}
+            - {{section.name}}
+        </button>
         {% endfor %}
     </div>
     {% else %}
@@ -20,9 +22,9 @@
 {% endblock %}
 
 {% block script %}
-    <script>
-        function redirect(key) {
-            location.href = '/section?section='+key;
-        }
-    </script>
+<script>
+    function redirect(key) {
+        location.href = '/section?section=' + key;
+    }
+</script>
 {% endblock %}

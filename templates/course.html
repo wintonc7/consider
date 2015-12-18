@@ -48,7 +48,7 @@
                 </button>
             </td>
         </tr>
-        <tr {% if not course.is_active %}class="disabled"{% endif %}>
+        <tr {% if not course.is_active %}class="disabled" {% endif %}>
             <td colspan="6">
                 <div class="collapse{%- if expand==course.name %} in{%- endif -%}" id="collapse{{loop.index}}">
                     <button type="button" class="btn btn-default btn-sm" onclick="addSection('{{course.name}}')"
@@ -86,7 +86,8 @@
                                         </button>
                                         {% else %}
                                         <button class="btn btn-success btn-sm"
-                                                onclick="toggleSectionStatus('{{course.name}}','{{section.name}}')">Activate
+                                                onclick="toggleSectionStatus('{{course.name}}','{{section.name}}')">
+                                            Activate
                                         </button>
                                         {% endif %}
                                     </td>
