@@ -1,0 +1,777 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>instructor &mdash; Consider 2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="top" title="Consider 2.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Consider 2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for instructor</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">webapp2</span>
+<span class="kn">from</span> <span class="nn">google.appengine.api</span> <span class="kn">import</span> <span class="n">users</span>
+<span class="kn">from</span> <span class="nn">google.appengine.ext</span> <span class="kn">import</span> <span class="n">ndb</span>
+
+<span class="kn">import</span> <span class="nn">consider</span>
+<span class="kn">import</span> <span class="nn">model</span>
+<span class="kn">import</span> <span class="nn">utils</span>
+
+
+<div class="viewcode-block" id="AddCourse"><a class="viewcode-back" href="../api.html#instructor.AddCourse">[docs]</a><span class="k">class</span> <span class="nc">AddCourse</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adding course to the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">course_name</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; already exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">course_name</span><span class="p">)</span>
+                        <span class="n">course</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">course_name</span>
+                        <span class="n">course</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; added.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ToggleCourse"><a class="viewcode-back" href="../api.html#instructor.ToggleCourse">[docs]</a><span class="k">class</span> <span class="nc">ToggleCourse</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Changing status of Course in the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">course_name</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Changing status of &quot;</span> <span class="o">+</span> <span class="n">course_name</span><span class="p">)</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">course</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">course</span><span class="o">.</span><span class="n">is_active</span>
+                        <span class="n">course</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Status changed for &quot;</span> <span class="o">+</span> <span class="n">course_name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Course not found in the database.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AddSection"><a class="viewcode-back" href="../api.html#instructor.AddSection">[docs]</a><span class="k">class</span> <span class="nc">AddSection</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adding section to a course in the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; already exist!&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">section_name</span><span class="p">)</span>
+                            <span class="n">section</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">section_name</span>
+                            <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; added.&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ToggleSection"><a class="viewcode-back" href="../api.html#instructor.ToggleSection">[docs]</a><span class="k">class</span> <span class="nc">ToggleSection</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Changing status of Section for a Course in the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Changing status of &quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; for course &quot;</span> <span class="o">+</span> <span class="n">course_name</span><span class="p">)</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">course</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+                            <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">section</span><span class="o">.</span><span class="n">is_active</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Status changed for &quot;</span> <span class="o">+</span> <span class="n">section_name</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Section not found in the database.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Status cannot be changed, please activate &quot;</span> <span class="o">+</span> <span class="n">course_name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Course not found in the database.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AddStudent"><a class="viewcode-back" href="../api.html#instructor.AddStudent">[docs]</a><span class="k">class</span> <span class="nc">AddStudent</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adding students to the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">emails</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;emails&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span> <span class="ow">and</span> <span class="n">emails</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">email</span> <span class="ow">in</span> <span class="n">emails</span><span class="p">:</span>
+                                <span class="n">email</span> <span class="o">=</span> <span class="n">email</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                                <span class="n">student_emails</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">email</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">email</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">student_emails</span><span class="p">:</span>
+                                    <span class="n">info</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">StudentInfo</span><span class="p">()</span>
+                                    <span class="n">info</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+                                    <span class="n">section</span><span class="o">.</span><span class="n">students</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+                                <span class="n">student</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">student</span><span class="p">:</span>
+                                    <span class="n">student</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">email</span><span class="p">)</span>
+                                    <span class="n">student</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+                                <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">student</span><span class="o">.</span><span class="n">sections</span><span class="p">:</span>
+                                    <span class="n">student</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                <span class="n">student</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Students added to Section &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">section</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="s">&quot;Students added to section.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; section does not exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RemoveStudent"><a class="viewcode-back" href="../api.html#instructor.RemoveStudent">[docs]</a><span class="k">class</span> <span class="nc">RemoveStudent</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Removing students to the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">email</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;email&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span> <span class="ow">and</span> <span class="n">email</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="n">email</span> <span class="o">=</span> <span class="n">email</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                            <span class="n">student</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">student</span><span class="p">:</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">students</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">email</span> <span class="o">!=</span> <span class="n">email</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="n">student</span><span class="o">.</span><span class="n">sections</span><span class="p">:</span>
+                                    <span class="n">student</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                <span class="n">student</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                        <span class="s">&quot;Student&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">student</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; has been removed from Section &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">section</span><span class="p">))</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="s">&quot;Student removed from section.&quot;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c"># self.response.write(&quot;E&quot; + student + &quot; does not exist!&quot;)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Student does not exist!&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; section does not exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Rounds"><a class="viewcode-back" href="../api.html#instructor.Rounds">[docs]</a><span class="k">class</span> <span class="nc">Rounds</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Handling rounds page for admin console&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="c"># User is either Instructor or Student</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">create_logout_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                    <span class="n">selected_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                    <span class="n">template_values</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_courses_and_sections</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">course_name</span><span class="p">,</span> <span class="n">selected_section</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="s">&#39;selectedSectionObject&#39;</span> <span class="ow">in</span> <span class="n">template_values</span><span class="p">:</span>
+                        <span class="n">current_section</span> <span class="o">=</span> <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSectionObject&#39;</span><span class="p">]</span>
+                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;activeRound&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">current_round</span>
+                        <span class="n">rounds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">current_section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">rounds</span><span class="p">:</span>
+                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;rounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rounds</span>
+                            <span class="n">discussion_rounds</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rounds</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">number</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;leadInQuestion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+                                <span class="k">elif</span> <span class="n">r</span><span class="o">.</span><span class="n">is_quiz</span><span class="p">:</span>
+                                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;summaryQuestion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">discussion_rounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;discussionRounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">discussion_rounds</span>
+                        <span class="k">if</span> <span class="s">&#39;summaryQuestion&#39;</span> <span class="ow">in</span> <span class="n">template_values</span><span class="p">:</span>
+                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;nextRound&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;nextRound&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;logouturl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+                    <span class="n">template</span> <span class="o">=</span> <span class="n">consider</span><span class="o">.</span><span class="n">JINJA_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;rounds.html&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">template_values</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AddRound"><a class="viewcode-back" href="../api.html#instructor.AddRound">[docs]</a><span class="k">class</span> <span class="nc">AddRound</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adding rounds in the database for a particular section&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;time&#39;</span><span class="p">)</span>
+                <span class="n">question</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;question&#39;</span><span class="p">)</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">)</span>
+                <span class="n">curr_round</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;round&#39;</span><span class="p">))</span>
+                <span class="n">is_last_round</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;isLastRound&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span> <span class="ow">and</span> <span class="n">time</span> <span class="ow">and</span> <span class="p">(</span><span class="n">question</span> <span class="ow">or</span> <span class="n">description</span><span class="p">)</span> <span class="ow">and</span> <span class="n">curr_round</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="n">is_last_round</span><span class="p">):</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="n">round_obj</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">curr_round</span><span class="p">)</span>
+                            <span class="n">round_obj</span><span class="o">.</span><span class="n">deadline</span> <span class="o">=</span> <span class="n">time</span>
+                            <span class="n">round_obj</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">curr_round</span>
+                            <span class="k">if</span> <span class="n">curr_round</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">is_last_round</span><span class="p">:</span>
+                                <span class="c"># It is either Lead-in question or summary question</span>
+                                <span class="n">round_obj</span><span class="o">.</span><span class="n">is_quiz</span> <span class="o">=</span> <span class="bp">True</span>
+                                <span class="n">number_options</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;number&#39;</span><span class="p">))</span>
+                                <span class="n">options</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;options&#39;</span><span class="p">))</span>
+                                <span class="n">round_obj</span><span class="o">.</span><span class="n">quiz</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Question</span><span class="p">(</span><span class="n">options_total</span><span class="o">=</span><span class="n">number_options</span><span class="p">,</span> <span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span>
+                                                                <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">round_obj</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+                            <span class="n">round_obj</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="c"># Only update the value of total rounds if a new round is created,</span>
+                            <span class="c"># not when we edit an old round is edited</span>
+                            <span class="k">if</span> <span class="n">curr_round</span> <span class="o">&gt;</span> <span class="n">section</span><span class="o">.</span><span class="n">rounds</span><span class="p">:</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">rounds</span> <span class="o">=</span> <span class="n">curr_round</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="s">&quot;Success, round added.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; section does not exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ActivateRound"><a class="viewcode-back" href="../api.html#instructor.ActivateRound">[docs]</a><span class="k">class</span> <span class="nc">ActivateRound</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Activating a particular round for a section&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">next_round</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;round&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span> <span class="ow">and</span> <span class="n">next_round</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span> <span class="o">!=</span> <span class="n">next_round</span><span class="p">:</span>
+                                <span class="c"># If the selected round is not currently active make it active</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">current_round</span> <span class="o">=</span> <span class="n">next_round</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="s">&quot;Success, round active.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; section does not exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SectionPage"><a class="viewcode-back" href="../api.html#instructor.SectionPage">[docs]</a><span class="k">class</span> <span class="nc">SectionPage</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Redirecting student based on the section they selected&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="c"># User is either Instructor or Student</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">create_logout_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Student logged in &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+                    <span class="n">section_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">section_key</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">section</span> <span class="o">=</span> <span class="n">ndb</span><span class="o">.</span><span class="n">Key</span><span class="p">(</span><span class="n">urlsafe</span><span class="o">=</span><span class="n">section_key</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/error?code=103&#39;</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">curr_round</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">current_round</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">curr_round</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="ow">not</span> <span class="n">curr_round</span><span class="o">.</span><span class="n">is_quiz</span><span class="p">:</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/discussion?section=&#39;</span> <span class="o">+</span> <span class="n">section_key</span><span class="p">)</span>
+                                            <span class="k">return</span>
+                                        <span class="n">deadline</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">curr_round</span><span class="o">.</span><span class="n">deadline</span><span class="p">,</span> <span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">T%H:%M&#39;</span><span class="p">)</span>
+                                        <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                                        <span class="n">template_values</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span>
+                                        <span class="p">}</span>
+                                        <span class="n">response</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">curr_round</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                        <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;option&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">option</span>
+                                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;comment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">comment</span>
+                                            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">summary</span><span class="p">:</span>
+                                                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;summary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">summary</span>
+                                        <span class="k">if</span> <span class="n">deadline</span> <span class="o">&lt;</span> <span class="n">current_time</span><span class="p">:</span>
+                                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;expired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;deadline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_round</span><span class="o">.</span><span class="n">deadline</span>
+                                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;question&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_round</span><span class="o">.</span><span class="n">quiz</span><span class="o">.</span><span class="n">question</span>
+                                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_round</span><span class="o">.</span><span class="n">quiz</span><span class="o">.</span><span class="n">options</span>
+                                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_round</span><span class="o">.</span><span class="n">quiz</span><span class="o">.</span><span class="n">options_total</span>
+                                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;sectionKey&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section_key</span>
+                                        <span class="k">if</span> <span class="n">curr_round</span><span class="o">.</span><span class="n">number</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                                            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;last_round&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                                        <span class="n">template</span> <span class="o">=</span> <span class="n">consider</span><span class="o">.</span><span class="n">JINJA_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;home.html&#39;</span><span class="p">)</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">template_values</span><span class="p">))</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/error?code=104&#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;Got exception: &#39;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Discussion"><a class="viewcode-back" href="../api.html#instructor.Discussion">[docs]</a><span class="k">class</span> <span class="nc">Discussion</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Redirecting accordingly based on email&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="c"># User is either Instructor or Student</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">create_logout_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Student navigated to discussion &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+                    <span class="n">section_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">section_key</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">section</span> <span class="o">=</span> <span class="n">ndb</span><span class="o">.</span><span class="n">Key</span><span class="p">(</span><span class="n">urlsafe</span><span class="o">=</span><span class="n">section_key</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/error?code=103&#39;</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                                        <span class="k">return</span>
+                                    <span class="n">requested_round</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;round&#39;</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">requested_round</span><span class="p">:</span>
+                                        <span class="n">requested_round</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_round</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">requested_round</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span>
+                                    <span class="n">d_round</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">requested_round</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">d_round</span><span class="p">:</span>
+                                        <span class="n">group</span> <span class="o">=</span> <span class="mi">0</span>
+                                        <span class="n">alias</span> <span class="o">=</span> <span class="bp">None</span>
+                                        <span class="k">for</span> <span class="n">stu</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span><span class="p">:</span>
+                                            <span class="k">if</span> <span class="n">stu</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">result</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+                                                <span class="n">group</span> <span class="o">=</span> <span class="n">stu</span><span class="o">.</span><span class="n">group</span>
+                                                <span class="n">alias</span> <span class="o">=</span> <span class="n">stu</span><span class="o">.</span><span class="n">alias</span>
+                                                <span class="k">break</span>
+                                        <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alias</span><span class="p">:</span>
+                                            <span class="n">group</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Group</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                            <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
+                                                <span class="n">comments</span> <span class="o">=</span> <span class="p">[]</span>
+                                                <span class="n">previous_round</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">requested_round</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                                                                                       <span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                                <span class="k">for</span> <span class="n">stu</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">members</span><span class="p">:</span>
+                                                    <span class="n">response</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">stu</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">previous_round</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                                    <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                                                        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span><span class="p">:</span>
+                                                            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">stu</span><span class="p">:</span>
+                                                                <span class="n">comment</span> <span class="o">=</span> <span class="p">{</span>
+                                                                    <span class="s">&#39;alias&#39;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span>
+                                                                    <span class="s">&#39;response&#39;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span>
+                                                                    <span class="s">&#39;opinion&#39;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">response</span>
+                                                                <span class="p">}</span>
+                                                                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">option</span> <span class="o">!=</span> <span class="s">&#39;NA&#39;</span><span class="p">:</span>
+                                                                    <span class="n">comment</span><span class="p">[</span><span class="s">&#39;option&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">previous_round</span><span class="o">.</span><span class="n">quiz</span><span class="o">.</span><span class="n">options</span><span class="p">[</span>
+                                                                        <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">option</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                                                                <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+                                                                <span class="k">break</span>
+                                                <span class="n">template_values</span> <span class="o">=</span> <span class="p">{</span>
+                                                    <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+                                                    <span class="s">&#39;alias&#39;</span><span class="p">:</span> <span class="n">alias</span><span class="p">,</span>
+                                                    <span class="s">&#39;comments&#39;</span><span class="p">:</span> <span class="n">comments</span>
+                                                <span class="p">}</span>
+                                                <span class="n">stu_response</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+                                                                                        <span class="n">parent</span><span class="o">=</span><span class="n">d_round</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                                <span class="k">if</span> <span class="n">stu_response</span><span class="p">:</span>
+                                                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;comment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stu_response</span><span class="o">.</span><span class="n">comment</span>
+                                                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;response&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">stu_response</span><span class="o">.</span><span class="n">response</span><span class="p">)</span>
+                                                <span class="n">deadline</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">d_round</span><span class="o">.</span><span class="n">deadline</span><span class="p">,</span>
+                                                                                      <span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">T%H:%M&#39;</span><span class="p">)</span>
+                                                <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                                                <span class="k">if</span> <span class="n">deadline</span> <span class="o">&lt;</span> <span class="n">current_time</span> <span class="ow">or</span> <span class="n">requested_round</span> <span class="o">!=</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span><span class="p">:</span>
+                                                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;expired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                                                <span class="k">if</span> <span class="n">d_round</span><span class="o">.</span><span class="n">is_quiz</span><span class="p">:</span>
+                                                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;expired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                                                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;deadline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_round</span><span class="o">.</span><span class="n">deadline</span>
+                                                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;rounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">current_round</span>
+                                                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;curr_page&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requested_round</span>
+                                                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_round</span><span class="o">.</span><span class="n">description</span>
+                                                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;sectionKey&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section_key</span>
+                                                <span class="n">template</span> <span class="o">=</span> <span class="n">consider</span><span class="o">.</span><span class="n">JINJA_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;discussion.html&#39;</span><span class="p">)</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">template_values</span><span class="p">))</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                                        <span class="s">&quot;Group not found for &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; Section: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                                                                <span class="n">section</span><span class="p">))</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/error?code=105&#39;</span><span class="p">)</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                                    <span class="s">&quot;Group not found for &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; Section: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">section</span><span class="p">))</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/error?code=105&#39;</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                                <span class="s">&quot;Requested round not found for &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; Section: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                                                        <span class="n">section</span><span class="p">))</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Section not found for key: &quot;</span> <span class="o">+</span> <span class="n">section_key</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Found exception &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/home&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Groups"><a class="viewcode-back" href="../api.html#instructor.Groups">[docs]</a><span class="k">class</span> <span class="nc">Groups</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Handling groups page for admin console&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">create_logout_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">selected_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">template_values</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_courses_and_sections</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">course_name</span><span class="p">,</span> <span class="n">selected_section</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;selectedSectionObject&#39;</span> <span class="ow">in</span> <span class="n">template_values</span><span class="p">:</span>
+                    <span class="n">current_section</span> <span class="o">=</span> <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSectionObject&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                                <span class="n">ancestor</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">current_section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+                        <span class="n">groups</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">groups</span>
+                        <span class="n">student</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">students</span>
+                        <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">stu</span> <span class="ow">in</span> <span class="n">student</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">student</span> <span class="o">==</span> <span class="n">stu</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+                                    <span class="n">res</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">stu</span><span class="o">.</span><span class="n">group</span>
+                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;responses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span>
+                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">groups</span>
+                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;logouturl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+                <span class="n">template</span> <span class="o">=</span> <span class="n">consider</span><span class="o">.</span><span class="n">JINJA_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;groups.html&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">template_values</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AddGroups"><a class="viewcode-back" href="../api.html#instructor.AddGroups">[docs]</a><span class="k">class</span> <span class="nc">AddGroups</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adding students to the database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">groups</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;groups&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span> <span class="ow">and</span> <span class="n">groups</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">groups</span> <span class="o">!=</span> <span class="n">groups</span> <span class="ow">and</span> <span class="n">groups</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="c"># If the total number of groups are not as requested change them</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span>
+                                <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="s">&quot;Groups modified.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; section does not exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UpdateGroups"><a class="viewcode-back" href="../api.html#instructor.UpdateGroups">[docs]</a><span class="k">class</span> <span class="nc">UpdateGroups</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updating groups of students&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">groups</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;groups&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">course_name</span> <span class="ow">and</span> <span class="n">section_name</span> <span class="ow">and</span> <span class="n">groups</span><span class="p">:</span>
+                    <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">section_name</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">course</span><span class="p">:</span>
+                        <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">student</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">student</span><span class="o">.</span><span class="n">email</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+                                    <span class="n">student</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">student</span><span class="o">.</span><span class="n">email</span><span class="p">])</span>
+                                    <span class="n">group</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Group</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">student</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="p">:</span>
+                                        <span class="n">group</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Group</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">student</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+                                        <span class="n">group</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">student</span><span class="o">.</span><span class="n">group</span>
+                                    <span class="k">if</span> <span class="n">student</span><span class="o">.</span><span class="n">email</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">members</span><span class="p">:</span>
+                                        <span class="n">group</span><span class="o">.</span><span class="n">members</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">student</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+                                        <span class="n">group</span><span class="o">.</span><span class="n">size</span> <span class="o">+=</span> <span class="mi">1</span>
+                                        <span class="n">student</span><span class="o">.</span><span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;S&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                                        <span class="n">group</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="n">section</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;S&quot;</span> <span class="o">+</span> <span class="s">&quot;Groups updated.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">section_name</span> <span class="o">+</span> <span class="s">&quot; section does not exist!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="n">course_name</span> <span class="o">+</span> <span class="s">&quot; course does not exist!&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;E&quot;</span> <span class="o">+</span> <span class="s">&quot;Error! invalid arguments.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Responses"><a class="viewcode-back" href="../api.html#instructor.Responses">[docs]</a><span class="k">class</span> <span class="nc">Responses</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Handling responses page for admin console&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">create_logout_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">selected_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">template_values</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_courses_and_sections</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">course_name</span><span class="p">,</span> <span class="n">selected_section</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;selectedSectionObject&#39;</span> <span class="ow">in</span> <span class="n">template_values</span><span class="p">:</span>
+                    <span class="n">current_section</span> <span class="o">=</span> <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSectionObject&#39;</span><span class="p">]</span>
+                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;round&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span>
+                    <span class="n">resp</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                                <span class="n">ancestor</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">current_section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+                        <span class="c"># response is a list of all the responses for the round i</span>
+                        <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                            <span class="n">resp</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">response</span>
+                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;responses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resp</span>
+                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;logouturl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+                <span class="n">template</span> <span class="o">=</span> <span class="n">consider</span><span class="o">.</span><span class="n">JINJA_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;responses.html&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">template_values</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GroupResponses"><a class="viewcode-back" href="../api.html#instructor.GroupResponses">[docs]</a><span class="k">class</span> <span class="nc">GroupResponses</span><span class="p">(</span><span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Handling groups_responses page for admin console&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">create_logout_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                <span class="n">course_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;course&#39;</span><span class="p">)</span>
+                <span class="n">selected_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;section&#39;</span><span class="p">)</span>
+                <span class="n">template_values</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_courses_and_sections</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">course_name</span><span class="p">,</span> <span class="n">selected_section</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;selectedSectionObject&#39;</span> <span class="ow">in</span> <span class="n">template_values</span><span class="p">:</span>
+                    <span class="n">current_section</span> <span class="o">=</span> <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSectionObject&#39;</span><span class="p">]</span>
+                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;round&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span>
+                    <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_section</span><span class="o">.</span><span class="n">groups</span>
+                    <span class="k">if</span> <span class="n">current_section</span><span class="o">.</span><span class="n">groups</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">resp</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">current_section</span><span class="o">.</span><span class="n">groups</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                                <span class="n">resp</span><span class="p">[</span><span class="s">&#39;group_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">current_section</span><span class="o">.</span><span class="n">rounds</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">responses</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                                    <span class="n">ancestor</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">Round</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">current_section</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">responses</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+                                    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">current_section</span><span class="o">.</span><span class="n">students</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">res</span><span class="o">.</span><span class="n">student</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">group</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                                            <span class="n">res</span><span class="o">.</span><span class="n">alias</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">alias</span>
+                                            <span class="n">resp</span><span class="p">[</span><span class="s">&#39;group_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">group</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+                                            <span class="k">break</span>
+                        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;responses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resp</span>
+                <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;logouturl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+                <span class="n">template</span> <span class="o">=</span> <span class="n">consider</span><span class="o">.</span><span class="n">JINJA_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;groups_responses.html&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">template_values</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Consider 2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Swaroop Joshi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
+    </div>
+  </body>
+</html>

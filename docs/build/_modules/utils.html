@@ -1,0 +1,176 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>utils &mdash; Consider 2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="top" title="Consider 2.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Consider 2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for utils</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">model</span>
+
+
+<div class="viewcode-block" id="get_role"><a class="viewcode-back" href="../api.html#utils.get_role">[docs]</a><span class="k">def</span> <span class="nf">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks and returns if the user is an Instructor or a Student, False if neither.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user: The user whose role is to be retrieved.</span>
+
+<span class="sd">    Returns: Instructor or Student or False.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="get_courses_and_sections"><a class="viewcode-back" href="../api.html#utils.get_courses_and_sections">[docs]</a><span class="k">def</span> <span class="nf">get_courses_and_sections</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">course_name</span><span class="p">,</span> <span class="n">selected_section</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        result:</span>
+<span class="sd">        course_name:</span>
+<span class="sd">        selected_section:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        object:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">template_values</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">courses</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">courses</span><span class="p">:</span>
+        <span class="n">course</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;courses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">courses</span>
+        <span class="k">if</span> <span class="n">course_name</span><span class="p">:</span>
+            <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">course</span><span class="p">:</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="n">courses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sections</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedCourse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sections</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">course_name</span><span class="p">:</span>
+            <span class="n">sections</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">courses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;sections&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sections</span>
+        <span class="k">if</span> <span class="n">sections</span><span class="p">:</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">selected_section</span><span class="p">:</span>
+                <span class="n">selected_section</span> <span class="o">=</span> <span class="n">selected_section</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">selected_section</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSectionObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span>
+            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;students&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span>
+    <span class="k">return</span> <span class="n">template_values</span></div>
+
+
+<div class="viewcode-block" id="check_response"><a class="viewcode-back" href="../api.html#utils.check_response">[docs]</a><span class="k">def</span> <span class="nf">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        response:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;support&#39;</span><span class="p">,</span> <span class="s">&#39;neutral&#39;</span><span class="p">,</span> <span class="s">&#39;disagree&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Consider 2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Swaroop Joshi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
+    </div>
+  </body>
+</html>

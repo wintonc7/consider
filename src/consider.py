@@ -1,3 +1,12 @@
+"""
+Package: consider
+~~~~~~~~~~~~~~~~~
+- Author(s): Rohit Kapoor, Swaroop Joshi
+- Last Modified: Dec. 18, 2015
+
+--------------------
+"""
+
 import logging
 import os
 
@@ -28,8 +37,20 @@ errorCodes = {
 
 
 class ErrorPage(webapp2.RequestHandler):
-    """Page to display errors"""
+    """
+    A generic page to display errors based on the error code.
 
+    The error codes are:
+       * '100': "Oops! Something went wrong please try again.",
+       * '101': "Sorry you are not registered with this application, please contact your Instructor.",
+       * '102': "Sorry you are not an instructor.",
+       * '103': "Sorry no rounds are active for this section, please try again later.",
+       * '104': "Sorry the round was not found, please contact your Instructor.",
+       * '105': "Sorry, your group was not found, please contact your Instructor."
+
+    HTTP errors like 404, 500 are handled by the system in the default manner.
+    ------
+    """
     def get(self):
         user = users.get_current_user()
         if user:
@@ -52,9 +73,19 @@ class ErrorPage(webapp2.RequestHandler):
 
 
 class MainPage(webapp2.RequestHandler):
-    """Main function that will handle the first request"""
+    """
+    Handles the main page.
 
+    If the user is authenticated successfully, redirects to the ``/home`` page, otherwise to the ``login`` page.
+    """
     def get(self):
+        """
+        The HTTP GET method on the ``MainPage``
+
+        Returns:
+            An appropriate rendered page
+
+        """
         user = users.get_current_user()
         if user:
             self.redirect('/home')
