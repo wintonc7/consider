@@ -1,0 +1,17 @@
+How to Generate This Documentation
+==================================
+
+This documentation is generated using `Sphinx <http://sphinx-doc.org/>`_
+on the `PyCharm 5.0.2 <http://jetbrains.com/pycharm>`_ IDE.
+
+These are the steps followed.
+
+* Create a ``docs`` directory inside the project.
+* Run Tools > Sphinx Quickstart in PyCharm.
+  Answer the prompts (in most cases default values are good enough, but make sure you select *yes* for ``autodoc``).
+* Make appropriate changes to ``index`` and ``conf.py`` files. Then add docstrings in the python source files.
+* In Run > Edit Configuratoins > Add New Configuration, select Pythond Docs > Sphinx.
+* Select the ``docs/source`` folder for input and ``docs/build`` for output. Choose ``html`` command.
+* Running this configuration should produce the html documentation in the build folder.
+
+Consult Sphinx documentation for more details and/or troubleshooting.

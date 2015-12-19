@@ -84,8 +84,6 @@ class Student(ndb.Model):
     """
     .. _Student:
 
-    .. _Students:
-
     An object to represent the Student in the app.
     """
     email = ndb.StringProperty(required=True)
@@ -103,7 +101,7 @@ class Group(ndb.Model):
     number = ndb.IntegerProperty(required=True)
     """ Integer. Index of the group within that `Section`_ """
     members = ndb.StringProperty(repeated=True)
-    """ List of Strings. Emails of the `Students`_ in this group. """
+    """ List of Strings. Emails of the `Student`_\ s in this group. """
     size = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Size of this group. """
 

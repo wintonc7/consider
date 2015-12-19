@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Consider documentation build configuration file, created by
+# CONSIDER documentation build configuration file, created by
 # sphinx-quickstart on Fri Dec 18 00:18:54 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -53,7 +53,7 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Consider'
+project = u'CONSIDER'
 copyright = u'2015, Swaroop Joshi'
 author = u'Swaroop Joshi'
 
@@ -230,7 +230,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'Consider.tex', u'Consider Documentation',
+  (master_doc, 'CONSIDER.tex', u'CONSIDER Documentation',
    u'Swaroop Joshi', 'manual'),
 ]
 
@@ -260,7 +260,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'consider', u'Consider Documentation',
+    (master_doc, 'consider', u'CONSIDER Documentation',
      [author], 1)
 ]
 
@@ -274,8 +274,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'Consider', u'Consider Documentation',
-   author, 'Consider', 'One line description of project.',
+  (master_doc, 'CONSIDER', u'CONSIDER Documentation',
+   author, 'CONSIDER', 'One line description of project.',
    'Miscellaneous'),
 ]
 
