@@ -3,10 +3,38 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Consider's documentation!
+Welcome to CONSIDER's documentation!
 ====================================
 
+What is CONSIDER?
+~~~~~~~~~~~~~~~~~
+..
+    Conflict and collaboration would seem to be ideas that are diametrically opposed to each other.
+    But, in fact, classic work by the Swiss developmental psychologist
+    `Jean Piaget <https://en.wikipedia.org/wiki/Jean_Piaget>`_ on how children and adults learn shows
+    that when learners engage with peers in critical discussion of ideas concerning which they have different
+    understandings, that contributes very effectively to learners developing deep understanding of the concepts
+    involved.
+
+    Various educators and researchers have observed that getting students in undergraduate courses to engage with other
+    students in thoughtful discussion of important concepts is very challenging.
+    It can be especially difficult to get women students and students from other underrepresented groups to participate
+    effectively in such discussions.
+
+    In this project, we, a group of researchers and software developers at `The Ohio State University <www.osu.edu>`_\ ,
+    are working on finding software solutions that exploit the affordances of mobile and web technologies to address
+    many of these challenges.
+
+CONSIDER is a web app that uses the idea of cognitive conflict to facilitate small group discussion within students on a given topic. Research shows that when learners engage with peers in critical discussion of ideas concerning which they have different understandings, that contributes very effectively to learners developing deep understanding of the  concepts involved.
+
+Another unique feature of CONSIDER is its *asynchronous, structured, rounds-based* discussion. Due to this, each student gets to, and has to, respond to the posts of every group member exactly once per round. She can revisit her post before the round ends (typically 24 hours) to make any modifications. This ensures that each student, whether quick on her feet, or prefers to think through subtle ramifications before posting, or anything in-between, participates equally effectively. In addition, frivolous posts and flame wars are completely avoided.
+
+CONSIDER also implements anonymity of the students while the discussion is going on. Due to this, students participate more freely, and the effectiveness of the discussion is not compromised by any gender/ethnic/other preconceptions some students may have.
+
+The web app is free to use and is developed using `Google App Engine <https://cloud.google.com/appengine/>`_ and Python. It is scalable and has responsive web frontend. As a result, it can be accessed from practically any device with great ease. All you need is a valid Gmail ID to use the app. Contact the :doc:`people` for details.
+
 Contents:
++++++++++
 
 .. toctree::
    :maxdepth: 4
@@ -14,7 +42,9 @@ Contents:
 
    API Documentation <api>
 
+   People <people>
 
+   How to Generate This Documentation <howto-doc>
 
 Indices and tables
 ==================
