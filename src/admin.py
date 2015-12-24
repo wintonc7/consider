@@ -15,8 +15,8 @@ import logging
 import webapp2
 from google.appengine.api import users
 
-import src.utils
-from model import Instructor
+import models
+import utils
 
 
 class AdminPage(webapp2.RequestHandler):
@@ -32,14 +32,14 @@ class AdminPage(webapp2.RequestHandler):
 
         if user:
             # if users.is_current_user_admin():
-            url = users.create_logout_url(self.request.uri)
+            url = users.create_logout_url(self.request.uri)  # TODO default dest. after logout should be /home
             template_values = {
                 'url': url
             }
-            instructors = Instructor.query().fetch()
+            instructors = models.Instructor.query().fetch()
             if instructors:
                 template_values['instructors'] = instructors
-            template = src.utils.JINJA_ENVIRONMENT.get_template('admin.html')
+            template = utils.jinja_env().get_template('admin.html')
             self.response.write(template.render(template_values))
             # else:
             #     self.response.write("You are not Rohit :p")
@@ -48,7 +48,7 @@ class AdminPage(webapp2.RequestHandler):
             template_values = {
                 'url': url
             }
-            template = src.utils.JINJA_ENVIRONMENT.get_template('login.html')
+            template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
 
     def post(self):
@@ -59,7 +59,7 @@ class AdminPage(webapp2.RequestHandler):
 
         # if users.is_current_user_admin():
         if email:
-            instructor = Instructor(id=email)
+            instructor = models.Instructor(id=email)
             instructor.email = email
             instructor.put()
             self.response.write(email + " has been added as an Instructor")
@@ -80,7 +80,7 @@ class AdminToggleInstructor(webapp2.RequestHandler):
         email = self.request.get('email')
         if email:
             logging.info("Changing status of " + email)
-            instructor = Instructor.query(Instructor.email == email).get()
+            instructor = models.Instructor.query(models.Instructor.email == email).get()
             if instructor:
                 instructor.is_active = not instructor.is_active
                 instructor.put()

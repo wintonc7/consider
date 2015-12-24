@@ -19,7 +19,7 @@ import webapp2
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-import model
+import models
 import utils
 
 
@@ -37,7 +37,7 @@ class SubmitResponse(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             student = utils.get_role(user)
-            if student and type(student) is model.Student:
+            if student and type(student) is models.Student:
                 option = self.request.get('option').lower()
                 comment = self.request.get('comm')
                 summary = self.request.get('summary')
@@ -47,9 +47,9 @@ class SubmitResponse(webapp2.RequestHandler):
                     try:
                         section = ndb.Key(urlsafe=section_key).get()
                         if section:
-                            current_round = model.Round.get_by_id(section.current_round, parent=section.key)
+                            current_round = models.Round.get_by_id(section.current_round, parent=section.key)
                             if current_round:
-                                response = model.Response(parent=current_round.key, id=student.email)
+                                response = models.Response(parent=current_round.key, id=student.email)
                                 if current_round.is_quiz:
                                     if not (option and comment):
                                         self.response.write('Invalid Parameters!')
@@ -110,7 +110,7 @@ class SectionPage(webapp2.RequestHandler):
             if result:
                 # User is either Instructor or Student
                 url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Student:
+                if type(result) is models.Student:
                     logging.info('Student logged in ' + str(result))
                     section_key = self.request.get('section')
                     if section_key:
@@ -120,7 +120,7 @@ class SectionPage(webapp2.RequestHandler):
                                 if section.current_round == 0:
                                     self.redirect('/error?code=103')
                                 else:
-                                    curr_round = model.Round.get_by_id(section.current_round, parent=section.key)
+                                    curr_round = models.Round.get_by_id(section.current_round, parent=section.key)
                                     if curr_round:
                                         if not curr_round.is_quiz:
                                             self.redirect('/discussion?section=' + section_key)
@@ -130,7 +130,7 @@ class SectionPage(webapp2.RequestHandler):
                                         template_values = {
                                             'url': url
                                         }
-                                        response = model.Response.get_by_id(result.email, parent=curr_round.key)
+                                        response = models.Response.get_by_id(result.email, parent=curr_round.key)
                                         if response:
                                             template_values['option'] = response.option
                                             template_values['comment'] = response.comment
@@ -145,7 +145,7 @@ class SectionPage(webapp2.RequestHandler):
                                         template_values['sectionKey'] = section_key
                                         if curr_round.number != 1:
                                             template_values['last_round'] = True
-                                        template = utils.JINJA_ENVIRONMENT.get_template('home.html')
+                                        template = utils.jinja_env().get_template('home.html')
                                         self.response.write(template.render(template_values))
                                     else:
                                         self.redirect('/error?code=104')
@@ -178,7 +178,7 @@ class Discussion(webapp2.RequestHandler):
             if result:
                 # User is either Instructor or Student
                 url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Student:
+                if type(result) is models.Student:
                     logging.info('Student navigated to discussion ' + str(result))
                     section_key = self.request.get('section')
                     if section_key:
@@ -196,7 +196,7 @@ class Discussion(webapp2.RequestHandler):
                                         requested_round = int(requested_round)
                                     else:
                                         requested_round = section.current_round
-                                    d_round = model.Round.get_by_id(requested_round, parent=section.key)
+                                    d_round = models.Round.get_by_id(requested_round, parent=section.key)
                                     if d_round:
                                         group = 0
                                         alias = None
@@ -206,13 +206,13 @@ class Discussion(webapp2.RequestHandler):
                                                 alias = stu.alias
                                                 break
                                         if group != 0 and alias:
-                                            group = model.Group.get_by_id(group, parent=section.key)
+                                            group = models.Group.get_by_id(group, parent=section.key)
                                             if group:
                                                 comments = []
-                                                previous_round = model.Round.get_by_id(requested_round - 1,
+                                                previous_round = models.Round.get_by_id(requested_round - 1,
                                                                                        parent=section.key)
                                                 for stu in group.members:
-                                                    response = model.Response.get_by_id(stu, parent=previous_round.key)
+                                                    response = models.Response.get_by_id(stu, parent=previous_round.key)
                                                     if response:
                                                         for s in section.students:
                                                             if s.email == stu:
@@ -231,7 +231,7 @@ class Discussion(webapp2.RequestHandler):
                                                     'alias': alias,
                                                     'comments': comments
                                                 }
-                                                stu_response = model.Response.get_by_id(result.email,
+                                                stu_response = models.Response.get_by_id(result.email,
                                                                                         parent=d_round.key)
                                                 if stu_response:
                                                     template_values['comment'] = stu_response.comment
@@ -249,7 +249,7 @@ class Discussion(webapp2.RequestHandler):
                                                 template_values['curr_page'] = requested_round
                                                 template_values['description'] = d_round.description
                                                 template_values['sectionKey'] = section_key
-                                                template = utils.JINJA_ENVIRONMENT.get_template('discussion.html')
+                                                template = utils.jinja_env().get_template('discussion.html')
                                                 self.response.write(template.render(template_values))
                                             else:
                                                 logging.error(

@@ -16,7 +16,7 @@ import logging
 import webapp2
 from google.appengine.api import users
 
-import model
+import models
 import utils
 
 
@@ -35,15 +35,15 @@ class AddCourse(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('name')
                 if course_name:
                     course_name = course_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
                         self.response.write("E" + course_name + " already exist!")
                     else:
-                        course = model.Course(parent=result.key, id=course_name)
+                        course = models.Course(parent=result.key, id=course_name)
                         course.name = course_name
                         course.put()
                         self.response.write("S" + course_name + " added.")
@@ -63,11 +63,11 @@ class ToggleCourse(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 if course_name:
                     logging.info("Changing status of " + course_name)
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
                         course.is_active = not course.is_active
                         course.put()
@@ -93,19 +93,19 @@ class AddSection(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 section_name = self.request.get('name')
                 course_name = self.request.get('course')
                 if course_name and section_name:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
                             self.response.write("E" + section_name + " already exist!")
                         else:
-                            section = model.Section(parent=course.key, id=section_name)
+                            section = models.Section(parent=course.key, id=section_name)
                             section.name = section_name
                             section.put()
                             self.response.write("S" + section_name + " added.")
@@ -127,15 +127,15 @@ class ToggleSection(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 if course_name and section_name:
                     logging.info("Changing status of " + section_name + " for course " + course_name)
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
                         if course.is_active:
-                            section = model.Section.get_by_id(section_name, parent=course.key)
+                            section = models.Section.get_by_id(section_name, parent=course.key)
                             if section:
                                 section.is_active = not section.is_active
                                 section.put()
@@ -162,27 +162,27 @@ class AddStudent(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 emails = json.loads(self.request.get('emails'))
                 if course_name and section_name and emails:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
                             for email in emails:
                                 email = email.lower()
                                 student_emails = [s.email for s in section.students]
                                 if email not in student_emails:
-                                    info = model.StudentInfo()
+                                    info = models.StudentInfo()
                                     info.email = email
                                     section.students.append(info)
-                                student = model.Student.get_by_id(email)
+                                student = models.Student.get_by_id(email)
                                 if not student:
-                                    student = model.Student(id=email)
+                                    student = models.Student(id=email)
                                     student.email = email
                                 if section.key not in student.sections:
                                     student.sections.append(section.key)
@@ -212,19 +212,19 @@ class RemoveStudent(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 email = self.request.get('email')
                 if course_name and section_name and email:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
                             email = email.lower()
-                            student = model.Student.get_by_id(email)
+                            student = models.Student.get_by_id(email)
                             if student:
                                 section.students = [s for s in section.students if s.email != email]
                                 if section.key in student.sections:
@@ -263,14 +263,14 @@ class Rounds(webapp2.RequestHandler):
             if result:
                 # User is either Instructor or Student
                 url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Instructor:
+                if type(result) is models.Instructor:
                     course_name = self.request.get('course')
                     selected_section = self.request.get('section')
                     template_values = utils.get_courses_and_sections(result, course_name, selected_section)
                     if 'selectedSectionObject' in template_values:
                         current_section = template_values['selectedSectionObject']
                         template_values['activeRound'] = current_section.current_round
-                        rounds = model.Round.query(ancestor=current_section.key).fetch()
+                        rounds = models.Round.query(ancestor=current_section.key).fetch()
                         if rounds:
                             template_values['rounds'] = rounds
                             discussion_rounds = []
@@ -287,7 +287,7 @@ class Rounds(webapp2.RequestHandler):
                         else:
                             template_values['nextRound'] = current_section.rounds + 1
                     template_values['logouturl'] = url
-                    template = utils.JINJA_ENVIRONMENT.get_template('rounds.html')
+                    template = utils.jinja_env().get_template('rounds.html')
                     self.response.write(template.render(template_values))
                 else:
                     self.redirect('/')
@@ -317,7 +317,7 @@ class AddRound(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 time = self.request.get('time')
@@ -329,11 +329,11 @@ class AddRound(webapp2.RequestHandler):
                         is_last_round):
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
-                            round_obj = model.Round(parent=section.key, id=curr_round)
+                            round_obj = models.Round(parent=section.key, id=curr_round)
                             round_obj.deadline = time
                             round_obj.number = curr_round
                             if curr_round == 1 or is_last_round:
@@ -341,7 +341,7 @@ class AddRound(webapp2.RequestHandler):
                                 round_obj.is_quiz = True
                                 number_options = int(self.request.get('number'))
                                 options = json.loads(self.request.get('options'))
-                                round_obj.quiz = model.Question(options_total=number_options, question=question,
+                                round_obj.quiz = models.Question(options_total=number_options, question=question,
                                                                 options=options)
                             else:
                                 round_obj.description = description
@@ -374,16 +374,16 @@ class ActivateRound(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 next_round = int(self.request.get('round'))
                 if course_name and section_name and next_round:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
                             if section.current_round != next_round:
                                 # If the selected round is not currently active make it active
@@ -408,7 +408,7 @@ class Groups(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 url = users.create_logout_url(self.request.uri)
                 course_name = self.request.get('course')
                 selected_section = self.request.get('section')
@@ -416,8 +416,8 @@ class Groups(webapp2.RequestHandler):
                 if 'selectedSectionObject' in template_values:
                     current_section = template_values['selectedSectionObject']
                     if current_section.rounds > 0:
-                        response = model.Response.query(
-                                ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                        response = models.Response.query(
+                                ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
                         groups = current_section.groups
                         student = current_section.students
                         for res in response:
@@ -427,7 +427,7 @@ class Groups(webapp2.RequestHandler):
                         template_values['responses'] = response
                         template_values['group'] = groups
                 template_values['logouturl'] = url
-                template = utils.JINJA_ENVIRONMENT.get_template('groups.html')
+                template = utils.jinja_env().get_template('groups.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
@@ -448,16 +448,16 @@ class AddGroups(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 groups = int(self.request.get('groups'))
                 if course_name and section_name and groups:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
                             if section.groups != groups and groups > 0:
                                 # If the total number of groups are not as requested change them
@@ -485,23 +485,23 @@ class UpdateGroups(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
                 groups = json.loads(self.request.get('groups'))
                 if course_name and section_name and groups:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
-                    course = model.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
-                        section = model.Section.get_by_id(section_name, parent=course.key)
+                        section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
                             for student in section.students:
                                 if student.email in groups:
                                     student.group = int(groups[student.email])
-                                    group = model.Group.get_by_id(student.group, parent=section.key)
+                                    group = models.Group.get_by_id(student.group, parent=section.key)
                                     if not group:
-                                        group = model.Group(parent=section.key, id=student.group)
+                                        group = models.Group(parent=section.key, id=student.group)
                                         group.number = student.group
                                     if student.email not in group.members:
                                         group.members.append(student.email)
@@ -529,7 +529,7 @@ class Responses(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 url = users.create_logout_url(self.request.uri)
                 course_name = self.request.get('course')
                 selected_section = self.request.get('section')
@@ -539,14 +539,14 @@ class Responses(webapp2.RequestHandler):
                     template_values['round'] = current_section.rounds
                     resp = {}
                     for i in range(1, current_section.rounds + 1):
-                        response = model.Response.query(
-                                ancestor=model.Round.get_by_id(i, parent=current_section.key).key).fetch()
+                        response = models.Response.query(
+                                ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
                         # response is a list of all the responses for the round i
                         if response:
                             resp[str(i)] = response
                     template_values['responses'] = resp
                 template_values['logouturl'] = url
-                template = utils.JINJA_ENVIRONMENT.get_template('responses.html')
+                template = utils.jinja_env().get_template('responses.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
@@ -565,7 +565,7 @@ class GroupResponses(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is model.Instructor:
+            if result and type(result) is models.Instructor:
                 url = users.create_logout_url(self.request.uri)
                 course_name = self.request.get('course')
                 selected_section = self.request.get('section')
@@ -580,8 +580,8 @@ class GroupResponses(webapp2.RequestHandler):
                             for r in range(1, current_section.rounds + 1):
                                 resp['group_' + str(g) + '_' + str(r)] = []
                         for r in range(1, current_section.rounds + 1):
-                            responses = model.Response.query(
-                                    ancestor=model.Round.get_by_id(r, parent=current_section.key).key).fetch()
+                            responses = models.Response.query(
+                                    ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
                             if responses:
                                 for res in responses:
                                     for s in current_section.students:
@@ -591,7 +591,7 @@ class GroupResponses(webapp2.RequestHandler):
                                             break
                         template_values['responses'] = resp
                 template_values['logouturl'] = url
-                template = utils.JINJA_ENVIRONMENT.get_template('groups_responses.html')
+                template = utils.jinja_env().get_template('groups_responses.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
@@ -613,13 +613,13 @@ class StudentsPage(webapp2.RequestHandler):
             if result:
                 # User is either Instructor or Student
                 url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Instructor:
+                if type(result) is models.Instructor:
                     logging.info('Instructor navigated to Students ' + str(result))
                     course_name = self.request.get('course')
                     selected_section = self.request.get('section')
                     template_values = utils.get_courses_and_sections(result, course_name, selected_section)
                     template_values['logouturl'] = url
-                    template = utils.JINJA_ENVIRONMENT.get_template('students.html')
+                    template = utils.jinja_env().get_template('students.html')
                     self.response.write(template.render(template_values))
                 else:
                     self.redirect('/')

@@ -11,25 +11,35 @@ Defines the functions and constants which are accessed by different modules of t
 
 """
 
-import os
+import models
 
-import jinja2
+def jinja_env():
+    """
+    Returns the Jinja2 environment from which templates to render the web pages can be obtained.
 
-import model
+    """
+    import jinja2
+    import os
+    return jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
+            extensions=['jinja2.ext.autoescape'],
+            autoescape=True)
 
-JINJA_ENVIRONMENT = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(
-                '{basedir}/{srcdir}/{tempdir}'.format(basedir=os.getcwd(), srcdir='src', tempdir='templates')),
-        extensions=['jinja2.ext.autoescape'],
-        autoescape=True)
-errorCodes = {
-    '100': "Oops! Something went wrong please try again.",
-    '101': "Sorry you are not registered with this application, please contact your Instructor.",
-    '102': "Sorry you are not an instructor.",
-    '103': "Sorry no rounds are active for this section, please try again later.",
-    '104': "Sorry the round was not found, please contact your Instructor.",
-    '105': "Sorry, your group was not found, please contact your Instructor."
-}
+
+def errorCodes():
+    """
+
+    Returns a dictionary of error codes in <code: message> format.
+
+    """
+    return {
+        '100': "Oops! Something went wrong please try again.",
+        '101': "Sorry you are not registered with this application, please contact your Instructor.",
+        '102': "Sorry you are not an instructor.",
+        '103': "Sorry no rounds are active for this section, please try again later.",
+        '104': "Sorry the round was not found, please contact your Instructor.",
+        '105': "Sorry, your group was not found, please contact your Instructor."
+    }
 
 
 def get_role(user):
@@ -44,11 +54,11 @@ def get_role(user):
 
     """
     if user:
-        result = model.Instructor.query(model.Instructor.email == user.email().lower()).get()
+        result = models.Instructor.query(models.Instructor.email == user.email().lower()).get()
         if result:
             return result
         else:
-            result = model.Student.query(model.Student.email == user.email().lower()).get()
+            result = models.Student.query(models.Student.email == user.email().lower()).get()
             if result:
                 return result
     return False
@@ -68,25 +78,25 @@ def get_courses_and_sections(instructor, course_name, selected_section):
 
     """
     template_values = {}
-    courses = model.Course.query(ancestor=instructor.key).fetch()
+    courses = models.Course.query(ancestor=instructor.key).fetch()
     if courses:
         course = None
         template_values['courses'] = courses
         if course_name:
             course_name = course_name.upper()
-            course = model.Course.get_by_id(course_name, parent=instructor.key)
+            course = models.Course.get_by_id(course_name, parent=instructor.key)
         if not course:
             course = courses[0]
-        sections = model.Section.query(ancestor=course.key).fetch()
+        sections = models.Section.query(ancestor=course.key).fetch()
         template_values['selectedCourse'] = course.name
         if not sections and not course_name:
-            sections = model.Section.query(ancestor=courses[0].key).fetch()
+            sections = models.Section.query(ancestor=courses[0].key).fetch()
         template_values['sections'] = sections
         if sections:
             section = None
             if selected_section:
                 selected_section = selected_section.upper()
-                section = model.Section.get_by_id(selected_section, parent=course.key)
+                section = models.Section.get_by_id(selected_section, parent=course.key)
             if not section:
                 section = sections[0]
             template_values['selectedSection'] = section.name

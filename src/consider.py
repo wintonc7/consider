@@ -16,9 +16,7 @@ from google.appengine.api import users
 
 import admin
 import instructor
-import model
-import src.instructor
-import src.student
+import models
 import student
 import utils
 
@@ -59,7 +57,7 @@ class ErrorPage(webapp2.RequestHandler):
             if not message:
                 message = utils.errorCodes['100']
             template_values['text'] = message
-            template = utils.JINJA_ENVIRONMENT.get_template('error.html')
+            template = utils.jinja_env().get_template('error.html')
             self.response.write(template.render(template_values))
         else:
             self.redirect('/')
@@ -80,13 +78,16 @@ class MainPage(webapp2.RequestHandler):
         """
         user = users.get_current_user()
         if user:
-            self.redirect('/home')
+            if users.is_current_user_admin():
+                self.redirect('/admin')
+            else:
+                self.redirect('/home')
         else:
             url = users.create_login_url(self.request.uri)
             template_values = {
                 'url': url
             }
-            template = utils.JINJA_ENVIRONMENT.get_template('login.html')
+            template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
 
 
@@ -105,19 +106,19 @@ class HomePage(webapp2.RequestHandler):
             if result:
                 # User is either Instructor or Student
                 url = users.create_logout_url(self.request.uri)
-                if type(result) is model.Instructor:
+                if type(result) is models.Instructor:
                     # Show instructor console
                     logging.info('Instructor logged in ' + str(result))
                     template_values = {'logouturl': url, 'expand': self.request.get('course')}
-                    courses = model.Course.query(ancestor=result.key).fetch()
+                    courses = models.Course.query(ancestor=result.key).fetch()
                     if courses:
                         for course in courses:
-                            course.sections_all = model.Section.query(ancestor=course.key).fetch()
+                            course.sections_all = models.Section.query(ancestor=course.key).fetch()
                             course.sections = len(course.sections_all)
                         template_values['courses'] = courses
-                    template = utils.JINJA_ENVIRONMENT.get_template('courses_and_sections.html')
+                    template = utils.jinja_env().get_template('courses_and_sections.html')
                     self.response.write(template.render(template_values))
-                elif type(result) is model.Student:
+                elif type(result) is models.Student:
                     logging.info('Student logged in ' + str(result))
                     template_values = {'logouturl': url, 'nickname': user.nickname()}
                     sections = result.sections
@@ -134,7 +135,7 @@ class HomePage(webapp2.RequestHandler):
                                 }
                                 section_list.append(sec)
                     template_values['sections'] = section_list
-                    template = utils.JINJA_ENVIRONMENT.get_template('student_home.html')
+                    template = utils.jinja_env().get_template('student_home.html')
                     self.response.write(template.render(template_values))
                 else:
                     logging.info(str(result) + ' navigated to Error')
@@ -157,16 +158,16 @@ application = webapp2.WSGIApplication([
     ('/toggleSection', instructor.ToggleSection),
     ('/addRound', instructor.AddRound),
     ('/activateRound', instructor.ActivateRound),
-    ('/discussion', src.student.Discussion),
+    ('/discussion', student.Discussion),
     ('/responses', instructor.Responses),
     ('/group_responses', instructor.GroupResponses),
     ('/addStudent', instructor.AddStudent),
     ('/removeStudent', instructor.RemoveStudent),
-    ('/section', src.student.SectionPage),
+    ('/section', student.SectionPage),
     ('/groups', instructor.Groups),
     ('/rounds', instructor.Rounds),
     ('/addGroups', instructor.AddGroups),
     ('/updateGroups', instructor.UpdateGroups),
-    ('/students', src.instructor.StudentsPage),
+    ('/students', instructor.StudentsPage),
     ('/submitResponse', student.SubmitResponse),
 ])
