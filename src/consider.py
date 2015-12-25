@@ -116,7 +116,7 @@ class HomePage(webapp2.RequestHandler):
                             course.sections_all = models.Section.query(ancestor=course.key).fetch()
                             course.sections = len(course.sections_all)
                         template_values['courses'] = courses
-                    template = utils.jinja_env().get_template('courses.html')
+                    template = utils.jinja_env().get_template('instructor_courses.html')
                     self.response.write(template.render(template_values))
                 elif type(result) is models.Student:
                     logging.info('Student logged in ' + str(result))
@@ -151,8 +151,7 @@ application = webapp2.WSGIApplication([
     ('/error', ErrorPage),
     ('/home', HomePage),
     ('/admin', admin.AdminPage),
-    ('/add_course', instructor.AddCourse),
-    ('/toggleCourse', instructor.ToggleCourse),
+    ('/courses', instructor.Courses),
     ('/add_section', instructor.AddSection),
     ('/toggleSection', instructor.ToggleSection),
     ('/addRound', instructor.AddRound),

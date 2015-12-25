@@ -20,62 +20,74 @@ import models
 import utils
 
 
-class AddCourse(webapp2.RequestHandler):
+class Courses(webapp2.RequestHandler):
     """
-    Adds a new course with the given name to the database.
+    Handles requests for managing courses: adding a course, toggling its status, etc.
+    """
 
-    Course names must be unique.
-    If the user tries to add a course with a previously used name again, it flags a message.
-    """
+    def add_course(self, instructor, course_name):
+        """
+        Adds a course to the datastore.
+
+        Args:
+            instructor: Instructor who is adding the course.
+            course_name: Name of the course; must be unique across the app.
+
+        """
+        if course_name:
+            course_name = course_name.upper()
+            course = models.Course.get_by_id(course_name, parent=instructor.key)
+            if course:
+                self.response.write('E' + course_name + ' already exists!')
+            else:
+                course = models.Course(parent=instructor.key, id=course_name)
+                course.name = course_name
+                course.put()
+                self.response.write("S" + course_name + " added.")
+        else:
+            self.response.write("Error! invalid arguments.")
+
+    def toggle_course(self, instructor, course_name):
+        """
+        Toggles the status of a course between Active and Inactive.
+
+        Args:
+            instructor: Instructor whose course is to be toggled.
+            course_name: Name of the course to be toggled.
+
+        """
+        if course_name:
+            logging.info("Changing status of the Course: " + course_name)
+            course = models.Course.get_by_id(course_name, parent=instructor.key)
+            if course:
+                course.is_active = not course.is_active
+                course.put()
+                self.response.write("Status changed for " + course_name)
+            else:
+                self.response.write("Course not found in the database.")
+        else:
+            self.response.write("Error! invalid arguments.")
 
     def post(self):
         """
-        HTTP POST method to add the course.
+        HTTP POST method for handling course requests.
         """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
             if result and type(result) is models.Instructor:
                 course_name = self.request.get('name')
-                if course_name:
-                    course_name = course_name.upper()
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        self.response.write("E" + course_name + " already exist!")
-                    else:
-                        course = models.Course(parent=result.key, id=course_name)
-                        course.name = course_name
-                        course.put()
-                        self.response.write("S" + course_name + " added.")
-                else:
-                    self.response.write("Error! invalid arguments.")
+                action = self.request.get('action')
+                logging.info('Courses/ POST / course: ' + course_name + ', action: ' + action)
 
-
-class ToggleCourse(webapp2.RequestHandler):
-    """
-    API to toggle between ``active`` and ``inactive`` course status. An instructor can call this API.
-    """
-
-    def post(self):
-        """
-        HTTP POST method to toggle the course status.
-        """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                if course_name:
-                    logging.info("Changing status of " + course_name)
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        course.is_active = not course.is_active
-                        course.put()
-                        self.response.write("Status changed for " + course_name)
-                    else:
-                        self.response.write("Course not found in the database.")
-                else:
-                    self.response.write("Error! invalid arguments.")
+                if action == 'add':
+                    self.add_course(result, course_name)
+                elif action == 'toggle':
+                    self.toggle_course(result, course_name)
+            else:
+                logging.error('Instructor expected [instructor.Courses.post]')
+        else:
+            logging.error('User expected [instructor.Courses.post]')
 
 
 class AddSection(webapp2.RequestHandler):
@@ -342,7 +354,7 @@ class AddRound(webapp2.RequestHandler):
                                 number_options = int(self.request.get('number'))
                                 options = json.loads(self.request.get('options'))
                                 round_obj.quiz = models.Question(options_total=number_options, question=question,
-                                                                options=options)
+                                                                 options=options)
                             else:
                                 round_obj.description = description
                             round_obj.put()
@@ -441,6 +453,7 @@ class AddGroups(webapp2.RequestHandler):
 
     The user (instructor) can modify the number of groups and then assign each student to one of the groups.
     """
+
     def post(self):
         """
         HTTP POST method to create groups.
@@ -478,6 +491,7 @@ class UpdateGroups(webapp2.RequestHandler):
 
     The user (instructor) can reassign groups using this API.
     """
+
     def post(self):
         """
         HTTP POST method to update the groups.
@@ -522,6 +536,7 @@ class Responses(webapp2.RequestHandler):
     """
     API to retrieve and display responses for each section, tabbed into different rounds.
     """
+
     def get(self):
         """
         HTTP GET method to retrieve the responses.
@@ -558,6 +573,7 @@ class GroupResponses(webapp2.RequestHandler):
     """
     API to retrieve and display responses for each section, organized into groups.
     """
+
     def get(self):
         """
         HTTP GET method to retrieve the group responses.
@@ -603,6 +619,7 @@ class StudentsPage(webapp2.RequestHandler):
     """
     API to display the list of students in the selected section.
     """
+
     def get(self):
         """
         HTTP GET method to retrieve the students.

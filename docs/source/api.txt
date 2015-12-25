@@ -7,7 +7,7 @@ API Documentation
    :members:
 
 
-.. automodule:: model
+.. automodule:: models
    :members:
 
 .. automodule:: consider

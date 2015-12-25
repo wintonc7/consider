@@ -46,6 +46,7 @@
     </div>
 </nav>
 
+
 <div class="container-fluid">
     <div class="row">
         {% if show_sidenavbar %}
@@ -53,10 +54,11 @@
             {% block sidenavbar %}{% endblock sidenavbar %}
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        {% else %}
-        <div class="main">
-        {% endif %}
-            {% block content %}{% endblock content %}
+            {% else %}
+            <div class="main">
+                {% endif %}
+                {% block content %}{% endblock content %}
+            </div>
         </div>
     </div>
 </div>

@@ -42,6 +42,7 @@ class AdminPage(webapp2.RequestHandler):
     def toggle_instructor(self, email):
         """
         Toggles the status of the selected instructor between 'Active' and 'Inactive'.
+
         Args:
             email: Email (identifier) of the instructor to be added.
 
@@ -65,9 +66,9 @@ class AdminPage(webapp2.RequestHandler):
         user = users.get_current_user()
 
         if user:
-            url = users.create_logout_url(self.request.uri)
+            logouturl = users.create_logout_url(self.request.uri)
             template_values = {
-                'url': url
+                'logouturl': logouturl
             }
             instructors = models.Instructor.query().fetch()
             if instructors:
@@ -75,9 +76,9 @@ class AdminPage(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('admin.html')
             self.response.write(template.render(template_values))
         else:
-            url = users.create_login_url(self.request.uri)
+            loginurl = users.create_login_url(self.request.uri)
             template_values = {
-                'url': url
+                'loginurl': loginurl
             }
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
