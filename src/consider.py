@@ -113,8 +113,8 @@ class HomePage(webapp2.RequestHandler):
                     courses = models.Course.query(ancestor=result.key).fetch()
                     if courses:
                         for course in courses:
-                            course.sections_all = models.Section.query(ancestor=course.key).fetch()
-                            course.sections = len(course.sections_all)
+                            course.sections = models.Section.query(ancestor=course.key).fetch()
+                            # course.sections = len(course.sections_all)
                         template_values['courses'] = courses
                     template = utils.jinja_env().get_template('instructor_courses.html')
                     self.response.write(template.render(template_values))
@@ -152,8 +152,7 @@ application = webapp2.WSGIApplication([
     ('/home', HomePage),
     ('/admin', admin.AdminPage),
     ('/courses', instructor.Courses),
-    ('/add_section', instructor.AddSection),
-    ('/toggleSection', instructor.ToggleSection),
+    ('/section', instructor.Section),
     ('/addRound', instructor.AddRound),
     ('/activateRound', instructor.ActivateRound),
     ('/discussion', student.Discussion),

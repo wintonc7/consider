@@ -90,13 +90,45 @@ class Courses(webapp2.RequestHandler):
             logging.error('User expected [instructor.Courses.post]')
 
 
-class AddSection(webapp2.RequestHandler):
+class Section(webapp2.RequestHandler):
     """
-    Adds a new section to the given course.
+    Handles requests for managing sections: adding a section, toggling its status, etc.
+    """
 
-    Section names must be unique within a course.
-    If a user tries to add a section with a previously used name, it flags a message.
-    """
+    def add_section(self, course, section_name):
+        """
+        Adds a section to the given course in the datastore.
+
+        Args:
+            course: Course to which the section is to be added.
+            section_name: Name of the section; must be unique within the course.
+
+        """
+        section = models.Section.get_by_id(section_name, parent=course.key)
+        if section:
+            self.response.write("E" + section_name + " already exist!")
+        else:
+            section = models.Section(parent=course.key, id=section_name)
+            section.name = section_name
+            section.put()
+            self.response.write("S" + section_name + " added.")
+
+    def toggle_section(self, course, section_name):
+        """
+        Toggles the status of a section between Active and Inactive.
+
+        Args:
+            course: Course under which this section exists
+            course_name: Name of the section to be toggled.
+
+        """
+        section = models.Section.get_by_id(section_name, parent=course.key)
+        if section:
+            section.is_active = not section.is_active
+            section.put()
+            self.response.write("Status changed for " + section_name)
+        else:
+            self.response.write("E" + "Section not found in the database.")
 
     def post(self):
         """
@@ -106,60 +138,25 @@ class AddSection(webapp2.RequestHandler):
         if user:
             result = utils.get_role(user)
             if result and type(result) is models.Instructor:
-                section_name = self.request.get('name')
-                course_name = self.request.get('course')
-                if course_name and section_name:
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
+                section_name = self.request.get('section').upper()
+                course_name = self.request.get('course').upper()
+                action = self.request.get('action')
+
+                if course_name:
                     course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        section = models.Section.get_by_id(section_name, parent=course.key)
-                        if section:
-                            self.response.write("E" + section_name + " already exist!")
+                    if course and course.is_active:
+                        if action == 'add':
+                            self.add_section(course, section_name)
+                        elif action == 'toggle':
+                            self.toggle_section(course, section_name)
                         else:
-                            section = models.Section(parent=course.key, id=section_name)
-                            section.name = section_name
-                            section.put()
-                            self.response.write("S" + section_name + " added.")
+                            self.response.write('E' + 'Wrong action!!')
                     else:
-                        self.response.write("E" + course_name + " course does not exist!")
+                        self.response.write("E" + course_name + " course does not exist OR is not active!")
                 else:
-                    self.response.write("Error! invalid arguments.")
-
-
-class ToggleSection(webapp2.RequestHandler):
-    """
-    API to toggle between ``active`` and ``inactive`` section status. An instructor can call this API.
-    """
-
-    def post(self):
-        """
-        HTTP POST method to toggle the section status.
-        """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                if course_name and section_name:
-                    logging.info("Changing status of " + section_name + " for course " + course_name)
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        if course.is_active:
-                            section = models.Section.get_by_id(section_name, parent=course.key)
-                            if section:
-                                section.is_active = not section.is_active
-                                section.put()
-                                self.response.write("Status changed for " + section_name)
-                            else:
-                                self.response.write("E" + "Section not found in the database.")
-                        else:
-                            self.response.write("E" + "Status cannot be changed, please activate " + course_name)
-                    else:
-                        self.response.write("E" + "Course not found in the database.")
-                else:
-                    self.response.write("E" + "Error! invalid arguments.")
+                    self.response.write("E" + "No valid course_name found.")
+            else:
+                self.response.write("Error! invalid arguments.")
 
 
 class AddStudent(webapp2.RequestHandler):

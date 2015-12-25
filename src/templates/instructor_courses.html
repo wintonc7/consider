@@ -1,4 +1,5 @@
 {% extends "instructor_base.html" %}
+{% block title %} | Courses {% endblock %}
 
 {% block content %}
 <h1 class="page-header">Courses</h1>
@@ -26,7 +27,7 @@
         <tr>
             <td>{{loop.index}}</td>
             <td>{{course.name}}</td>
-            <td>{{course.sections}}</td>
+            <td>{{course.sections | length}}</td>
             <td>{%- if course.is_active -%}
                 <span class="label label-success">Active</span>
                 {%- else -%}
@@ -58,7 +59,7 @@
                         {{course.name}}
                     </button>
                     <div class="well well-sm">
-                        {% if course.sections_all %}
+                        {% if course.sections %}
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
@@ -70,7 +71,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for section in course.sections_all %}
+                                {% for section in course.sections %}
                                 <tr>
                                     <td>{{loop.index}}</td>
                                     <td>{{section.name}}</td>
@@ -212,7 +213,7 @@
         bootbox.confirm("Are you sure, you want to add Section: " + sectionName + " to Course: " + sectionCourse + "  ?", function (result) {
             if (result) {
                 // do the POST and get the callback
-                $.post(url, {name: sectionName, course: sectionCourse}, function (data) {
+                $.post('/section', {section: sectionName, course: sectionCourse, action: 'add'}, function (data) {
                     if (data.charAt(0) == 'E') {
                         $("#sectionNameContainer").addClass("has-error");
                         $("#sectionNameHelpBlock").text(data.substring(1));
@@ -271,7 +272,7 @@
         bootbox.confirm("Toggle status of: " + section + " in course: " + course + "?", function (result) {
             if (result) {
                 // do the POST and get the callback
-                $.post("/toggleSection", {course: course, section: section}, function (data) {
+                $.post("/section", {course: course, section: section, action:'toggle'}, function (data) {
                     if (data.charAt(0) == 'E') {
                         bootbox.alert(data.substring(1));
                     }
