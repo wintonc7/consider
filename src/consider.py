@@ -52,10 +52,10 @@ class ErrorPage(webapp2.RequestHandler):
             error = self.request.get('code')
             message = None
             if error:
-                if error in utils.errorCodes:
-                    message = utils.errorCodes[error]
+                if error in utils.error_codes():
+                    message = utils.error_codes()[error]
             if not message:
-                message = utils.errorCodes['100']
+                message = utils.error_codes()['100']
             template_values['text'] = message
             template = utils.jinja_env().get_template('error.html')
             self.response.write(template.render(template_values))
@@ -116,7 +116,7 @@ class HomePage(webapp2.RequestHandler):
                             course.sections_all = models.Section.query(ancestor=course.key).fetch()
                             course.sections = len(course.sections_all)
                         template_values['courses'] = courses
-                    template = utils.jinja_env().get_template('courses_and_sections.html')
+                    template = utils.jinja_env().get_template('courses.html')
                     self.response.write(template.render(template_values))
                 elif type(result) is models.Student:
                     logging.info('Student logged in ' + str(result))
@@ -151,7 +151,6 @@ application = webapp2.WSGIApplication([
     ('/error', ErrorPage),
     ('/home', HomePage),
     ('/admin', admin.AdminPage),
-    ('/toggleInstructor', admin.AdminToggleInstructor),
     ('/add_course', instructor.AddCourse),
     ('/toggleCourse', instructor.ToggleCourse),
     ('/add_section', instructor.AddSection),

@@ -619,7 +619,7 @@ class StudentsPage(webapp2.RequestHandler):
                     selected_section = self.request.get('section')
                     template_values = utils.get_courses_and_sections(result, course_name, selected_section)
                     template_values['logouturl'] = url
-                    template = utils.jinja_env().get_template('students.html')
+                    template = utils.jinja_env().get_template('list_students.html')
                     self.response.write(template.render(template_values))
                 else:
                     self.redirect('/')

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Consider {% block title %}{% endblock %}</title>
+    <title>Consider {% block title %}{% endblock title %}</title>
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/admin.css" rel="stylesheet">
@@ -17,7 +17,7 @@
     <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-    {% endblock %}
+    {% endblock head %}
 </head>
 <body>
 <div id="spinner" class="dots">
@@ -33,16 +33,11 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Consider</a>
+            <a class="navbar-brand" href="/home">Consider</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse" aria-expanded="true">
             <ul class="nav navbar-nav navbar-right hidden-big">
-                <li><a href="/home">Courses</a></li>
-                <li><a href="/students">Students</a></li>
-                <li><a href="/rounds">Rounds</a></li>
-                <li><a href="/groups">Groups</a></li>
-                <li><a href="/responses">Responses</a></li>
-                <li><a href="/group_responses">Group Responses</a></li>
+                {% block topnavbar %}{% endblock topnavbar %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="{{logouturl}}">Logout</a></li>
@@ -53,22 +48,15 @@
 
 <div class="container-fluid">
     <div class="row">
+        {% if show_sidenavbar %}
         <div class="col-sm-3 col-md-2 sidebar">
-            <ul class="nav nav-sidebar">
-                <li><a href="/home">Courses</a></li>
-                <li><a href="/students">Students</a></li>
-            </ul>
-            <ul class="nav nav-sidebar">
-                <li><a href="/rounds">Rounds</a></li>
-                <li><a href="/groups">Groups</a></li>
-            </ul>
-            <ul class="nav nav-sidebar">
-                <li><a href="/responses">Responses</a></li>
-                <li><a href="/group_responses">Group Responses</a></li>
-            </ul>
+            {% block sidenavbar %}{% endblock sidenavbar %}
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            {% block content %}{% endblock %}
+        {% else %}
+        <div class="main">
+        {% endif %}
+            {% block content %}{% endblock content %}
         </div>
     </div>
 </div>
@@ -92,6 +80,6 @@
         $("#spinner").fadeOut("slow");
     });
 </script>
-{% block script %}{% endblock %}
+{% block script %}{% endblock script %}
 </body>
 </html>

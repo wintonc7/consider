@@ -26,7 +26,7 @@ def jinja_env():
             autoescape=True)
 
 
-def errorCodes():
+def error_codes():
     """
 
     Returns a dictionary of error codes in <code: message> format.
