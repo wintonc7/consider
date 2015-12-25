@@ -4,7 +4,7 @@ instructor.py
 Implements the APIs for Instructor role in the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 18, 2015
+- Last Modified: Dec. 25, 2015
 
 --------------------
 
@@ -159,10 +159,59 @@ class Section(webapp2.RequestHandler):
                 self.response.write("Error! invalid arguments.")
 
 
-class AddStudent(webapp2.RequestHandler):
+class Students(webapp2.RequestHandler):
     """
     API to add a student to the given section and course.
     """
+
+    def add_students(self, section, emails):
+        """
+        Adds one or more students to the given section in the datastore.
+
+        Args:
+            section: Section to which the studetns are to be added.
+            emails: Emails (IDs) of students to be added.
+
+        """
+
+        for email in emails:
+            email = email.lower()
+            student_emails = [s.email for s in section.students]
+            if email not in student_emails:
+                info = models.StudentInfo()
+                info.email = email
+                section.students.append(info)
+            student = models.Student.get_by_id(email)
+            if not student:
+                student = models.Student(id=email)
+                student.email = email
+            if section.key not in student.sections:
+                student.sections.append(section.key)
+            student.put()
+        section.put()
+        logging.info("Students added to Section " + str(section))
+
+    def remove_student(self, section, email):
+        """
+        Removes a specific students from the given section.
+
+        Args:
+            section: Section from which the student is to be removed.
+            email: Email (ID) of the student to be removed.
+
+        """
+        student = models.Student.get_by_id(email)
+        if student:
+            section.students = [s for s in section.students if s.email != email]
+            if section.key in student.sections:
+                student.sections.remove(section.key)
+            student.put()
+            section.put()
+            logging.info(
+                    "Student" + str(student) + " has been removed from Section " + str(section))
+            self.response.write("S" + "Student removed from section.")
+        else:
+            self.response.write("E" + "Student does not exist!")
 
     def post(self):
         """
@@ -172,33 +221,23 @@ class AddStudent(webapp2.RequestHandler):
         if user:
             result = utils.get_role(user)
             if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                emails = json.loads(self.request.get('emails'))
-                if course_name and section_name and emails:
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
+                course_name = self.request.get('course').upper()
+                section_name = self.request.get('section').upper()
+                action = self.request.get('action')
+
+                if course_name and section_name:
+
                     course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
                         section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
-                            for email in emails:
-                                email = email.lower()
-                                student_emails = [s.email for s in section.students]
-                                if email not in student_emails:
-                                    info = models.StudentInfo()
-                                    info.email = email
-                                    section.students.append(info)
-                                student = models.Student.get_by_id(email)
-                                if not student:
-                                    student = models.Student(id=email)
-                                    student.email = email
-                                if section.key not in student.sections:
-                                    student.sections.append(section.key)
-                                student.put()
-                            section.put()
-                            logging.info("Students added to Section " + str(section))
-                            self.response.write("S" + "Students added to section.")
+
+                            if action == 'add':
+                                emails = json.loads(self.request.get('emails'))  # retrieve emails
+                                self.add_students(section, emails)
+                            elif action == 'remove':
+                                email = self.request.get('email').lower()
+                                self.remove_student(section, email)
                         else:
                             self.response.write("E" + section_name + " section does not exist!")
                     else:
@@ -206,52 +245,30 @@ class AddStudent(webapp2.RequestHandler):
                 else:
                     self.response.write("E" + "Error! invalid arguments.")
 
-
-class RemoveStudent(webapp2.RequestHandler):
-    """
-    API to remove a student from a section of the course.
-
-    The student still continues to be part of other sections of this course and other courses in the app.
-    """
-
-    def post(self):
+    def get(self):
         """
-        HTTP POST method to remove the student.
+        HTTP GET method to retrieve the list of students from the datastore.
         """
         user = users.get_current_user()
         if user:
             result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                email = self.request.get('email')
-                if course_name and section_name and email:
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        section = models.Section.get_by_id(section_name, parent=course.key)
-                        if section:
-                            email = email.lower()
-                            student = models.Student.get_by_id(email)
-                            if student:
-                                section.students = [s for s in section.students if s.email != email]
-                                if section.key in student.sections:
-                                    student.sections.remove(section.key)
-                                student.put()
-                                section.put()
-                                logging.info(
-                                        "Student" + str(student) + " has been removed from Section " + str(section))
-                                self.response.write("S" + "Student removed from section.")
-                            else:
-                                # self.response.write("E" + student + " does not exist!")
-                                self.response.write("E" + "Student does not exist!")
-                        else:
-                            self.response.write("E" + section_name + " section does not exist!")
-                    else:
-                        self.response.write("E" + course_name + " course does not exist!")
+            if result:
+                # User is either Instructor or Student
+                url = users.create_logout_url(self.request.uri)
+                if type(result) is models.Instructor:
+                    logging.info('Instructor navigated to Students ' + str(result))
+                    course_name = self.request.get('course')
+                    selected_section = self.request.get('section')
+                    template_values = utils.get_courses_and_sections(result, course_name, selected_section)
+                    template_values['logouturl'] = url
+                    template = utils.jinja_env().get_template('list_students.html')
+                    self.response.write(template.render(template_values))
                 else:
-                    self.response.write("E" + "Error! invalid arguments.")
+                    self.redirect('/')
+            else:
+                self.redirect('/')
+        else:
+            self.redirect('/')
 
 
 class Rounds(webapp2.RequestHandler):
@@ -606,37 +623,6 @@ class GroupResponses(webapp2.RequestHandler):
                 template_values['logouturl'] = url
                 template = utils.jinja_env().get_template('groups_responses.html')
                 self.response.write(template.render(template_values))
-            else:
-                self.redirect('/')
-        else:
-            self.redirect('/')
-
-
-class StudentsPage(webapp2.RequestHandler):
-    """
-    API to display the list of students in the selected section.
-    """
-
-    def get(self):
-        """
-        HTTP GET method to retrieve the students.
-        """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result:
-                # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
-                if type(result) is models.Instructor:
-                    logging.info('Instructor navigated to Students ' + str(result))
-                    course_name = self.request.get('course')
-                    selected_section = self.request.get('section')
-                    template_values = utils.get_courses_and_sections(result, course_name, selected_section)
-                    template_values['logouturl'] = url
-                    template = utils.jinja_env().get_template('list_students.html')
-                    self.response.write(template.render(template_values))
-                else:
-                    self.redirect('/')
             else:
                 self.redirect('/')
         else:

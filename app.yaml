@@ -19,10 +19,6 @@ handlers:
   login: admin
   auth_fail_action: redirect
 
-- url: /toggleInstructor
-  script: src.consider.application
-  login: admin
-
 - url: /.*
   script: src.consider.application
   login: required
