@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Discussions</title>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/discussion.css" rel="stylesheet">
+    <link href="/css/dots.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div id="spinner" class="dots">
+    Loading...
+</div>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/home">Consider</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
+            <ul class="nav navbar-nav">
+                {% for i in range(1,rounds) %}
+                <li {% if i==curr_page-1 -%}class="active"><a href="#">{%- else -%}><a
+                        href="/discussion?section={{sectionKey}}&round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="row">
+        <div id="count-container" class="alert alert-warning col-md-6"><p>Time left to complete: {% if expired -%} Time
+            is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p></div>
+        <a class="btn btn-warning sign-out-btn col-md-2 col-md-offset-4" href="{{url}}">
+            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
+        </a>
+    </div>
+    <h1 class="lead">Welcome {{alias}}</h1>
+    {% if description %}<h1 class="well lead"
+                            style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">
+    {{description}}</h1>{% endif %}
+    {% for comment in comments %}
+    <div class="jumbotron" id="jum_{{loop.index}}">
+        <h2>{{comment.alias}}</h2>
+        {% if comment.option %}
+        <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
+        {% endif %}
+        {% for opinion in comment.opinion %}
+        <span class="badge"
+              style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}: <span
+                class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}"
+                aria-hidden="true"></span></span>
+        {% endfor %}
+        <div class="well"
+             style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">
+            {{comment.response}}
+        </div>
+        <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if
+                expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-up"
+                                                                aria-hidden="true"></span> Support
+        </button>
+        <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info" {% if
+                expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-hand-right"
+                                                                aria-hidden="true"></span> Neutral
+        </button>
+        <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger" {% if
+                expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-down"
+                                                                aria-hidden="true"></span> Disagree
+        </button>
+    </div>
+    {% endfor %}
+    {% if not expired -%}
+    <div id="alert_comment" class="alert alert-info fade in" role="alert" style="display: none;">
+        <button type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4>Be sure to explain, in the box below...</h4>
+        {% for comment in comments %}
+        <p id="alert_{{loop.index}}"></p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form id="form" method="post" {% if not expired -%} action="/submitResponse" {%- endif -%}>
+        <textarea class="form-control" rows="5" id="comment"
+                  placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%}
+                  disabled="true" {%- endif -%}>
+        {%- if comment -%}
+            {{comment}}
+        {%- endif -%}
+        </textarea>
+        <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
+                -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
+        </button>
+    </form>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/bootbox.min.js"></script>
+<script src="/js/countdown.min.js"></script>
+<script type="text/javascript">
+    var l = {{comments | length}}
+    var resp = [];
+    resp[0] = null;
+
+    jQuery.ajaxSetup({
+        beforeSend: function () {
+            $('#spinner').show();
+        },
+        complete: function () {
+            $('#spinner').hide();
+        },
+        success: function () {
+        }
+    });
+
+    $(window).load(function () {
+        $("#spinner").fadeOut("slow");
+    });
+
+    {% if response %}
+    resp = resp.concat('{{response}}'.split(','));
+    window.onload = initComments;
+    {% endif %}
+
+    function initComments() {
+        for (var i = 1; i <= l; i++) {
+            if (resp[i] == "support") {
+                $("#jum_" + i).removeClass().addClass('jumbotron').addClass('support');
+            }
+            else if (resp[i] == "neutral") {
+                $("#jum_" + i).removeClass().addClass('jumbotron').addClass('neutral');
+            }
+            else {
+                $("#jum_" + i).removeClass().addClass('jumbotron').addClass('disagree');
+            }
+        }
+    }
+
+    {%- if not expired -%}
+    var clock = document.getElementById("countdown");
+    targetDate = new Date("{{deadline}}Z");
+    clock.innerHTML = countdown(targetDate).toString();
+    setInterval(function () {
+        clock.innerHTML = countdown(targetDate).toString();
+    }, 1000);
+
+    $('.alert .close').on('click', function (e) {
+        $(this).parent().hide();
+    });
+
+    $("#form").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+
+        //collect form elements
+        if (!selAll()) {
+            bootbox.alert('Please choose your opinion for all the comments.');
+        }
+        else {
+            var $form = $(this);
+            var comment = $form.find("textarea").val();
+            var url = $form.attr("action");
+            $.post(url, {comm: comment, response: JSON.stringify(resp), section: '{{sectionKey}}'}, function (data) {
+                bootbox.alert(data, function () {
+                    ocomment = comment;
+                });
+            });
+        }
+    });
+
+    function selAll() {
+        for (var i = 1; i <= l; i++) {
+            if (!resp[i]) return false;
+        }
+        return true;
+    }
+
+    function updateAlert(obj) {
+        var type = obj.id.substring(0, 3);
+        var index = obj.id.substring(4);
+        if (type == "sup") {
+            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
+            $("#alert_" + index).html("Why you Support S" + index + "?");
+            resp[index] = 'support';
+            $("#alert_comment").show();
+        }
+        else if (type == "neu") {
+            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
+            $("#alert_" + index).html("You are neutral with S" + index + "...");
+            resp[index] = 'neutral';
+            $("#alert_comment").show();
+        }
+        else {
+            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
+            $("#alert_" + index).html("Why you Disagree with S" + index + "?");
+            resp[index] = 'disagree';
+            $("#alert_comment").show();
+        }
+    }
+
+    var ocomment = $('#comment').val();
+
+    $(window).bind('beforeunload', function () {
+        if ($('#comment').val() !== ocomment) {
+            return "It looks like you have input you haven't submitted.";
+        }
+    });
+    {% endif %}
+</script>
+</body>
+</html>

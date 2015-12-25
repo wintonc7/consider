@@ -144,6 +144,7 @@ class HomePage(webapp2.RequestHandler):
                 self.redirect('/error?code=101')
         else:
             self.redirect('/')
+            self.error()
 
 
 application = webapp2.WSGIApplication([
@@ -152,17 +153,15 @@ application = webapp2.WSGIApplication([
     ('/home', HomePage),
     ('/admin', admin.AdminPage),
     ('/courses', instructor.Courses),
-    ('/section', instructor.Section),
+    ('/sections', instructor.Section),
     ('/students', instructor.Students),
-    ('/addRound', instructor.AddRound),
-    ('/activateRound', instructor.ActivateRound),
-    ('/discussion', student.Discussion),
+    ('/rounds', instructor.Rounds),
     ('/responses', instructor.Responses),
     ('/group_responses', instructor.GroupResponses),
-    ('/section', student.SectionPage),
     ('/groups', instructor.Groups),
-    ('/rounds', instructor.Rounds),
     ('/addGroups', instructor.AddGroups),
     ('/updateGroups', instructor.UpdateGroups),
+    ('/discussion', student.Discussion),
+    ('/section', student.SectionPage),
     ('/submitResponse', student.SubmitResponse),
 ])

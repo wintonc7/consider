@@ -322,14 +322,43 @@ class Rounds(webapp2.RequestHandler):
         else:
             self.redirect('/')
 
+    def add_round(self, section):
+        curr_round = int(self.request.get('round'))
+        time = self.request.get('time')
 
-class AddRound(webapp2.RequestHandler):
-    """
-    API to add a round to the section.
+        round_obj = models.Round(parent=section.key, id=curr_round)
+        round_obj.deadline = time
+        round_obj.number = curr_round
 
-    Pops open a new ``modal`` which asks for the details of the round, including deadline and question.
+        round_type = self.request.get('roundType')
+        if round_type == 'leadin' or round_type == 'summary':
+            question = self.request.get('question')
 
-    """
+            round_obj.is_quiz = True
+            num_options = int(self.request.get('number'))
+            options = json.loads(self.request.get('options'))
+            round_obj.quiz = models.Question(options_total=num_options, question=question,
+                                             options=options)
+        elif round_type == 'discussion':
+            description = self.request.get('description')
+            round_obj.description = description
+        else:
+            logging.error('Unknown round_type passed.')
+        round_obj.put()
+        # Only update the value of total rounds if a new round is created,
+        # not when we edit an old round is edited
+        if curr_round > section.rounds:
+            section.rounds = curr_round
+            section.put()
+        self.response.write("S" + "Success, round added.")
+
+    def activate_round(self, section):
+        next_round = int(self.request.get('round'))
+        if section.current_round != next_round:
+            # If the selected round is not currently active make it active
+            section.current_round = next_round
+            section.put()
+            self.response.write("S" + "Success, round active.")
 
     def post(self):
         """
@@ -344,84 +373,29 @@ class AddRound(webapp2.RequestHandler):
         if user:
             result = utils.get_role(user)
             if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                time = self.request.get('time')
-                question = self.request.get('question')
-                description = self.request.get('description')
-                curr_round = int(self.request.get('round'))
-                is_last_round = bool(self.request.get('isLastRound'))
-                if course_name and section_name and time and (question or description) and curr_round and str(
-                        is_last_round):
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
+                course_name = self.request.get('course').upper()
+                section_name = self.request.get('section').upper()
+
+                # get course and section from datastore
+                if course_name and section_name:
                     course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
                         section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
-                            round_obj = models.Round(parent=section.key, id=curr_round)
-                            round_obj.deadline = time
-                            round_obj.number = curr_round
-                            if curr_round == 1 or is_last_round:
-                                # It is either Lead-in question or summary question
-                                round_obj.is_quiz = True
-                                number_options = int(self.request.get('number'))
-                                options = json.loads(self.request.get('options'))
-                                round_obj.quiz = models.Question(options_total=number_options, question=question,
-                                                                 options=options)
+                            #
+                            action = self.request.get('action')
+                            if action == 'add':
+                                self.add_round(section)
+                            elif action == 'activate':
+                                self.activate_round(section)
                             else:
-                                round_obj.description = description
-                            round_obj.put()
-                            # Only update the value of total rounds if a new round is created,
-                            # not when we edit an old round is edited
-                            if curr_round > section.rounds:
-                                section.rounds = curr_round
-                                section.put()
-                            self.response.write("S" + "Success, round added.")
-                        else:
-                            self.response.write("E" + section_name + " section does not exist!")
+                                pass
                     else:
-                        self.response.write("E" + course_name + " course does not exist!")
+                        logging.error('Section {s} does not exist!'.format(s=section_name))
                 else:
-                    self.response.write("E" + "Error! invalid arguments.")
-
-
-class ActivateRound(webapp2.RequestHandler):
-    """
-    API to activate a particular round for this section.
-
-    The instructor can add rounds in advance, but has to activate each round when it is supposed to start.
-    """
-
-    def post(self):
-        """
-        HTTP POST method to activate the round.
-        """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                next_round = int(self.request.get('round'))
-                if course_name and section_name and next_round:
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        section = models.Section.get_by_id(section_name, parent=course.key)
-                        if section:
-                            if section.current_round != next_round:
-                                # If the selected round is not currently active make it active
-                                section.current_round = next_round
-                                section.put()
-                            self.response.write("S" + "Success, round active.")
-                        else:
-                            self.response.write("E" + section_name + " section does not exist!")
-                    else:
-                        self.response.write("E" + course_name + " course does not exist!")
-                else:
-                    self.response.write("E" + "Error! invalid arguments.")
+                    logging.error('Course {c} does not exist!'.format(c=course_name))
+            else:
+                logging.error('Course or section name not passed!')
 
 
 class Groups(webapp2.RequestHandler):

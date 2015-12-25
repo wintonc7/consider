@@ -149,8 +149,7 @@
                 <h4 class="modal-title" id="sectionModalLabel">Add a Section</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" id="sectionModalForm" method="post" style="text-align: center;"
-                      action="/add_section">
+                <form class="form-horizontal" id="sectionModalForm" method="post" style="text-align: center;">
                     <div class="form-group">
                         <label for="sectionName" class="col-sm-4 control-label">Section Name:</label>
 
@@ -213,7 +212,7 @@
         bootbox.confirm("Are you sure, you want to add Section: " + sectionName + " to Course: " + sectionCourse + "  ?", function (result) {
             if (result) {
                 // do the POST and get the callback
-                $.post('/section', {section: sectionName, course: sectionCourse, action: 'add'}, function (data) {
+                $.post('/sections', {section: sectionName, course: sectionCourse, action: 'add'}, function (data) {
                     if (data.charAt(0) == 'E') {
                         $("#sectionNameContainer").addClass("has-error");
                         $("#sectionNameHelpBlock").text(data.substring(1));
