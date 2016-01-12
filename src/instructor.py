@@ -427,20 +427,12 @@ class Groups(webapp2.RequestHandler):
                         template_values['responses'] = response
                         template_values['group'] = groups
                 template_values['logouturl'] = url
-                template = utils.jinja_env().get_template('groups.html')
+                template = utils.jinja_env().get_template('instructor_groups.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
         else:
             self.redirect('/')
-
-
-class AddGroups(webapp2.RequestHandler):
-    """
-    API to organize students in to groups.
-
-    The user (instructor) can modify the number of groups and then assign each student to one of the groups.
-    """
 
     def post(self):
         """
@@ -452,66 +444,46 @@ class AddGroups(webapp2.RequestHandler):
             if result and type(result) is models.Instructor:
                 course_name = self.request.get('course')
                 section_name = self.request.get('section')
-                groups = int(self.request.get('groups'))
-                if course_name and section_name and groups:
+                if course_name and section_name:
                     course_name = course_name.upper()
                     section_name = section_name.upper()
                     course = models.Course.get_by_id(course_name, parent=result.key)
                     if course:
                         section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
-                            if section.groups != groups and groups > 0:
-                                # If the total number of groups are not as requested change them
-                                section.groups = groups
-                                section.put()
-                            self.response.write("S" + "Groups modified.")
-                        else:
-                            self.response.write("E" + section_name + " section does not exist!")
-                    else:
-                        self.response.write("E" + course_name + " course does not exist!")
-                else:
-                    self.response.write("E" + "Error! invalid arguments.")
-
-
-class UpdateGroups(webapp2.RequestHandler):
-    """
-    API to update the group assignments.
-
-    The user (instructor) can reassign groups using this API.
-    """
-
-    def post(self):
-        """
-        HTTP POST method to update the groups.
-        """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                groups = json.loads(self.request.get('groups'))
-                if course_name and section_name and groups:
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        section = models.Section.get_by_id(section_name, parent=course.key)
-                        if section:
-                            for student in section.students:
-                                if student.email in groups:
-                                    student.group = int(groups[student.email])
-                                    group = models.Group.get_by_id(student.group, parent=section.key)
-                                    if not group:
-                                        group = models.Group(parent=section.key, id=student.group)
-                                        group.number = student.group
-                                    if student.email not in group.members:
-                                        group.members.append(student.email)
-                                        group.size += 1
-                                        student.alias = 'S' + str(group.size)
-                                        group.put()
-                            section.put()
-                            self.response.write("S" + "Groups updated.")
+                            action = self.request.get('action')
+                            logging.info('action = ' + action)
+                            if action == 'add':
+                                groups = int(self.request.get('groups'))
+                                if groups:
+                                    if section.groups != groups and groups > 0:
+                                        # If the total number of groups are not as requested change them
+                                        section.groups = groups
+                                        section.put()
+                                    self.response.write("S" + "Groups modified.")
+                                else:
+                                    self.response.write('E' + 'Groups count not available.')
+                            elif action == 'update':
+                                groups = json.loads(self.request.get('groups'))
+                                if groups:
+                                    for student in section.students:
+                                        if student.email in groups:
+                                            student.group = int(groups[student.email])
+                                            group = models.Group.get_by_id(student.group, parent=section.key)
+                                            if not group:
+                                                group = models.Group(parent=section.key, id=student.group)
+                                                group.number = student.group
+                                            if student.email not in group.members:
+                                                group.members.append(student.email)
+                                                group.size += 1
+                                                student.alias = 'S' + str(group.size)
+                                                group.put()
+                                    section.put()
+                                    self.response.write("S" + "Groups updated.")
+                                else:
+                                    self.response.write('E' + 'Groups information not available.')
+                            else:
+                                self.response.write('E' + 'Unknown action' + action if action else 'None')
                         else:
                             self.response.write("E" + section_name + " section does not exist!")
                     else:
