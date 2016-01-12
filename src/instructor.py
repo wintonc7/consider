@@ -549,7 +549,7 @@ class Responses(webapp2.RequestHandler):
                             resp[str(i)] = response
                     template_values['responses'] = resp
                 template_values['logouturl'] = url
-                template = utils.jinja_env().get_template('responses.html')
+                template = utils.jinja_env().get_template('instructor_responses.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')
@@ -595,7 +595,7 @@ class GroupResponses(webapp2.RequestHandler):
                                             break
                         template_values['responses'] = resp
                 template_values['logouturl'] = url
-                template = utils.jinja_env().get_template('groups_responses.html')
+                template = utils.jinja_env().get_template('instructor_groups_responses.html')
                 self.response.write(template.render(template_values))
             else:
                 self.redirect('/')

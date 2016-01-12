@@ -144,7 +144,6 @@ class HomePage(webapp2.RequestHandler):
                 self.redirect('/error?code=101')
         else:
             self.redirect('/')
-            self.error()
 
 
 application = webapp2.WSGIApplication([
@@ -164,4 +163,4 @@ application = webapp2.WSGIApplication([
     ('/discussion', student.Discussion),
     ('/section', student.SectionPage),
     ('/submitResponse', student.SubmitResponse),
-])
+], debug=True)
