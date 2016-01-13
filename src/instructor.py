@@ -38,14 +38,14 @@ class Courses(webapp2.RequestHandler):
             course_name = course_name.upper()
             course = models.Course.get_by_id(course_name, parent=instructor.key)
             if course:
-                self.response.write('E' + course_name + ' already exists!')
+                utils.error(course_name + ' already exists [instructor.Courses.add_course]')
             else:
                 course = models.Course(parent=instructor.key, id=course_name)
                 course.name = course_name
                 course.put()
-                self.response.write("S" + course_name + " added.")
+                utils.log(course_name + ' added. [instructor.Courses.add_course]', type='S')
         else:
-            self.response.write("Error! invalid arguments.")
+            utils.error('course_name empty [instructor.Courses.add_course]')
 
     def toggle_course(self, instructor, course_name):
         """
@@ -57,37 +57,58 @@ class Courses(webapp2.RequestHandler):
 
         """
         if course_name:
-            logging.info("Changing status of the Course: " + course_name)
+            utils.log('Changing status of the Course: ' + course_name)
             course = models.Course.get_by_id(course_name, parent=instructor.key)
             if course:
                 course.is_active = not course.is_active
                 course.put()
-                self.response.write("Status changed for " + course_name)
+                utils.log('Status changed for ' + course_name, type='S')
             else:
-                self.response.write("Course not found in the database.")
+                utils.error('Course ' + course_name + ' not found' + ' [' + self.__class__.__name__ + ']',
+                            handler=self)
         else:
-            self.response.write("Error! invalid arguments.")
+            utils.error('course_name is empty [instructor.Courses.add_course]', handler=self)
 
     def post(self):
         """
         HTTP POST method for handling course requests.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
+        role, user = utils.get_role_user()
+        if role and user:
+            if role == models.Role.instructor:
                 course_name = self.request.get('name')
                 action = self.request.get('action')
-                logging.info('Courses/ POST / course: ' + course_name + ', action: ' + action)
 
                 if action == 'add':
-                    self.add_course(result, course_name)
+                    self.add_course(user, course_name)
                 elif action == 'toggle':
-                    self.toggle_course(result, course_name)
+                    self.toggle_course(user, course_name)
             else:
-                logging.error('Instructor expected [instructor.Courses.post]')
+                utils.error('role is not Instructor [' + self.__class__.__name__ + ']', handler=self)
         else:
-            logging.error('User expected [instructor.Courses.post]')
+            utils.error('role or user is None [' + self.__class__.__name__ + ']', handler=self)
+
+    def get(self):
+        """
+        Display the ``Course``_ list for this ``Instructor``_.
+        """
+        role, user = utils.get_role_user()
+        if role and user:
+            logouturl = users.create_logout_url(self.request.uri)
+            if role == models.Role.instructor:
+                utils.log('Instructor logged in ' + str(user))
+                template_values = {'logouturl': logouturl, 'expand': self.request.get('course')}
+                courses = models.Course.query(ancestor=user.key).fetch()
+                if courses:
+                    for course in courses:
+                        course.sections = models.Section.query(ancestor=course.key).fetch()
+                    template_values['courses'] = courses
+                template = utils.jinja_env().get_template('instructor_courses.html')
+                self.response.write(template.render(template_values))
+            else:
+                utils.error('user is not instructor [' + self.__class__.__name__ + ']')
+        else:
+            utils.error('role or user is None [' + self.__class__.__name__ + ']')
 
 
 class Section(webapp2.RequestHandler):
@@ -106,12 +127,12 @@ class Section(webapp2.RequestHandler):
         """
         section = models.Section.get_by_id(section_name, parent=course.key)
         if section:
-            self.response.write("E" + section_name + " already exist!")
+            utils.error(section_name + ' already exists [' + self.__class__.__name__ + ']')
         else:
             section = models.Section(parent=course.key, id=section_name)
             section.name = section_name
             section.put()
-            self.response.write("S" + section_name + " added.")
+            utils.log(section_name + ' added [' + self.__class__.__name__ + '].', type='S')
 
     def toggle_section(self, course, section_name):
         """
@@ -126,37 +147,38 @@ class Section(webapp2.RequestHandler):
         if section:
             section.is_active = not section.is_active
             section.put()
-            self.response.write("Status changed for " + section_name)
+            utils.log('Status changed for ' + section_name, type='S')
         else:
-            self.response.write("E" + "Section not found in the database.")
+            utils.error('Section not found in the database [' + self.__class__.__name__ + '].', handler=self)
 
     def post(self):
         """
         HTTP POST method to add a section to a course.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
+        role, user = utils.get_role_user()
+        if role and user:
+            if role == models.Role.instructor:
                 section_name = self.request.get('section').upper()
                 course_name = self.request.get('course').upper()
                 action = self.request.get('action')
 
                 if course_name:
-                    course = models.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=user.key)
                     if course and course.is_active:
                         if action == 'add':
                             self.add_section(course, section_name)
                         elif action == 'toggle':
                             self.toggle_section(course, section_name)
                         else:
-                            self.response.write('E' + 'Wrong action!!')
+                            utils.error('Unexpected action', handler=self)
                     else:
-                        self.response.write("E" + course_name + " course does not exist OR is not active!")
+                        utils.error(course_name + ' course does not exist OR is not active!', handler=self)
                 else:
-                    self.response.write("E" + "No valid course_name found.")
+                    utils.error('No valid course_name found.', handler=self)
             else:
-                self.response.write("Error! invalid arguments.")
+                utils.error('user is not instructor [instructor.Section.post]', handler=self)
+        else:
+            utils.error('role or user is None [instructor.Section.post]', handler=self)
 
 
 class Students(webapp2.RequestHandler):
@@ -189,7 +211,7 @@ class Students(webapp2.RequestHandler):
                 student.sections.append(section.key)
             student.put()
         section.put()
-        logging.info("Students added to Section " + str(section))
+        utils.log('Students added to Section ' + str(section), type='S')
 
     def remove_student(self, section, email):
         """
@@ -207,27 +229,25 @@ class Students(webapp2.RequestHandler):
                 student.sections.remove(section.key)
             student.put()
             section.put()
-            logging.info(
-                    "Student" + str(student) + " has been removed from Section " + str(section))
-            self.response.write("S" + "Student removed from section.")
+            utils.log(
+                    'Student {0} has been removed from Section {1}'.format(str(student), str(section)), handler=self,
+                    type='S')
         else:
-            self.response.write("E" + "Student does not exist!")
+            utils.error('Student does not exist!', handler=self)
 
     def post(self):
         """
         HTTP POST method to add the student.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
+        role, user = utils.get_role_user()
+        if role and user:
+            if role == models.Role.instructor:
                 course_name = self.request.get('course').upper()
                 section_name = self.request.get('section').upper()
                 action = self.request.get('action')
 
                 if course_name and section_name:
-
-                    course = models.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=user.key)
                     if course:
                         section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
@@ -239,35 +259,36 @@ class Students(webapp2.RequestHandler):
                                 email = self.request.get('email').lower()
                                 self.remove_student(section, email)
                         else:
-                            self.response.write("E" + section_name + " section does not exist!")
+                            utils.error(section_name + ' section does not exist!')
                     else:
-                        self.response.write("E" + course_name + " course does not exist!")
+                        utils.error(course_name + ' course does not exist!')
                 else:
-                    self.response.write("E" + "Error! invalid arguments.")
+                    utils.error('invalid arguments.')
+            else:
+                utils.error('user is not instructor')
+        else:
+            utils.error('role and user empty')
 
     def get(self):
         """
         HTTP GET method to retrieve the list of students from the datastore.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result:
-                # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
-                if type(result) is models.Instructor:
-                    logging.info('Instructor navigated to Students ' + str(result))
-                    course_name = self.request.get('course')
-                    selected_section = self.request.get('section')
-                    template_values = utils.get_courses_and_sections(result, course_name, selected_section)
-                    template_values['logouturl'] = url
-                    template = utils.jinja_env().get_template('instructor_list_students.html')
-                    self.response.write(template.render(template_values))
-                else:
-                    self.redirect('/')
+        role, user = utils.get_role_user()
+        if role and user:
+            logout_url = users.create_logout_url(self.request.uri)
+            if role == models.Role.instructor:
+                utils.log('Instructor navigated to Students ' + str(user))
+                course_name = self.request.get('course')
+                selected_section = self.request.get('section')
+                template_values = utils.get_courses_and_sections(user, course_name, selected_section)
+                template_values['logouturl'] = logout_url
+                template = utils.jinja_env().get_template('instructor_list_students.html')
+                self.response.write(template.render(template_values))
             else:
+                utils.error('user is not instructor')
                 self.redirect('/')
         else:
+            utils.error('role and user empty.')
             self.redirect('/')
 
 
@@ -283,43 +304,40 @@ class Rounds(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the rounds.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result:
-                # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
-                if type(result) is models.Instructor:
-                    course_name = self.request.get('course')
-                    selected_section = self.request.get('section')
-                    template_values = utils.get_courses_and_sections(result, course_name, selected_section)
-                    if 'selectedSectionObject' in template_values:
-                        current_section = template_values['selectedSectionObject']
-                        template_values['activeRound'] = current_section.current_round
-                        rounds = models.Round.query(ancestor=current_section.key).fetch()
-                        if rounds:
-                            template_values['rounds'] = rounds
-                            discussion_rounds = []
-                            for r in rounds:
-                                if r.number == 1:
-                                    template_values['leadInQuestion'] = r
-                                elif r.is_quiz:
-                                    template_values['summaryQuestion'] = r
-                                else:
-                                    discussion_rounds.append(r)
-                            template_values['discussionRounds'] = discussion_rounds
-                        if 'summaryQuestion' in template_values:
-                            template_values['nextRound'] = current_section.rounds
-                        else:
-                            template_values['nextRound'] = current_section.rounds + 1
-                    template_values['logouturl'] = url
-                    template = utils.jinja_env().get_template('instructor_rounds.html')
-                    self.response.write(template.render(template_values))
-                else:
-                    self.redirect('/')
+        role, user = utils.get_role_user()
+        if role and user:
+            logout_url = users.create_logout_url(self.request.uri)
+            if role == models.Role.instructor:
+                course_name = self.request.get('course')
+                selected_section = self.request.get('section')
+                template_values = utils.get_courses_and_sections(user, course_name, selected_section)
+                if 'selectedSectionObject' in template_values:
+                    current_section = template_values['selectedSectionObject']
+                    template_values['activeRound'] = current_section.current_round
+                    rounds = models.Round.query(ancestor=current_section.key).fetch()
+                    if rounds:
+                        template_values['rounds'] = rounds
+                        discussion_rounds = []
+                        for r in rounds:
+                            if r.number == 1:
+                                template_values['leadInQuestion'] = r
+                            elif r.is_quiz:
+                                template_values['summaryQuestion'] = r
+                            else:
+                                discussion_rounds.append(r)
+                        template_values['discussionRounds'] = discussion_rounds
+                    if 'summaryQuestion' in template_values:
+                        template_values['nextRound'] = current_section.rounds
+                    else:
+                        template_values['nextRound'] = current_section.rounds + 1
+                template_values['logouturl'] = logout_url
+                template = utils.jinja_env().get_template('instructor_rounds.html')
+                self.response.write(template.render(template_values))
             else:
+                utils.error('user is not instructor.')
                 self.redirect('/')
         else:
+            utils.error('role and user empty')
             self.redirect('/')
 
     def add_round(self, section):
@@ -343,14 +361,14 @@ class Rounds(webapp2.RequestHandler):
             description = self.request.get('description')
             round_obj.description = description
         else:
-            logging.error('Unknown round_type passed.')
+            utils.error('Unknown round_type passed.')
         round_obj.put()
         # Only update the value of total rounds if a new round is created,
         # not when we edit an old round is edited
         if curr_round > section.rounds:
             section.rounds = curr_round
             section.put()
-        self.response.write("S" + "Success, round added.")
+        utils.log('Success, round added.', type='S', handler=self)
 
     def activate_round(self, section):
         next_round = int(self.request.get('round'))
@@ -358,7 +376,7 @@ class Rounds(webapp2.RequestHandler):
             # If the selected round is not currently active make it active
             section.current_round = next_round
             section.put()
-            self.response.write("S" + "Success, round active.")
+            utils.log('Success, round active.', type='S', handler=self)
 
     def post(self):
         """
@@ -369,16 +387,15 @@ class Rounds(webapp2.RequestHandler):
         # TODO Time picker suitable to all browsers (currently works only on Chrome)
         # TODO Timezone support in deadlines
 
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
+        role, user = utils.get_role_user()
+        if role and user:
+            if role == models.Role.instructor:
                 course_name = self.request.get('course').upper()
                 section_name = self.request.get('section').upper()
 
                 # get course and section from datastore
                 if course_name and section_name:
-                    course = models.Course.get_by_id(course_name, parent=result.key)
+                    course = models.Course.get_by_id(course_name, parent=user.key)
                     if course:
                         section = models.Section.get_by_id(section_name, parent=course.key)
                         if section:
@@ -391,11 +408,13 @@ class Rounds(webapp2.RequestHandler):
                             else:
                                 pass
                     else:
-                        logging.error('Section {s} does not exist!'.format(s=section_name))
+                        utils.error('Section {s} does not exist!'.format(s=section_name))
                 else:
-                    logging.error('Course {c} does not exist!'.format(c=course_name))
+                    utils.error('Course {c} does not exist!'.format(c=course_name))
             else:
-                logging.error('Course or section name not passed!')
+                utils.error('user is not instructor')
+        else:
+            utils.error('role and user empty')
 
 
 class Groups(webapp2.RequestHandler):
@@ -404,92 +423,94 @@ class Groups(webapp2.RequestHandler):
 
     """
 
-    def get(self):
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                url = users.create_logout_url(self.request.uri)
-                course_name = self.request.get('course')
-                selected_section = self.request.get('section')
-                template_values = utils.get_courses_and_sections(result, course_name, selected_section)
-                if 'selectedSectionObject' in template_values:
-                    current_section = template_values['selectedSectionObject']
-                    if current_section.rounds > 0:
-                        response = models.Response.query(
-                                ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
-                        groups = current_section.groups
-                        student = current_section.students
-                        for res in response:
-                            for stu in student:
-                                if res.student == stu.email:
-                                    res.group = stu.group
-                        template_values['responses'] = response
-                        template_values['group'] = groups
-                template_values['logouturl'] = url
-                template = utils.jinja_env().get_template('instructor_groups.html')
-                self.response.write(template.render(template_values))
-            else:
-                self.redirect('/')
+    def modify_group_count(self, section, group_count):
+        if group_count:
+            if section.groups != group_count and group_count > 0:
+                # If the total number of groups are not as requested change them
+                section.groups = group_count
+                section.put()
+            utils.log('Groups modified.', type='S', handler=self)
         else:
+            utils.error('Groups count not available.', handler=self)
+
+    def update_groups(self, section, groups):
+        if groups:
+            for student in section.students:
+                if student.email in groups:
+                    student.group = int(groups[student.email])
+                    group = models.Group.get_by_id(student.group, parent=section.key)
+                    if not group:
+                        group = models.Group(parent=section.key, id=student.group)
+                        group.number = student.group
+                    if student.email not in group.members:
+                        group.members.append(student.email)
+                        group.size += 1
+                        student.alias = 'S' + str(group.size)
+                        group.put()
+            section.put()
+            utils.log('Groups updated.', handler=self)
+        else:
+            utils.error('Groups information not available.', handler=self)
+
+    def get(self):
+        role, user = utils.get_role_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        if role and user and role == models.Role.instructor:
+            course_name = self.request.get('course').upper()
+            selected_section = self.request.get('section').upper()
+            template_values = utils.get_courses_and_sections(user, course_name, selected_section)
+            if 'selectedSectionObject' in template_values:
+                current_section = template_values['selectedSectionObject']
+                if current_section.rounds > 0:
+                    response = models.Response.query(
+                            ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                    groups = current_section.groups
+                    student = current_section.students
+                    for res in response:
+                        for stu in student:
+                            if res.student == stu.email:
+                                res.group = stu.group
+                    template_values['responses'] = response
+                    template_values['group'] = groups
+            template_values['logouturl'] = logout_url
+            template = utils.jinja_env().get_template('instructor_groups.html')
+            self.response.write(template.render(template_values))
+        else:
+            utils.error('user not instructor')
             self.redirect('/')
 
     def post(self):
         """
         HTTP POST method to create groups.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course')
-                section_name = self.request.get('section')
-                if course_name and section_name:
-                    course_name = course_name.upper()
-                    section_name = section_name.upper()
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        section = models.Section.get_by_id(section_name, parent=course.key)
-                        if section:
-                            action = self.request.get('action')
-                            logging.info('action = ' + action)
-                            if action == 'add':
-                                groups = int(self.request.get('groups'))
-                                if groups:
-                                    if section.groups != groups and groups > 0:
-                                        # If the total number of groups are not as requested change them
-                                        section.groups = groups
-                                        section.put()
-                                    self.response.write("S" + "Groups modified.")
-                                else:
-                                    self.response.write('E' + 'Groups count not available.')
-                            elif action == 'update':
-                                groups = json.loads(self.request.get('groups'))
-                                if groups:
-                                    for student in section.students:
-                                        if student.email in groups:
-                                            student.group = int(groups[student.email])
-                                            group = models.Group.get_by_id(student.group, parent=section.key)
-                                            if not group:
-                                                group = models.Group(parent=section.key, id=student.group)
-                                                group.number = student.group
-                                            if student.email not in group.members:
-                                                group.members.append(student.email)
-                                                group.size += 1
-                                                student.alias = 'S' + str(group.size)
-                                                group.put()
-                                    section.put()
-                                    self.response.write("S" + "Groups updated.")
-                                else:
-                                    self.response.write('E' + 'Groups information not available.')
-                            else:
-                                self.response.write('E' + 'Unknown action' + action if action else 'None')
+        role, user = utils.get_role_user()
+        if role and user and role == models.Role.instructor:
+            course_name = self.request.get('course').upper()
+            section_name = self.request.get('section').upper()
+            if course_name and section_name:
+                course = models.Course.get_by_id(course_name, parent=user.key)
+                if course:
+                    section = models.Section.get_by_id(section_name, parent=course.key)
+                    if section:
+                        action = self.request.get('action')
+                        logging.info('action = ' + action)
+                        if action == 'add':
+                            group_count = int(self.request.get('groups'))
+                            self.modify_group_count(section, group_count)
+                        elif action == 'update':
+                            groups = json.loads(self.request.get('groups'))
+                            self.update_groups(section, groups)
+
                         else:
-                            self.response.write("E" + section_name + " section does not exist!")
+                            utils.error('Unknown action' + action if action else 'None')
                     else:
-                        self.response.write("E" + course_name + " course does not exist!")
+                        utils.error(section_name + ' section does not exist!')
                 else:
-                    self.response.write("E" + "Error! invalid arguments.")
+                    utils.error(course_name + ' course does not exist!')
+            else:
+                utils.error('Invalid arguments.')
+        else:
+            utils.error('role and user empty, or user not instructor.')
 
 
 class Responses(webapp2.RequestHandler):
@@ -501,31 +522,28 @@ class Responses(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the responses.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                url = users.create_logout_url(self.request.uri)
-                course_name = self.request.get('course')
-                selected_section = self.request.get('section')
-                template_values = utils.get_courses_and_sections(result, course_name, selected_section)
-                if 'selectedSectionObject' in template_values:
-                    current_section = template_values['selectedSectionObject']
-                    template_values['round'] = current_section.rounds
-                    resp = {}
-                    for i in range(1, current_section.rounds + 1):
-                        response = models.Response.query(
-                                ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
-                        # response is a list of all the responses for the round i
-                        if response:
-                            resp[str(i)] = response
-                    template_values['responses'] = resp
-                template_values['logouturl'] = url
-                template = utils.jinja_env().get_template('instructor_responses.html')
-                self.response.write(template.render(template_values))
-            else:
-                self.redirect('/')
+        role, user = utils.get_role_user()
+        if role and user and role == models.Role.instructor:
+            logout_url = users.create_logout_url(self.request.uri)
+            course_name = self.request.get('course').upper()
+            selected_section = self.request.get('section').upper()
+            template_values = utils.get_courses_and_sections(user, course_name, selected_section)
+            if 'selectedSectionObject' in template_values:
+                current_section = template_values['selectedSectionObject']
+                template_values['round'] = current_section.rounds
+                resp = {}
+                for i in range(1, current_section.rounds + 1):
+                    response = models.Response.query(
+                            ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
+                    # response is a list of all the responses for the round i
+                    if response:
+                        resp[str(i)] = response
+                template_values['responses'] = resp
+            template_values['logouturl'] = logout_url
+            template = utils.jinja_env().get_template('instructor_responses.html')
+            self.response.write(template.render(template_values))
         else:
+            utils.error('user empty or not instructor')
             self.redirect('/')
 
 
@@ -538,38 +556,35 @@ class GroupResponses(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the group responses.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                url = users.create_logout_url(self.request.uri)
-                course_name = self.request.get('course')
-                selected_section = self.request.get('section')
-                template_values = utils.get_courses_and_sections(result, course_name, selected_section)
-                if 'selectedSectionObject' in template_values:
-                    current_section = template_values['selectedSectionObject']
-                    template_values['round'] = current_section.rounds
-                    template_values['groups'] = current_section.groups
-                    if current_section.groups > 0:
-                        resp = {}
-                        for g in range(1, current_section.groups + 1):
-                            for r in range(1, current_section.rounds + 1):
-                                resp['group_' + str(g) + '_' + str(r)] = []
+        role, user = utils.get_role_user()
+        if role and user and role == models.Role.instructor:
+            logout_url = users.create_logout_url(self.request.uri)
+            course_name = self.request.get('course').upper()
+            selected_section = self.request.get('section').upper()
+            template_values = utils.get_courses_and_sections(user, course_name, selected_section)
+            if 'selectedSectionObject' in template_values:
+                current_section = template_values['selectedSectionObject']
+                template_values['round'] = current_section.rounds
+                template_values['groups'] = current_section.groups
+                if current_section.groups > 0:
+                    resp = {}
+                    for g in range(1, current_section.groups + 1):
                         for r in range(1, current_section.rounds + 1):
-                            responses = models.Response.query(
-                                    ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
-                            if responses:
-                                for res in responses:
-                                    for s in current_section.students:
-                                        if s.email == res.student and s.group != 0:
-                                            res.alias = s.alias
-                                            resp['group_' + str(s.group) + '_' + str(r)].append(res)
-                                            break
-                        template_values['responses'] = resp
-                template_values['logouturl'] = url
-                template = utils.jinja_env().get_template('instructor_groups_responses.html')
-                self.response.write(template.render(template_values))
-            else:
-                self.redirect('/')
+                            resp['group_' + str(g) + '_' + str(r)] = []
+                    for r in range(1, current_section.rounds + 1):
+                        responses = models.Response.query(
+                                ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
+                        if responses:
+                            for res in responses:
+                                for s in current_section.students:
+                                    if s.email == res.student and s.group != 0:
+                                        res.alias = s.alias
+                                        resp['group_' + str(s.group) + '_' + str(r)].append(res)
+                                        break
+                    template_values['responses'] = resp
+            template_values['logouturl'] = logout_url
+            template = utils.jinja_env().get_template('instructor_groups_responses.html')
+            self.response.write(template.render(template_values))
         else:
+            utils.error('user empty or not instructor')
             self.redirect('/')

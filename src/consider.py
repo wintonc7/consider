@@ -45,9 +45,9 @@ class ErrorPage(webapp2.RequestHandler):
         """
         user = users.get_current_user()
         if user:
-            url = users.create_logout_url(self.request.uri)
+            logout_url = users.create_logout_url(self.request.uri)
             template_values = {
-                'url': url
+                'logouturl': logout_url
             }
             error = self.request.get('code')
             message = None
@@ -83,9 +83,9 @@ class MainPage(webapp2.RequestHandler):
             else:
                 self.redirect('/home')
         else:
-            url = users.create_login_url(self.request.uri)
+            login_url = users.create_login_url(self.request.uri)
             template_values = {
-                'url': url
+                'url': login_url
             }
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
@@ -100,50 +100,12 @@ class HomePage(webapp2.RequestHandler):
         """
         If a valid ``user`` is logged in, and if the user is an ``Instructor``, redirect to the Instructor console, which contains a list of courses and sections that instructor is in charge of; if the user is a ``Student``, retrieves the list of sections that student is enrolled in, and redirects to the student home page populated with that list.
         """
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result:
-                # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
-                if type(result) is models.Instructor:
-                    # Show instructor console
-                    logging.info('Instructor logged in ' + str(result))
-                    template_values = {'logouturl': url, 'expand': self.request.get('course')}
-                    courses = models.Course.query(ancestor=result.key).fetch()
-                    if courses:
-                        for course in courses:
-                            course.sections = models.Section.query(ancestor=course.key).fetch()
-                            # course.sections = len(course.sections_all)
-                        template_values['courses'] = courses
-                    template = utils.jinja_env().get_template('instructor_courses.html')
-                    self.response.write(template.render(template_values))
-                elif type(result) is models.Student:
-                    logging.info('Student logged in ' + str(result))
-                    template_values = {'logouturl': url, 'nickname': user.nickname()}
-                    sections = result.sections
-                    section_list = []
-                    if sections:
-                        for section in sections:
-                            section_obj = section.get()
-                            course_obj = section.parent().get()
-                            if section_obj and course_obj:
-                                sec = {
-                                    'key': section.urlsafe(),
-                                    'name': section_obj.name,
-                                    'course': course_obj.name
-                                }
-                                section_list.append(sec)
-                    template_values['sections'] = section_list
-                    template = utils.jinja_env().get_template('student_home.html')
-                    self.response.write(template.render(template_values))
-                else:
-                    logging.info(str(result) + ' navigated to Error')
-                    self.redirect('/error?code=101')
-            else:
-                self.redirect('/error?code=101')
+        role, user = utils.get_role_user()
+        if role and user:
+            logging.info(role + ' logged in: ' + str(user))
+            self.redirect('/courses') if role == models.Role.instructor else  self.redirect('/student_home')
         else:
-            self.redirect('/')
+            self.redirect('/error?code=101')
 
 
 application = webapp2.WSGIApplication([
@@ -159,5 +121,6 @@ application = webapp2.WSGIApplication([
     ('/group_responses', instructor.GroupResponses),
     ('/groups', instructor.Groups),
     ('/discussion', student.Discussion),
+    ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
 ], debug=True)

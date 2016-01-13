@@ -10,8 +10,13 @@ Defines the functions and constants which are accessed by different modules of t
 
 
 """
+import logging
+
+import webapp2
+from google.appengine.api import users
 
 import models
+
 
 def jinja_env():
     """
@@ -42,26 +47,26 @@ def error_codes():
     }
 
 
-def get_role(user):
-    """
-    Checks and returns if the user is an Instructor or a Student, False if neither.
+def log(message, type='', handler=None):
+    logging.info(type + ' ' + message)
+    if handler:
+        handler.response.write(type + ' ' + message)
 
-    Args:
-        user: The user whose role is to be retrieved.
 
-    Returns:
-        object: Instructor or Student or False.
+def error(message, handler=None):
+    log(message, type='Error', handler=handler)
 
-    """
+
+def get_role_user():
+    user = users.get_current_user()
     if user:
-        result = models.Instructor.query(models.Instructor.email == user.email().lower()).get()
-        if result:
-            return result
-        else:
-            result = models.Student.query(models.Student.email == user.email().lower()).get()
-            if result:
-                return result
-    return False
+        instructor = models.Instructor.query(models.Instructor.email == user.email().lower()).get()
+        if instructor:
+            return models.Role.instructor, instructor
+        student = models.Student.query(models.Student.email == user.email().lower()).get()
+        if student:
+            return models.Role.student, student
+    return None, None
 
 
 def get_courses_and_sections(instructor, course_name, selected_section):

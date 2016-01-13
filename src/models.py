@@ -154,3 +154,9 @@ class Response(ndb.Model):
     """ String. The summary post in the last round."""
     student = ndb.StringProperty(required=True)
     """ String. Email of the `Student`_ who is the author of this response."""
+
+
+class Role:
+    instructor = 'INSTRUCTOR'
+    student = 'STUDENT'
+    admin = 'ADMIN'
