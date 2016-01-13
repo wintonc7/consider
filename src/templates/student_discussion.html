@@ -1,27 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Discussions</title>
+{% extends "student_base.html" %}
 
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/discussion.css" rel="stylesheet">
-    <link href="/css/dots.css" rel="stylesheet">
+{% block title %}| Rounds{% endblock %}
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-</head>
-<body>
-<div id="spinner" class="dots">
-    Loading...
-</div>
-<nav class="navbar navbar-default navbar-fixed-top">
+{% block head %}
+{{ super() }}
+<link href="/css/discussion.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
+<nav class="navbar navbar-default">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
@@ -43,18 +30,18 @@
         </div>
     </div>
 </nav>
+
 <div class="container">
     <div class="row">
-        <div id="count-container" class="alert alert-warning col-md-6"><p>Time left to complete: {% if expired -%} Time
-            is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p></div>
-        <a class="btn btn-warning sign-out-btn col-md-2 col-md-offset-4" href="{{url}}">
-            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
-        </a>
+        <div id="count-container" class="alert alert-warning col-md-12">
+            <p>Time left to complete: {% if expired -%} Time
+            is over {%- else -%} <span id="countdown"></span> {%- endif -%}</p>
+        </div>
     </div>
     <h1 class="lead">Welcome {{alias}}</h1>
-    {% if description %}<h1 class="well lead"
-                            style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">
-    {{description}}</h1>{% endif %}
+    {% if description %}
+    <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
+    {% endif %}
     {% for comment in comments %}
     <div class="jumbotron" id="jum_{{loop.index}}">
         <h2>{{comment.alias}}</h2>
@@ -63,17 +50,19 @@
         {% endif %}
         {% for opinion in comment.opinion %}
         <span class="badge"
-              style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}: <span
+              style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}:
+            <span
                 class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}"
-                aria-hidden="true"></span></span>
+                aria-hidden="true"></span>
+        </span>
         {% endfor %}
         <div class="well"
              style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">
             {{comment.response}}
         </div>
         <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if
-                expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-up"
-                                                                aria-hidden="true"></span> Support
+                expired -%} disabled="true" {%- endif -%}>
+            <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support
         </button>
         <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info" {% if
                 expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-hand-right"
@@ -96,7 +85,7 @@
         {% endfor %}
     </div>
     {% endif %}
-    <form id="form" method="post" {% if not expired -%} action="/submitResponse" {%- endif -%}>
+    <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
         <textarea class="form-control" rows="5" id="comment"
                   placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%}
                   disabled="true" {%- endif -%}>
@@ -109,29 +98,15 @@
         </button>
     </form>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/bootbox.min.js"></script>
+{% endblock content %}
+
+{% block script %}
+{{ super() }}
 <script src="/js/countdown.min.js"></script>
 <script type="text/javascript">
     var l = {{comments | length}}
     var resp = [];
     resp[0] = null;
-
-    jQuery.ajaxSetup({
-        beforeSend: function () {
-            $('#spinner').show();
-        },
-        complete: function () {
-            $('#spinner').hide();
-        },
-        success: function () {
-        }
-    });
-
-    $(window).load(function () {
-        $("#spinner").fadeOut("slow");
-    });
 
     {% if response %}
     resp = resp.concat('{{response}}'.split(','));
@@ -223,5 +198,4 @@
     });
     {% endif %}
 </script>
-</body>
-</html>
+{% endblock script %}

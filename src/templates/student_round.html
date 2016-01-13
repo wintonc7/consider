@@ -1,6 +1,6 @@
 {% extends "student_base.html" %}
 
-{% block title %}| Home{% endblock %}
+{% block title %}| Rounds{% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -25,7 +25,7 @@
         <div class="jumbotron">
             <p> {{question}} </p>
         </div>
-        <form id="form" method="post" {% if not expired -%} action="/submitResponse" {%- endif -%}>
+        <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
             <div class="list-group">
                 {% for option in options %}
                 <input type="radio" name="optionsRadios" id="option{{loop.index}}" value="option{{loop.index}}" {% if expired -%} disabled="true" {%- endif -%}>
@@ -53,7 +53,7 @@
             <h4 class="modal-title" id="myModalLabel">Please provide a brief summary... </h4>
           </div>
           <div class="modal-body">
-            <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/submitResponse">
+            <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/student_rounds">
                 <div class="form-group">
                   <div class="col-sm-12">
                     <textarea class="form-control" rows="10" id="inputSummary" name="summary" placeholder="Your summary..." required>{{summary}}</textarea>

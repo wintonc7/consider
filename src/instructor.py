@@ -261,7 +261,7 @@ class Students(webapp2.RequestHandler):
                     selected_section = self.request.get('section')
                     template_values = utils.get_courses_and_sections(result, course_name, selected_section)
                     template_values['logouturl'] = url
-                    template = utils.jinja_env().get_template('list_students.html')
+                    template = utils.jinja_env().get_template('instructor_list_students.html')
                     self.response.write(template.render(template_values))
                 else:
                     self.redirect('/')
@@ -313,7 +313,7 @@ class Rounds(webapp2.RequestHandler):
                         else:
                             template_values['nextRound'] = current_section.rounds + 1
                     template_values['logouturl'] = url
-                    template = utils.jinja_env().get_template('rounds.html')
+                    template = utils.jinja_env().get_template('instructor_rounds.html')
                     self.response.write(template.render(template_values))
                 else:
                     self.redirect('/')

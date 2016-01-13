@@ -271,7 +271,7 @@
         bootbox.confirm("Toggle status of: " + section + " in course: " + course + "?", function (result) {
             if (result) {
                 // do the POST and get the callback
-                $.post("/section", {course: course, section: section, action:'toggle'}, function (data) {
+                $.post("/sections", {course: course, section: section, action:'toggle'}, function (data) {
                     if (data.charAt(0) == 'E') {
                         bootbox.alert(data.substring(1));
                     }

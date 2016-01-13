@@ -23,77 +23,7 @@ import models
 import utils
 
 
-class SubmitResponse(webapp2.RequestHandler):
-    """
-    API to submit a student's response to the current round.
-
-    The student can save the response and return again, before the deadline, to modify it.
-    """
-
-    def post(self):
-        """
-        HTTP POST method to submit the response.
-        """
-        user = users.get_current_user()
-        if user:
-            student = utils.get_role(user)
-            if student and type(student) is models.Student:
-                option = self.request.get('option').lower()
-                comment = self.request.get('comm')
-                summary = self.request.get('summary')
-                res = self.request.get('response')
-                section_key = self.request.get('section')
-                if section_key:
-                    try:
-                        section = ndb.Key(urlsafe=section_key).get()
-                        if section:
-                            current_round = models.Round.get_by_id(section.current_round, parent=section.key)
-                            if current_round:
-                                response = models.Response(parent=current_round.key, id=student.email)
-                                if current_round.is_quiz:
-                                    if not (option and comment):
-                                        self.response.write('Invalid Parameters!')
-                                        return
-                                    if current_round.number != 1 and not summary:
-                                        self.response.write('Invalid Parameters!')
-                                        return
-                                    response.option = option
-                                    if summary:
-                                        response.summary = summary
-                                else:
-                                    res = json.loads(res)
-                                    if not (res and comment) or not utils.is_valid_response(res):
-                                        self.response.write('Invalid Parameters!')
-                                        return
-                                    for i in range(1, len(res)):
-                                        response.response.append(res[i])
-                                deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                                current_time = datetime.datetime.now()
-                                if deadline >= current_time:
-                                    response.comment = comment
-                                    response.student = student.email
-                                    response.put()
-                                    self.response.write(
-                                            'Thank you, your response have been saved and you can edit your response any time before the deadline.')
-                                else:
-                                    self.response.write(
-                                            'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
-                            else:
-                                self.response.write('Sorry! The round is not visible, please try again later.')
-                        else:
-                            self.response.write('Sorry! The section is not visible, please try again later.')
-                    except:
-                        self.response.write(
-                                'Sorry! There was some error submitting your response please try again later.')
-                else:
-                    self.response.write('Invalid Parameters!')
-            else:
-                self.response.write('Sorry! You were not identified as a student, please try again later.')
-        else:
-            self.response.write('Sorry! User is not recognized, please try again later.')
-
-
-class SectionPage(webapp2.RequestHandler):
+class Rounds(webapp2.RequestHandler):
     """
     API to redirect a student based on what stage she is in in a particular section:
     lead-in question, discussion or summary round.
@@ -163,6 +93,68 @@ class SectionPage(webapp2.RequestHandler):
                 self.redirect('/')
         else:
             self.redirect('/')
+
+    def post(self):
+        """
+        HTTP POST method to submit the response.
+        """
+        user = users.get_current_user()
+        if user:
+            student = utils.get_role(user)
+            if student and type(student) is models.Student:
+                option = self.request.get('option').lower()
+                comment = self.request.get('comm')
+                summary = self.request.get('summary')
+                res = self.request.get('response')
+                section_key = self.request.get('section')
+                if section_key:
+                    try:
+                        section = ndb.Key(urlsafe=section_key).get()
+                        if section:
+                            current_round = models.Round.get_by_id(section.current_round, parent=section.key)
+                            if current_round:
+                                response = models.Response(parent=current_round.key, id=student.email)
+                                if current_round.is_quiz:
+                                    if not (option and comment):
+                                        self.response.write('Invalid Parameters!')
+                                        return
+                                    if current_round.number != 1 and not summary:
+                                        self.response.write('Invalid Parameters!')
+                                        return
+                                    response.option = option
+                                    if summary:
+                                        response.summary = summary
+                                else:
+                                    res = json.loads(res)
+                                    if not (res and comment) or not utils.is_valid_response(res):
+                                        self.response.write('Invalid Parameters!')
+                                        return
+                                    for i in range(1, len(res)):
+                                        response.response.append(res[i])
+                                deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
+                                current_time = datetime.datetime.now()
+                                if deadline >= current_time:
+                                    response.comment = comment
+                                    response.student = student.email
+                                    response.put()
+                                    self.response.write(
+                                            'Thank you, your response have been saved and you can edit your response any time before the deadline.')
+                                else:
+                                    self.response.write(
+                                            'Sorry, the time for submission for this round has expired and your response was not saved, please wait for the next round.')
+                            else:
+                                self.response.write('Sorry! The round is not visible, please try again later.')
+                        else:
+                            self.response.write('Sorry! The section is not visible, please try again later.')
+                    except:
+                        self.response.write(
+                                'Sorry! There was some error submitting your response please try again later.')
+                else:
+                    self.response.write('Invalid Parameters!')
+            else:
+                self.response.write('Sorry! You were not identified as a student, please try again later.')
+        else:
+            self.response.write('Sorry! User is not recognized, please try again later.')
 
 
 class Discussion(webapp2.RequestHandler):
@@ -251,7 +243,7 @@ class Discussion(webapp2.RequestHandler):
                                                 template_values['curr_page'] = requested_round
                                                 template_values['description'] = d_round.description
                                                 template_values['sectionKey'] = section_key
-                                                template = utils.jinja_env().get_template('discussion.html')
+                                                template = utils.jinja_env().get_template('student_discussion.html')
                                                 self.response.write(template.render(template_values))
                                             else:
                                                 logging.error(
