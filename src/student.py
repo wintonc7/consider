@@ -100,6 +100,7 @@ class SectionPage(webapp2.RequestHandler):
 
     If no round is active for this section, it redirects to an appropriate error page.
     """
+
     def get(self):
         """
         HTTP GET method to retrieve the sections and rounds under it.
@@ -109,7 +110,7 @@ class SectionPage(webapp2.RequestHandler):
             result = utils.get_role(user)
             if result:
                 # User is either Instructor or Student
-                url = users.create_logout_url(self.request.uri)
+                logouturl = users.create_logout_url(self.request.uri)
                 if type(result) is models.Student:
                     logging.info('Student logged in ' + str(result))
                     section_key = self.request.get('section')
@@ -128,7 +129,7 @@ class SectionPage(webapp2.RequestHandler):
                                         deadline = datetime.datetime.strptime(curr_round.deadline, '%Y-%m-%dT%H:%M')
                                         current_time = datetime.datetime.now()
                                         template_values = {
-                                            'url': url
+                                            'logouturl': logouturl
                                         }
                                         response = models.Response.get_by_id(result.email, parent=curr_round.key)
                                         if response:
@@ -145,7 +146,7 @@ class SectionPage(webapp2.RequestHandler):
                                         template_values['sectionKey'] = section_key
                                         if curr_round.number != 1:
                                             template_values['last_round'] = True
-                                        template = utils.jinja_env().get_template('home.html')
+                                        template = utils.jinja_env().get_template('student_round.html')
                                         self.response.write(template.render(template_values))
                                     else:
                                         self.redirect('/error?code=104')
@@ -168,6 +169,7 @@ class Discussion(webapp2.RequestHandler):
     """
     API to retrieve discussion information, i.e. the responses from previous round and deadline for the current round.
     """
+
     def get(self):
         """
         HTTP GET method to retrieve the discussion information.
@@ -210,7 +212,7 @@ class Discussion(webapp2.RequestHandler):
                                             if group:
                                                 comments = []
                                                 previous_round = models.Round.get_by_id(requested_round - 1,
-                                                                                       parent=section.key)
+                                                                                        parent=section.key)
                                                 for stu in group.members:
                                                     response = models.Response.get_by_id(stu, parent=previous_round.key)
                                                     if response:
@@ -232,7 +234,7 @@ class Discussion(webapp2.RequestHandler):
                                                     'comments': comments
                                                 }
                                                 stu_response = models.Response.get_by_id(result.email,
-                                                                                        parent=d_round.key)
+                                                                                         parent=d_round.key)
                                                 if stu_response:
                                                     template_values['comment'] = stu_response.comment
                                                     template_values['response'] = ','.join(

@@ -1,34 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Consider home</title>
+{% extends "student_base.html" %}
 
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/home.css" rel="stylesheet">
-    <link href="/css/dots.css" rel="stylesheet" type="text/css">
+{% block title %}| Home{% endblock %}
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div id="spinner" class="dots">
-        Loading...
-    </div>
+{% block head %}
+{{ super() }}
+<link href="/css/home.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
     <div class="container">
         <div class="row">
-            <div id="count-container" class="alert alert-warning col-md-6"><p>Time left to complete: {% if expired -%} Time is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p></div>
-            <a class="btn btn-warning sign-out-btn col-md-2 col-md-offset-4" href="{{url}}">
-             <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out
-            </a>
+            <div id="count-container" class="alert alert-warning col-md-18">
+                <p>Time left to complete: {% if expired -%} Time is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p>
+            </div>
         </div>
-        {%- if last_round -%}<div class="row"><a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion?section={{sectionKey}}" target="_blank"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Go to Discussions</a></div> {%- endif -%}
+        {%- if last_round -%}
+        <div class="row">
+            <a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion?section={{sectionKey}}" target="_blank">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Go to Discussions</a>
+        </div> {%- endif -%}
         <div class="header">
             <h3 class="text-muted">{%- if last_round -%}Post Discussion Question{%- endif -%}</h3>
         </div>
@@ -45,10 +35,11 @@
                 {% endfor %}
             </div>
             <textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required {% if expired -%} disabled="true" {%- endif -%}>
-            {%- if comment -%}{{comment}}
-            {%- endif -%}
+            {%- if comment -%}{{comment}}{%- endif -%}
             </textarea>
-            <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
+            <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}>
+                <span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
+            </button>
         </form>
     </div>
     {%- if last_round -%}
@@ -56,7 +47,9 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
             <h4 class="modal-title" id="myModalLabel">Please provide a brief summary... </h4>
           </div>
           <div class="modal-body">
@@ -77,24 +70,13 @@
       </div>
     </div>
     {% endif %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/countdown.min.js"></script>
-    <script src="/js/bootbox.min.js"></script>
-    <script type="text/javascript">
-        jQuery.ajaxSetup({
-            beforeSend: function() {
-             $('#spinner').show();
-            },
-            complete: function(){
-             $('#spinner').hide();
-            },
-            success: function() {}
-        });
+{% endblock content %}
 
-        $(window).load(function() {
-	        $("#spinner").fadeOut("slow");
-        });
+
+{% block script %}
+{{ super() }}
+<script src="/js/countdown.min.js"></script>
+<script>
 
     {%- if option -%}
         $("#{{option}}").prop("checked",true);
@@ -104,6 +86,7 @@
 
         var clock = document.getElementById("countdown");
 	    targetDate = new Date("{{deadline}}Z");
+        console.log("targetDate = "+targetDate);
 	    clock.innerHTML = countdown(targetDate).toString();
 	    setInterval(function(){
 	    		clock.innerHTML = countdown(targetDate).toString();
@@ -124,6 +107,7 @@
             var $form = $(this);
             var summary = $form.find("textarea").val();
             var url = $form.attr("action");
+            console.log("option = " + radio + ", comment = " + comment + ", url = " + url);
             $.post(url, {option:radio, comm:comment, summary:summary, section:'{{sectionKey}}'}, function (data) {
                 bootbox.alert(data,function(){
                     ocomment = comment;
@@ -131,7 +115,7 @@
                 });
             });
         });
-    {% endif %}
+    {% endif %} // last_round
 
 	    $("#form").submit(function (event){
 	    	//Prevent the default behaviour
@@ -147,15 +131,16 @@
 	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val();
 	        	comment = $form.find("textarea").val();
 	        	var url = $form.attr("action");
+                console.log("option = " + radio + ", comment = " + comment + ", url = " + url);
                 {% if last_round %}
                     $('#myModal').modal('show');
-                {% else %}
+                {% else %} //last_round
 	        	$.post(url,{option:radio, comm:comment, section:'{{sectionKey}}'},function (data) {
 		        	bootbox.alert(data,function(){
                         ocomment = comment;
                     });
 		        });
-                {% endif %}
+                {% endif %} // last_round
 	        }
 	    });
 
@@ -166,7 +151,6 @@
                 return "It looks like you have input you haven't submitted.";
             }
         });
-	   {%- endif -%}
-    </script>
-  </body>
-</html>
+	   {%- endif -%} // not expired
+</script>
+{% endblock script %}}
