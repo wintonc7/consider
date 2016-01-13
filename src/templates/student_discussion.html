@@ -2,34 +2,15 @@
 
 {% block title %}| Rounds{% endblock %}
 
+{% set type_discussion = True %}
+
 {% block head %}
 {{ super() }}
 <link href="/css/discussion.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
-<nav class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/home">Consider</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
-            <ul class="nav navbar-nav">
-                {% for i in range(1,rounds) %}
-                <li {% if i==curr_page-1 -%}class="active"><a href="#">{%- else -%}><a
-                        href="/discussion?section={{sectionKey}}&round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</nav>
+{{ super() }}
 
 <div class="container">
     <div class="row">
@@ -128,12 +109,12 @@
     }
 
     {%- if not expired -%}
-    var clock = document.getElementById("countdown");
-    targetDate = new Date("{{deadline}}Z");
-    clock.innerHTML = countdown(targetDate).toString();
-    setInterval(function () {
-        clock.innerHTML = countdown(targetDate).toString();
-    }, 1000);
+//    var clock = document.getElementById("countdown");
+//    targetDate = new Date("{{deadline}}Z");
+//    clock.innerHTML = countdown(targetDate).toString();
+//    setInterval(function () {
+//        clock.innerHTML = countdown(targetDate).toString();
+//    }, 1000);
 
     $('.alert .close').on('click', function (e) {
         $(this).parent().hide();

@@ -2,18 +2,17 @@
 
 {% block title %}| Rounds{% endblock %}
 
+{% set type_discussion = False %}
+
 {% block head %}
 {{ super() }}
 <link href="/css/home.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
+{{ super() }}
     <div class="container">
-        <div class="row">
-            <div id="count-container" class="alert alert-warning col-md-18">
-                <p>Time left to complete: {% if expired -%} Time is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p>
-            </div>
-        </div>
+
         {%- if last_round -%}
         <div class="row">
             <a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion?section={{sectionKey}}" target="_blank">
@@ -75,7 +74,6 @@
 
 {% block script %}
 {{ super() }}
-<script src="/js/countdown.min.js"></script>
 <script>
 
     {%- if option -%}
@@ -83,14 +81,6 @@
     {%- endif -%}
 
     {% if not expired -%}
-
-        var clock = document.getElementById("countdown");
-	    targetDate = new Date("{{deadline}}Z");
-        console.log("targetDate = "+targetDate);
-	    clock.innerHTML = countdown(targetDate).toString();
-	    setInterval(function(){
-	    		clock.innerHTML = countdown(targetDate).toString();
-	  		}, 1000);
 
         var radio, comment;
 
