@@ -1,0 +1,427 @@
+{% extends "instructor_base.html" %}
+{% block title %} | Rounds{% endblock %}
+
+{% block content %}
+<h1 class="page-header">Rounds</h1>
+<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h4>Course</h4>
+        {% if courses %}
+        <select id="courseSelector" class="form-control">
+            {% for course in courses %}
+            <option {% if selectedCourse== course.name %}selected="selected" {% endif %}>{{course.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        Please add a course to add Students
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h4>Section</h4>
+        {% if sections %}
+        <select id="sectionSelector" class="form-control">
+            {% for section in sections %}
+            <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        {% if courses %}
+        There are no sections in this Course
+        {% else %}
+        Please select a course to see sections
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+<h4 class="sub-header">Current round</h4>
+{% if rounds %}
+<h5 class="well well-sm">{% if not activeRound %}No round {% else %} Round {{activeRound}} is {% endif %}in
+    progress</h5>
+<div class="row">
+    <div class="col-md-2">
+        <select id="roundSelector" class="form-control">
+            {% for round in rounds %}
+            <option {% if activeRound== round.number %}selected="selected" {% endif %}>{{round.number}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="button" class="btn btn-default" onclick="makeActive()"
+                aria-label="Activate Round">
+            <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> Make Active
+        </button>
+    </div>
+</div>
+{% endif %}
+<h4 class="sub-header">Lead-in Question:</h4>
+{% if selectedSection %}
+{% if leadInQuestion %}
+<button type="button" class="btn btn-default" onclick="addQuestion()"
+        aria-label="Edit Question">
+    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit Question
+</button>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Round</th>
+            <th>Deadline (GMT)</th>
+            <th>Question</th>
+            <th>Options</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{leadInQuestion.number}}</td>
+            <td>{{leadInQuestion.deadline}}</td>
+            <td>{{leadInQuestion.quiz.question}}</td>
+            <td>
+                <ul class="list-group">
+                    {% for option in leadInQuestion.quiz.options %}
+                    <li class="list-group-item">{{option}}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% else %}
+<button type="button" class="btn btn-default" onclick="addQuestion()" style=""
+        aria-label="Add Question">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
+</button>
+{% endif %}
+{% else %}
+<p>Select a section to continue.</p>
+{% endif %}
+<h4 class="sub-header">Discussions:</h4>
+{% if leadInQuestion %}
+{% if discussionRounds %}
+{% if not summaryQuestion %}
+<button type="button" class="btn btn-default" onclick="addDiscussion()"
+        aria-label="Add Discussion">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
+</button>
+{% endif %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Round</th>
+            <th>Deadline (GMT)</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for obj in discussionRounds %}
+        <tr>
+            <td>{{obj.number}}</td>
+            <td>{{obj.deadline}}</td>
+            <td>{{obj.description}}</td>
+            <td>
+                <button class="btn btn-default" aria-label="Edit Discussion"><span class="glyphicon glyphicon-pencil"
+                                                                                   aria-hidden="true"></span></button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<button type="button" class="btn btn-default" onclick="addDiscussion()" style=""
+        aria-label="Start Discussion">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Start Discussion
+</button>
+{% endif %}
+{% else %}
+<p>Not started.</p>
+{% endif %}
+<h4 class="sub-header">Summary Question:</h4>
+{% if discussionRounds %}
+{% if summaryQuestion %}
+<button type="button" class="btn btn-default" onclick="addLastQuestion()"
+        aria-label="Edit Question">
+    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit Question
+</button>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Round</th>
+            <th>Deadline (GMT)</th>
+            <th>Question</th>
+            <th>Options</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{summaryQuestion.number}}</td>
+            <td>{{summaryQuestion.deadline}}</td>
+            <td>{{summaryQuestion.quiz.question}}</td>
+            <td>
+                <ul class="list-group">
+                    {% for option in summaryQuestion.quiz.options %}
+                    <li class="list-group-item">{{option}}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% else %}
+<button type="button" class="btn btn-default" onclick="addLastQuestion()" style=""
+        aria-label="Add Question">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
+</button>
+{% endif %}
+{% else %}
+<p>Not started.</p>
+{% endif %}
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Please add the question</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <div class="form-group">
+                        <label for="endTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="endTime" type="datetime-local" class="form-control" name="time" required="true">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputQuestion" class="col-sm-2 control-label">Question</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputQuestion" name="question"
+                                      placeholder="Please enter the question..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputOptions" class="col-sm-2 control-label">Number of options</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="inputOptions" name="options">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4" selected="selected">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputOptions1" class="col-sm-2 control-label">Options: </label>
+                        <div class="col-sm-10" id="optionsContainer">
+                            <input type="text" class="form-control" id="inputOptions1" name="Options1"
+                                   style="margin-bottom: 10px" required="true">
+                            <input type="text" class="form-control" id="inputOptions2" name="Options2"
+                                   style="margin-bottom: 10px" required="true">
+                            <input type="text" class="form-control" id="inputOptions3" name="Options3"
+                                   style="margin-bottom: 10px" required="true">
+                            <input type="text" class="form-control" id="inputOptions4" name="Options4"
+                                   style="margin-bottom: 10px" required="true">
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitQuestion()">Submit Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% if not summaryQuestion %}
+<div class="modal fade" id="discussionModal" tabindex="-1" role="dialog" aria-labelledby="discussionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="discussionModalLabel">Please add a description</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="discussionForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <div class="form-group">
+                        <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionEndTime" type="datetime-local" class="form-control"
+                                   name="discussionTime" required="true">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputDiscussionQuestion" class="col-sm-2 control-label">Description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputDiscussionQuestion"
+                                      name="discussionQuestion" placeholder="Please enter a description..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitDiscussion()">Submit Round</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+    $('#courseSelector').on('change', function () {
+        location.href = "/rounds?course=" + this.value;
+    });
+
+    $('#sectionSelector').on('change', function () {
+        location.href = "/rounds?course={{selectedCourse}}&section=" + this.value;
+    });
+
+    var lastQuestion = false;
+
+    function addQuestion() {
+        lastQuestion = false;
+        $("#myModal").modal('show');
+    }
+
+    function addLastQuestion() {
+        lastQuestion = true;
+        $("#myModal").modal('show');
+    }
+
+    function submitQuestion() {
+        $("#modalForm").find('[type="submit"]').trigger('click');
+    }
+
+    function makeActive() {
+        r = $("#roundSelector").val();
+
+        $.post("/rounds", {
+            course: "{{selectedCourse}}", section: "{{selectedSection}}", round: r, action: 'activate'
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
+            }
+        });
+    }
+
+    $("#modalForm").submit(function (event) {
+        event.preventDefault();
+        var $form = $(this),
+                question = $form.find("textarea").val(),
+                options = $form.find("select").val(),
+                url = $form.attr("action");
+
+        var optionVals = [];
+        for (var i = 1; i <= options; i++) {
+            var val = $("#inputOptions" + i).val();
+            optionVals.push(val);
+        }
+        optionVals = JSON.stringify(optionVals);
+
+        var time_val = $("#endTime").val();
+
+        console.log(question + options + time_val + optionVals);
+
+        if (!lastQuestion) {
+            // do the POST and get the callback
+            $.post(url, {
+                time: time_val, question: question, number: options, options: optionVals, course: "{{selectedCourse}}",
+                section: "{{selectedSection}}", round: 1, roundType: 'leadin', action: 'add'
+            }, function (data) {
+                if (data.charAt(0) == 'E') {
+                    bootbox.alert(data.substring(1));
+                }
+                else {
+                    bootbox.alert(data.substring(1), function () {
+                        location.reload();
+                    });
+                }
+            });
+        }
+        else {
+            // do the POST and get the callback
+            $.post(url, {
+                time: time_val, question: question, number: options, options: optionVals, course: "{{selectedCourse}}",
+                section: "{{selectedSection}}", round: '{{nextRound}}', roundType: 'summary', action: 'add'
+            }, function (data) {
+                if (data.charAt(0) == 'E') {
+                    bootbox.alert(data.substring(1));
+                }
+                else {
+                    bootbox.alert(data.substring(1), function () {
+                        location.reload();
+                    });
+                }
+            });
+        }
+    });
+
+    {% if not summaryQuestion %}
+    function addDiscussion() {
+        $("#discussionModal").modal('show');
+    }
+
+    function submitDiscussion() {
+        $("#discussionForm").find('[type="submit"]').trigger('click');
+    }
+
+    $("#discussionForm").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+
+        //collect form elements
+        var $form = $(this),
+                time_val = $("#discussionEndTime").val(),
+                description = $form.find("textarea").val(),
+                url = $form.attr("action");
+
+        // do the POST and get the callback
+        $.post(url, {
+            time: time_val, round: "{{nextRound}}", description: description, course: "{{selectedCourse}}",
+            section: "{{selectedSection}}", roundType: 'discussion', action: 'add'
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
+            }
+        });
+    });
+    {% endif %}
+
+    $("#inputOptions").change(function () {
+        var select = parseInt($('#inputOptions').val(), 10);
+        var html = '';
+        for (var i = 1; i <= select; i++) {
+            html += '<input type="text" class="form-control" id="inputOptions' + i + '" name="Options' + i + '" placeholder="Option ' + i + '" style="margin-bottom: 10px" required="true">';
+        }
+        $('#optionsContainer').empty().html(html);
+    }).change();
+
+</script>
+{% endblock %}
