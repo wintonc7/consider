@@ -13,7 +13,6 @@ Implements the APIs for Student role in the app.
 
 import datetime
 import json
-import logging
 
 import webapp2
 from google.appengine.api import users
@@ -37,8 +36,8 @@ class Rounds(webapp2.RequestHandler):
         """
         role, student = utils.get_role_user()
         if student and role == models.Role.student:
-            logouturl = users.create_logout_url(self.request.uri)
-            logging.info('Student logged in ' + str(student))
+            logout_url = users.create_logout_url(self.request.uri)
+            utils.log('Student logged in ' + str(student))
             section_key = self.request.get('section')
             if section_key:
                 try:
@@ -55,7 +54,7 @@ class Rounds(webapp2.RequestHandler):
                                 deadline = datetime.datetime.strptime(curr_round.deadline, '%Y-%m-%dT%H:%M')
                                 current_time = datetime.datetime.now()
                                 template_values = {
-                                    'logouturl': logouturl
+                                    'logouturl': logout_url
                                 }
                                 response = models.Response.get_by_id(student.email, parent=curr_round.key)
                                 if response:
@@ -79,7 +78,7 @@ class Rounds(webapp2.RequestHandler):
                     else:
                         self.redirect('/home')
                 except Exception as e:
-                    logging.error('Got exception: ' + e.message)
+                    utils.error('Got exception: ' + e.message)
                     self.redirect('/home')
             else:
                 self.redirect('/')
@@ -106,17 +105,17 @@ class Rounds(webapp2.RequestHandler):
                             response = models.Response(parent=current_round.key, id=student.email)
                             if current_round.is_quiz:
                                 if not (option and comment):
-                                    self.response.write('Invalid Parameters!')
+                                    utils.error('Invalid Parameters: option or comment is null')
                                     return
                                 if current_round.number != 1 and not summary:
-                                    self.response.write('Invalid Parameters!')
+                                    utils.error('Invalid Parameters: round is 1 or summary is null')
                                     return
                                 response.option = option
                                 response.summary = summary if summary else ''
                             else:
                                 res = json.loads(res)
                                 if not (res and comment) or not utils.is_valid_response(res):
-                                    self.response.write('Invalid Parameters!')
+                                    utils.error('Invalid Parameters: comment is null or res is not a valid response')
                                     return
                                 for i in range(1, len(res)):
                                     response.response.append(res[i])
@@ -137,15 +136,15 @@ class Rounds(webapp2.RequestHandler):
                         else:
                             utils.error('Sorry! The round is not visible, please try again later.', handler=self)
                     else:
-                        utils.error('Sorry! The section is not visible, please try again later.', handler=self)
+                        utils.error('Section is null')
                 except:
                     utils.error(
                             'Sorry! There was some error submitting your response please try again later.',
                             handler=self)
             else:
-                utils.error('Invalid Parameters!', handler=self)
+                utils.error('Invalid Parameters: section_key is null')
         else:
-            utils.error('Sorry! User is not recognized, please try again later.', handler=self)
+            utils.error('user is null or not student', handler=self)
 
 
 class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
@@ -262,8 +261,8 @@ class HomePage(webapp2.RequestHandler):
         """
         role, student = utils.get_role_user()
         if student and role == models.Role.student:
-            logouturl = users.create_logout_url(self.request.uri)
-            template_values = {'logouturl': logouturl, 'nickname': student.email}
+            logout_url = users.create_logout_url(self.request.uri)
+            template_values = {'logouturl': logout_url, 'nickname': student.email}
             sections = student.sections
             section_list = []
             if sections:
@@ -281,4 +280,4 @@ class HomePage(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('student_home.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user is empty or not student')
+            utils.error('user is null or not student')
