@@ -4,7 +4,7 @@ utils.py
 Defines the functions and constants which are accessed by different modules of this application.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 18, 2015
+- Last Modified: Jan. 13, 2016
 
 --------------------
 
@@ -12,7 +12,6 @@ Defines the functions and constants which are accessed by different modules of t
 """
 import logging
 
-import webapp2
 from google.appengine.api import users
 
 import models
@@ -48,16 +47,47 @@ def error_codes():
 
 
 def log(message, type='', handler=None):
+    """
+    Logs the message to the console using ``logging.info``.
+
+    Args:
+        message (str):
+            Message to be logged.
+        type (str):
+            'S' for success, 'E' for error, blank for other.
+        handler (webapp2.RequestHandler):
+            Handler to post the same message back to the user.
+
+    """
     logging.info(type + ' ' + message)
     if handler:
         handler.response.write(type + ' ' + message)
 
 
 def error(message, handler=None):
+    """
+    Logs an error message to the console.
+
+    Args:
+        message (str):
+          Message to be logged.
+        handler (webapp2.RequestHandler):
+          Handler to post the same message back to user.
+
+    """
     log(message, type='Error', handler=handler)
 
 
 def get_role_user():
+    """
+    Returns the role and the user object for the currently logged in user.
+
+    Returns:
+        <role, user>:
+            A tuple where ``role`` can be INSTRUCTOR or STUDENT
+            and ``user`` is the appropriate object for the currently logged in user.
+
+    """
     user = users.get_current_user()
     if user:
         instructor = models.Instructor.query(models.Instructor.email == user.email().lower()).get()
@@ -74,12 +104,16 @@ def get_courses_and_sections(instructor, course_name, selected_section):
     Fetches the courses and sections for the given instructor.
 
     Args:
-        instructor (object): Instructor whose courses are to be retrieved
-        course_name (str): Name of the course whose sections are to be retrieved (optional)
-        selected_section (str): Name of the selected section (optional)
+        instructor (object):
+          Instructor whose courses are to be retrieved
+        course_name (str):
+          Name of the course whose sections are to be retrieved (optional)
+        selected_section (str):
+          Name of the selected section (optional)
 
     Returns:
-        template_values (dict): Courses and sections to be rendered.
+        template_values (dict):
+            Courses and sections to be rendered.
 
     """
     template_values = {}
@@ -115,10 +149,12 @@ def is_valid_response(response):
     Checks if any of the responses is one of the three valid options: support, neutral or disagree.
 
     Args:
-        response (list): A list of responses to be checked.
+        response (list):
+            A list of responses to be checked.
 
     Returns:
-        bool: ``True`` if all of the responses are valid. ``False`` if any is invalid.
+        bool:
+            ``True`` if all of the responses are valid. ``False`` if any is invalid.
 
     """
     for i in range(1, len(response)):

@@ -4,7 +4,7 @@ student.py
 Implements the APIs for Student role in the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 18, 2015
+- Last Modified: Jan. 13, 2016
 
 --------------------
 

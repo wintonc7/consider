@@ -4,14 +4,13 @@ instructor.py
 Implements the APIs for Instructor role in the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 25, 2015
+- Last Modified: Jan. 13, 2016
 
 --------------------
 
 
 """
 import json
-import logging
 
 import webapp2
 from google.appengine.api import users
@@ -30,8 +29,10 @@ class Courses(webapp2.RequestHandler):
         Adds a course to the datastore.
 
         Args:
-            instructor: Instructor who is adding the course.
-            course_name: Name of the course; must be unique across the app.
+            instructor (object):
+                Instructor who is adding the course.
+            course_name (str):
+                Name of the course; must be unique across the app.
 
         """
         course = models.Course.get_by_id(course_name, parent=instructor.key)
@@ -48,8 +49,10 @@ class Courses(webapp2.RequestHandler):
         Toggles the status of a course between Active and Inactive.
 
         Args:
-            instructor: Instructor whose course is to be toggled.
-            course_name: Name of the course to be toggled.
+            instructor (object):
+                Instructor whose course is to be toggled.
+            course_name (str):
+                Name of the course to be toggled.
 
         """
         course = models.Course.get_by_id(course_name, parent=instructor.key)
@@ -83,7 +86,7 @@ class Courses(webapp2.RequestHandler):
 
     def get(self):
         """
-        Display the ``Course``_ list for this ``Instructor``_.
+        Display the Course list for this Instructor.
         """
         role, user = utils.get_role_user()
         if user and role == models.Role.instructor:
@@ -111,8 +114,10 @@ class Section(webapp2.RequestHandler):
         Adds a section to the given course in the datastore.
 
         Args:
-            course: Course to which the section is to be added.
-            section_name: Name of the section; must be unique within the course.
+            course (object):
+                Course to which the section is to be added.
+            section_name (str):
+                Name of the section; must be unique within the course.
 
         """
         section = models.Section.get_by_id(section_name, parent=course.key)
@@ -129,8 +134,10 @@ class Section(webapp2.RequestHandler):
         Toggles the status of a section between Active and Inactive.
 
         Args:
-            course: Course under which this section exists
-            course_name: Name of the section to be toggled.
+            course (object):
+                Course under which this section exists
+            section_name (str):
+                Name of the section to be toggled.
 
         """
         section = models.Section.get_by_id(section_name, parent=course.key)
@@ -145,14 +152,14 @@ class Section(webapp2.RequestHandler):
         """
         HTTP POST method to add a section to a course.
         """
-        role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        role, instructor = utils.get_role_user()
+        if instructor and role == models.Role.instructor:
             course_name = self.request.get('course')
             section_name = self.request.get('section')
             action = self.request.get('action')
 
             if course_name and section_name and action:
-                course = models.Course.get_by_id(course_name.upper(), parent=user.key)
+                course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
                 if course and course.is_active:
                     if action == 'add':
                         self.add_section(course, section_name.upper())
@@ -178,8 +185,10 @@ class Students(webapp2.RequestHandler):
         Adds one or more students to the given section in the datastore.
 
         Args:
-            section: Section to which the studetns are to be added.
-            emails: Emails (IDs) of students to be added.
+            section (object):
+                Section to which the studetns are to be added.
+            emails (str):
+                Emails (IDs) of students to be added.
 
         """
 
@@ -205,8 +214,10 @@ class Students(webapp2.RequestHandler):
         Removes a specific students from the given section.
 
         Args:
-            section: Section from which the student is to be removed.
-            email: Email (ID) of the student to be removed.
+            section (object):
+                Section from which the student is to be removed.
+            email (str):
+                Email (ID) of the student to be removed.
 
         """
         student = models.Student.get_by_id(email)
@@ -363,15 +374,15 @@ class Rounds(webapp2.RequestHandler):
         # TODO Time picker suitable to all browsers (currently works only on Chrome)
         # TODO Timezone support in deadlines
 
-        role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        role, instructor = utils.get_role_user()
+        if instructor and role == models.Role.instructor:
             course_name = self.request.get('course').upper()
             section_name = self.request.get('section').upper()
             action = self.request.get('action')
 
             # get course and section from datastore
             if course_name and section_name and action:
-                course = models.Course.get_by_id(course_name, parent=user.key)
+                course = models.Course.get_by_id(course_name, parent=instructor.key)
                 if course:
                     section = models.Section.get_by_id(section_name, parent=course.key)
                     if section:
@@ -398,6 +409,16 @@ class Groups(webapp2.RequestHandler):
     """
 
     def modify_group_count(self, section, group_count):
+        """
+        Modifies the total number of groups in this section.
+
+        Args:
+            section (object):
+                Section whose group count is to be modified
+            group_count (int):
+                The new total number of groups.
+
+        """
         if group_count:
             if section.groups != group_count and group_count > 0:
                 # If the total number of groups are not as requested change them
@@ -408,6 +429,17 @@ class Groups(webapp2.RequestHandler):
             utils.error('Groups count not available.', handler=self)
 
     def update_groups(self, section, groups):
+        """
+        Updates the groups assignments for the given section.
+
+        Args:
+            section (object):
+                Section whose group assignments are to be updated.
+            groups (dict):
+                Dictionary of type ``{email:n}``, where ``email`` is the identifier for a student
+                and ``n`` is the group-id that student is to be assigned to.
+
+        """
         if groups:
             for student in section.students:
                 if student.email in groups:
@@ -427,6 +459,10 @@ class Groups(webapp2.RequestHandler):
             utils.error('Groups information not available.', handler=self)
 
     def get(self):
+        """
+        HTTP GET Method to render the ``/groups`` page for the logged in Instructor.
+
+        """
         role, user = utils.get_role_user()
         if user and role == models.Role.instructor:
             logout_url = users.create_logout_url(self.request.uri)
@@ -459,17 +495,17 @@ class Groups(webapp2.RequestHandler):
         """
         HTTP POST method to create groups.
         """
-        role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        role, instructor = utils.get_role_user()
+        if instructor and role == models.Role.instructor:
             course_name = self.request.get('course')
             section_name = self.request.get('section')
             action = self.request.get('action')
             if course_name and section_name and action:
-                course = models.Course.get_by_id(course_name.upper(), parent=user.key)
+                course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
                 if course:
                     section = models.Section.get_by_id(section_name.upper(), parent=course.key)
                     if section:
-                        logging.info('action = ' + action)
+                        utils.log('action = ' + action)
                         if action == 'add':
                             group_count = int(self.request.get('groups'))
                             self.modify_group_count(section, group_count)

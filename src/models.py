@@ -50,9 +50,9 @@ class Section(ndb.Model):
     """
     .. _Section:
 
-    An object to represent section information in the datastrore.
+    An object to represent section information in the datastore.
 
-    Child of the `Course`_ object.
+    Child of the `Course`_ object. Parent of `Round`_\ , `Group`_\ , `Response`_\ .
     """
     name = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique within a course. """
@@ -72,7 +72,7 @@ class Instructor(ndb.Model):
     """
     .. _Instructor:
 
-    An object to represent the course Instrutor in the app.
+    An object to represent the course Instructor in the app. Parent of the `Course`_ class.
     """
     email = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique. Retrieved from Gmail automatically """
@@ -97,6 +97,8 @@ class Group(ndb.Model):
     .. _Group:
 
     An object to represent the Group of students in a course section.
+
+    Child of `Section`_.
     """
     number = ndb.IntegerProperty(required=True)
     """ Integer. Index of the group within that `Section`_ """
@@ -120,11 +122,14 @@ class Question(ndb.Model):
     """ List of Strings. Options for this question."""
     # TODO Templates for questions - MCQ, long answers, short answers, etc.
 
+
 class Round(ndb.Model):
     """
     .. _Round:
 
     An object to represent the Round in the datastore.
+
+    Child of `Section`_.
     """
     deadline = ndb.StringProperty(required=True, indexed=False)
     """ String. Represents the deadline in the format %Y-%m-%dT%H:%M """
@@ -143,6 +148,8 @@ class Response(ndb.Model):
     .. _Response:
 
     An object to represent all types of student responses.
+
+    Child of `Round`_.
     """
     option = ndb.StringProperty(default='NA', indexed=False)
     """ String. Selected option from the multiple choices, if it's a response to a quiz round."""
@@ -157,6 +164,9 @@ class Response(ndb.Model):
 
 
 class Role:
+    def __init__(self):
+        pass
+
     instructor = 'INSTRUCTOR'
     student = 'STUDENT'
     admin = 'ADMIN'

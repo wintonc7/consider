@@ -2,14 +2,12 @@
 consider.py
 ~~~~~~~~~~~
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 18, 2015
+- Last Modified: Jan. 13, 2016
 
 --------------------
 
 Main module of the app. Implements the ``application`` object; handlers for error, home and root pages; and redirects URL to appropriate handler classes.
 """
-
-import logging
 
 import webapp2
 from google.appengine.api import users
@@ -67,7 +65,8 @@ class MainPage(webapp2.RequestHandler):
     """
     Handles the main landing page ``(/)`` of the app.
 
-    If the user is authenticated successfully, redirects to the ``/home`` page, otherwise to the ``login`` page.
+    If the user is logged in, and is an admin, redirects to the ``/admin`` page, if not an admin, redirects to the ``/home`` page.
+    If not logged in, shows the ``login`` page.
     """
 
     def get(self):
@@ -102,8 +101,8 @@ class HomePage(webapp2.RequestHandler):
         """
         role, user = utils.get_role_user()
         if role and user:
-            logging.info(role + ' logged in: ' + str(user))
-            self.redirect('/courses') if role == models.Role.instructor else  self.redirect('/student_home')
+            utils.log(str(user) + ' logged in as: ' + role)
+            self.redirect('/courses') if role == models.Role.instructor else self.redirect('/student_home')
         else:
             self.redirect('/error?code=101')
 

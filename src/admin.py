@@ -10,7 +10,6 @@ APIs for handling admin specific tasks of the app, like adding an instructor.
 
 
 """
-import logging
 
 import webapp2
 from google.appengine.api import users
@@ -29,59 +28,59 @@ class AdminPage(webapp2.RequestHandler):
         Adds an instructor to the datastore.
 
         Args:
-            email: Email of the instructor to be added.
+            email (str):
+                Email of the instructor to be added.
+
         """
         if email:
             instructor = models.Instructor(id=email)
             instructor.email = email
             instructor.put()
-            self.response.write(email + " has been added as an Instructor")
+            utils.log(email + ' has been added as an Instructor', type='S', handler=self)
         else:
-            self.response.write("Error! invalid arguments.")
+            utils.error('Invalid arguments: email')
 
     def toggle_instructor(self, email):
         """
         Toggles the status of the selected instructor between 'Active' and 'Inactive'.
 
         Args:
-            email: Email (identifier) of the instructor to be added.
+            email (str):
+                Email (identifier) of the instructor to be added.
 
         """
         if email:
-            logging.info("Changing status of " + email)
             instructor = models.Instructor.query(models.Instructor.email == email).get()
             if instructor:
                 instructor.is_active = not instructor.is_active
                 instructor.put()
-                self.response.write("Status changed for " + email)
+                utils.log('Status changed for ' + email, handler=self)
             else:
-                self.response.write("Instructor not found in the database.")
+                utils.error('Instructor (' + email + ') not found')
         else:
-            self.response.write("Error! invalid arguments.")
+            utils.error('Invalid arguments: email')
 
     def get(self):
         """
         HTTP GET method to retrieve the list of instructors currently added to the app.
         """
         user = users.get_current_user()
-
         if user:
-            logouturl = users.create_logout_url(self.request.uri)
+            logout_url = users.create_logout_url(self.request.uri)
             template_values = {
-                'logouturl': logouturl
+                'logouturl': logout_url
             }
             instructors = models.Instructor.query().fetch()
             if instructors:
                 template_values['instructors'] = instructors
             template = utils.jinja_env().get_template('admin.html')
-            self.response.write(template.render(template_values))
         else:
-            loginurl = users.create_login_url(self.request.uri)
+            login_url = users.create_login_url(self.request.uri)
             template_values = {
-                'loginurl': loginurl
+                'loginurl': login_url
             }
             template = utils.jinja_env().get_template('login.html')
-            self.response.write(template.render(template_values))
+        self.response.write(template.render(template_values))
 
     def post(self):
         """
