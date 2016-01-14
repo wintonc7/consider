@@ -337,22 +337,14 @@ class Rounds(webapp2.RequestHandler):
             description = self.request.get('description')
             round_obj.description = description
         else:
-<<<<<<< HEAD
             utils.error('Unknown round_type passed.')
-=======
-            logging.error('Unknown round_type passed.')
->>>>>>> origin/master
         round_obj.put()
         # Only update the value of total rounds if a new round is created,
         # not when we edit an old round is edited
         if curr_round > section.rounds:
             section.rounds = curr_round
             section.put()
-<<<<<<< HEAD
         utils.log('Success, round added.', type='S', handler=self)
-=======
-        self.response.write("S" + "Success, round added.")
->>>>>>> origin/master
 
     def activate_round(self, section):
         next_round = int(self.request.get('round'))
@@ -360,11 +352,7 @@ class Rounds(webapp2.RequestHandler):
             # If the selected round is not currently active make it active
             section.current_round = next_round
             section.put()
-<<<<<<< HEAD
             utils.log('Success, round active.', type='S', handler=self)
-=======
-            self.response.write("S" + "Success, round active.")
->>>>>>> origin/master
 
     def post(self):
         """
@@ -375,7 +363,6 @@ class Rounds(webapp2.RequestHandler):
         # TODO Time picker suitable to all browsers (currently works only on Chrome)
         # TODO Timezone support in deadlines
 
-<<<<<<< HEAD
         role, user = utils.get_role_user()
         if user and role == models.Role.instructor:
             course_name = self.request.get('course').upper()
@@ -402,35 +389,6 @@ class Rounds(webapp2.RequestHandler):
                 utils.error('Invalid arguments: course_name or section_name or action is null')
         else:
             utils.error('user null or not instructor')
-=======
-        user = users.get_current_user()
-        if user:
-            result = utils.get_role(user)
-            if result and type(result) is models.Instructor:
-                course_name = self.request.get('course').upper()
-                section_name = self.request.get('section').upper()
-
-                # get course and section from datastore
-                if course_name and section_name:
-                    course = models.Course.get_by_id(course_name, parent=result.key)
-                    if course:
-                        section = models.Section.get_by_id(section_name, parent=course.key)
-                        if section:
-                            #
-                            action = self.request.get('action')
-                            if action == 'add':
-                                self.add_round(section)
-                            elif action == 'activate':
-                                self.activate_round(section)
-                            else:
-                                pass
-                    else:
-                        logging.error('Section {s} does not exist!'.format(s=section_name))
-                else:
-                    logging.error('Course {c} does not exist!'.format(c=course_name))
-            else:
-                logging.error('Course or section name not passed!')
->>>>>>> origin/master
 
 
 class Groups(webapp2.RequestHandler):

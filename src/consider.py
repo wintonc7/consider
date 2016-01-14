@@ -117,21 +117,10 @@ application = webapp2.WSGIApplication([
     ('/sections', instructor.Section),
     ('/students', instructor.Students),
     ('/rounds', instructor.Rounds),
-<<<<<<< HEAD
-=======
-    ('/discussion', student.Discussion),
->>>>>>> origin/master
     ('/responses', instructor.Responses),
     ('/group_responses', instructor.GroupResponses),
     ('/groups', instructor.Groups),
-<<<<<<< HEAD
     ('/discussion', student.Discussion),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
 ], debug=True)
-=======
-    ('/addGroups', instructor.AddGroups),
-    ('/updateGroups', instructor.UpdateGroups),
-    ('/submitResponse', student.SubmitResponse),
-])
->>>>>>> origin/master
