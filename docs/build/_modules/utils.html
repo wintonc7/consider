@@ -1,0 +1,310 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>utils &mdash; CONSIDER 2.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CONSIDER 2.0 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CONSIDER
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../people.html">People</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../howto-doc.html">How to Generate This Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">CONSIDER</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>utils</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for utils</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">utils.py</span>
+<span class="sd">~~~~~~~~~~~~~~~~~</span>
+<span class="sd">Defines the functions and constants which are accessed by different modules of this application.</span>
+
+<span class="sd">- Author(s): Rohit Kapoor, Swaroop Joshi</span>
+<span class="sd">- Last Modified: Dec. 18, 2015</span>
+
+<span class="sd">--------------------</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">jinja2</span>
+
+<span class="kn">import</span> <span class="nn">model</span>
+
+<span class="n">JINJA_ENVIRONMENT</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>
+        <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span>
+                <span class="s">&#39;{basedir}/{srcdir}/{tempdir}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">basedir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">srcdir</span><span class="o">=</span><span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="n">tempdir</span><span class="o">=</span><span class="s">&#39;templates&#39;</span><span class="p">)),</span>
+        <span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;jinja2.ext.autoescape&#39;</span><span class="p">],</span>
+        <span class="n">autoescape</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">errorCodes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;100&#39;</span><span class="p">:</span> <span class="s">&quot;Oops! Something went wrong please try again.&quot;</span><span class="p">,</span>
+    <span class="s">&#39;101&#39;</span><span class="p">:</span> <span class="s">&quot;Sorry you are not registered with this application, please contact your Instructor.&quot;</span><span class="p">,</span>
+    <span class="s">&#39;102&#39;</span><span class="p">:</span> <span class="s">&quot;Sorry you are not an instructor.&quot;</span><span class="p">,</span>
+    <span class="s">&#39;103&#39;</span><span class="p">:</span> <span class="s">&quot;Sorry no rounds are active for this section, please try again later.&quot;</span><span class="p">,</span>
+    <span class="s">&#39;104&#39;</span><span class="p">:</span> <span class="s">&quot;Sorry the round was not found, please contact your Instructor.&quot;</span><span class="p">,</span>
+    <span class="s">&#39;105&#39;</span><span class="p">:</span> <span class="s">&quot;Sorry, your group was not found, please contact your Instructor.&quot;</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_role"><a class="viewcode-back" href="../api.html#utils.get_role">[docs]</a><span class="k">def</span> <span class="nf">get_role</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks and returns if the user is an Instructor or a Student, False if neither.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user: The user whose role is to be retrieved.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        object: Instructor or Student or False.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Instructor</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="get_courses_and_sections"><a class="viewcode-back" href="../api.html#utils.get_courses_and_sections">[docs]</a><span class="k">def</span> <span class="nf">get_courses_and_sections</span><span class="p">(</span><span class="n">instructor</span><span class="p">,</span> <span class="n">course_name</span><span class="p">,</span> <span class="n">selected_section</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetches the courses and sections for the given instructor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        instructor (object): Instructor whose courses are to be retrieved</span>
+<span class="sd">        course_name (str): Name of the course whose sections are to be retrieved (optional)</span>
+<span class="sd">        selected_section (str): Name of the selected section (optional)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        template_values (dict): Courses and sections to be rendered.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">template_values</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">courses</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">instructor</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">courses</span><span class="p">:</span>
+        <span class="n">course</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;courses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">courses</span>
+        <span class="k">if</span> <span class="n">course_name</span><span class="p">:</span>
+            <span class="n">course_name</span> <span class="o">=</span> <span class="n">course_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Course</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">course_name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">instructor</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">course</span><span class="p">:</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="n">courses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sections</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedCourse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sections</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">course_name</span><span class="p">:</span>
+            <span class="n">sections</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ancestor</span><span class="o">=</span><span class="n">courses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+        <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;sections&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sections</span>
+        <span class="k">if</span> <span class="n">sections</span><span class="p">:</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">selected_section</span><span class="p">:</span>
+                <span class="n">selected_section</span> <span class="o">=</span> <span class="n">selected_section</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Section</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">selected_section</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;selectedSectionObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span>
+            <span class="n">template_values</span><span class="p">[</span><span class="s">&#39;students&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">students</span>
+    <span class="k">return</span> <span class="n">template_values</span></div>
+
+
+<div class="viewcode-block" id="is_valid_response"><a class="viewcode-back" href="../api.html#utils.is_valid_response">[docs]</a><span class="k">def</span> <span class="nf">is_valid_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if any of the responses is one of the three valid options: support, neutral or disagree.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        response (list): A list of responses to be checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: ``True`` if all of the responses are valid. ``False`` if any is invalid.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;support&#39;</span><span class="p">,</span> <span class="s">&#39;neutral&#39;</span><span class="p">,</span> <span class="s">&#39;disagree&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span></div>
+    <span class="c"># SJ: 12/18/2015: Changed to make a better func. name</span>
+    <span class="c"># for i in range(1, len(response)):</span>
+    <span class="c">#     if response[i] not in [&#39;support&#39;, &#39;neutral&#39;, &#39;disagree&#39;]:</span>
+    <span class="c">#         return True</span>
+    <span class="c"># return False</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Swaroop Joshi.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

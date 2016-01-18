@@ -1,0 +1,851 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Documentation &mdash; CONSIDER 2.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="CONSIDER 2.0 documentation" href="index.html"/>
+        <link rel="next" title="People" href="people.html"/>
+        <link rel="prev" title="Welcome to CONSIDER’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CONSIDER
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-py">model.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#consider-py">consider.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#admin-py">admin.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#instructor-py">instructor.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#student-py">student.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utils-py">utils.py</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="people.html">People</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto-doc.html">How to Generate This Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">CONSIDER</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>API Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/api.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-src">
+<span id="api-documentation"></span><h1>API Documentation<a class="headerlink" href="#module-src" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-model"></span><div class="section" id="model-py">
+<h2>model.py<a class="headerlink" href="#model-py" title="Permalink to this headline">¶</a></h2>
+<p>Implements the data model for the app.</p>
+<p>All the entities derive from <code class="docutils literal"><span class="pre">ndb</span></code> class of Google App Engine.</p>
+<ul class="simple">
+<li>Author(s): Rohit Kapoor, Swaroop Joshi</li>
+<li>Last Modified: Dec. 18, 2015</li>
+</ul>
+<hr class="docutils" />
+<dl class="class">
+<dt id="model.Course">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Course</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Course"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Course" title="Permalink to this definition">¶</a></dt>
+<dd><p id="course">An object to represent course information in the datastore.</p>
+<p>Parent of the <a class="reference internal" href="#section">Section</a> object.</p>
+<dl class="attribute">
+<dt id="model.Course.is_active">
+<code class="descname">is_active</code><a class="headerlink" href="#model.Course.is_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. Indicates if the course is currently active or not.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Course.name">
+<code class="descname">name</code><a class="headerlink" href="#model.Course.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Must be non-empty and unique.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Group">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Group</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Group" title="Permalink to this definition">¶</a></dt>
+<dd><p id="group">An object to represent the Group of students in a course section.</p>
+<dl class="attribute">
+<dt id="model.Group.members">
+<code class="descname">members</code><a class="headerlink" href="#model.Group.members" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Strings. Emails of the <a class="reference internal" href="#student">Student</a>s in this group.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Group.number">
+<code class="descname">number</code><a class="headerlink" href="#model.Group.number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Index of the group within that <a class="reference internal" href="#section">Section</a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Group.size">
+<code class="descname">size</code><a class="headerlink" href="#model.Group.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Size of this group.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Instructor">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Instructor</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Instructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Instructor" title="Permalink to this definition">¶</a></dt>
+<dd><p id="instructor">An object to represent the course Instrutor in the app.</p>
+<dl class="attribute">
+<dt id="model.Instructor.email">
+<code class="descname">email</code><a class="headerlink" href="#model.Instructor.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Must be non-empty and unique. Retrieved from Gmail automatically</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Instructor.is_active">
+<code class="descname">is_active</code><a class="headerlink" href="#model.Instructor.is_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. Indicates if this instructor is active or not.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Question">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Question</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Question"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Question" title="Permalink to this definition">¶</a></dt>
+<dd><p id="question">An object to represent the Question in the data store. Currently only multiple choice questions are supported.</p>
+<dl class="attribute">
+<dt id="model.Question.options">
+<code class="descname">options</code><a class="headerlink" href="#model.Question.options" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Strings. Options for this question.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Question.options_total">
+<code class="descname">options_total</code><a class="headerlink" href="#model.Question.options_total" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Number of options for the question.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Question.question">
+<code class="descname">question</code><a class="headerlink" href="#model.Question.question" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. The text of the question.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Response">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Response</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Response" title="Permalink to this definition">¶</a></dt>
+<dd><p id="response">An object to represent all types of student responses.</p>
+<dl class="attribute">
+<dt id="model.Response.comment">
+<code class="descname">comment</code><a class="headerlink" href="#model.Response.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Comment no a peer&#8217;s post from the previous round.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Response.option">
+<code class="descname">option</code><a class="headerlink" href="#model.Response.option" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Selected option from the multiple choices, if it&#8217;s a response to a quiz round.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Response.response">
+<code class="descname">response</code><a class="headerlink" href="#model.Response.response" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Strings. Can take values <code class="docutils literal"><span class="pre">support</span></code>, <code class="docutils literal"><span class="pre">disagree</span></code> or <code class="docutils literal"><span class="pre">neutral</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Response.student">
+<code class="descname">student</code><a class="headerlink" href="#model.Response.student" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Email of the <a class="reference internal" href="#student">Student</a> who is the author of this response.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Response.summary">
+<code class="descname">summary</code><a class="headerlink" href="#model.Response.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. The summary post in the last round.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Round">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Round</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Round"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Round" title="Permalink to this definition">¶</a></dt>
+<dd><p id="round">An object to represent the Round in the datastore.</p>
+<dl class="attribute">
+<dt id="model.Round.deadline">
+<code class="descname">deadline</code><a class="headerlink" href="#model.Round.deadline" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Represents the deadline in the format %Y-%m-%dT%H:%M</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Round.description">
+<code class="descname">description</code><a class="headerlink" href="#model.Round.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Description or brief instructions for the round.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Round.is_quiz">
+<code class="descname">is_quiz</code><a class="headerlink" href="#model.Round.is_quiz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. If <code class="docutils literal"><span class="pre">True</span></code>, this is a quiz round (e.g., lead-in question); if <code class="docutils literal"><span class="pre">False</span></code>, a discussion round.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Round.number">
+<code class="descname">number</code><a class="headerlink" href="#model.Round.number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Index of the round.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Round.quiz">
+<code class="descname">quiz</code><a class="headerlink" href="#model.Round.quiz" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference internal" href="#question">Question</a> property. Contains the question if this is a quiz round.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Section">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Section</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Section" title="Permalink to this definition">¶</a></dt>
+<dd><p id="section">An object to represent section information in the datastrore.</p>
+<p>Child of the <a class="reference internal" href="#course">Course</a> object.</p>
+<dl class="attribute">
+<dt id="model.Section.current_round">
+<code class="descname">current_round</code><a class="headerlink" href="#model.Section.current_round" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Index of the current round. (default: 0)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Section.groups">
+<code class="descname">groups</code><a class="headerlink" href="#model.Section.groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Number of groups in this section. (default: 0)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Section.is_active">
+<code class="descname">is_active</code><a class="headerlink" href="#model.Section.is_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. Indicates if this section is active or not.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Section.name">
+<code class="descname">name</code><a class="headerlink" href="#model.Section.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Must be non-empty and unique within a course.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Section.rounds">
+<code class="descname">rounds</code><a class="headerlink" href="#model.Section.rounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. Number of rounds for this section. (default: 0)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Section.students">
+<code class="descname">students</code><a class="headerlink" href="#model.Section.students" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of <a class="reference internal" href="#studentinfo">StudentInfo</a> representing all the <a class="reference internal" href="#student">Student</a> entities in this section.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.Student">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">Student</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#Student"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.Student" title="Permalink to this definition">¶</a></dt>
+<dd><p id="student">An object to represent the Student in the app.</p>
+<dl class="attribute">
+<dt id="model.Student.email">
+<code class="descname">email</code><a class="headerlink" href="#model.Student.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Must be non-empty and unique. Retrieved from Gmail automatically</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.Student.sections">
+<code class="descname">sections</code><a class="headerlink" href="#model.Student.sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of active <a class="reference internal" href="#section">Section</a> s this student is enrolled in.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="model.StudentInfo">
+<em class="property">class </em><code class="descclassname">model.</code><code class="descname">StudentInfo</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model.html#StudentInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model.StudentInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p id="studentinfo">An object to represent a student&#8217;s information in the datastore.</p>
+<dl class="attribute">
+<dt id="model.StudentInfo.alias">
+<code class="descname">alias</code><a class="headerlink" href="#model.StudentInfo.alias" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Identifies a student within a discussion round. Takes values S1, S2, etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.StudentInfo.email">
+<code class="descname">email</code><a class="headerlink" href="#model.StudentInfo.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>String. Must be non-empty and unique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="model.StudentInfo.group">
+<code class="descname">group</code><a class="headerlink" href="#model.StudentInfo.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. The group this student is part of.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-consider"></span><div class="section" id="consider-py">
+<h2>consider.py<a class="headerlink" href="#consider-py" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Author(s): Rohit Kapoor, Swaroop Joshi</li>
+<li>Last Modified: Dec. 18, 2015</li>
+</ul>
+<hr class="docutils" />
+<p>Main module of the app. Implements the <code class="docutils literal"><span class="pre">application</span></code> object; handlers for error, home and root pages; and redirects URL to appropriate handler classes.</p>
+<dl class="class">
+<dt id="consider.ErrorPage">
+<em class="property">class </em><code class="descclassname">consider.</code><code class="descname">ErrorPage</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consider.html#ErrorPage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consider.ErrorPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the <code class="docutils literal"><span class="pre">/error</span></code> page, a generic page to display errors based on app-specific, custom error code.</p>
+<p>The error codes are:</p>
+<ul class="simple">
+<li>&#8216;100&#8217;: &#8220;Oops! Something went wrong please try again.&#8221;,</li>
+<li>&#8216;101&#8217;: &#8220;Sorry you are not registered with this application, please contact your Instructor.&#8221;,</li>
+<li>&#8216;102&#8217;: &#8220;Sorry you are not an instructor.&#8221;,</li>
+<li>&#8216;103&#8217;: &#8220;Sorry no rounds are active for this section, please try again later.&#8221;,</li>
+<li>&#8216;104&#8217;: &#8220;Sorry the round was not found, please contact your Instructor.&#8221;,</li>
+<li>&#8216;105&#8217;: &#8220;Sorry, your group was not found, please contact your Instructor.&#8221;</li>
+</ul>
+<p>HTTP errors like 404, 500 are handled by the system in the default manner.</p>
+<dl class="method">
+<dt id="consider.ErrorPage.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/consider.html#ErrorPage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consider.ErrorPage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>If a valid <code class="docutils literal"><span class="pre">user</span></code> is logged in, loads the template <code class="docutils literal"><span class="pre">error.html</span></code> and displays the appropriate error message,
+corresponding to the error code sent in, on it. Redirects to the root page <code class="docutils literal"><span class="pre">(/)</span></code> otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="consider.HomePage">
+<em class="property">class </em><code class="descclassname">consider.</code><code class="descname">HomePage</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consider.html#HomePage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consider.HomePage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the <code class="docutils literal"><span class="pre">/home</span></code> page. Redirects based on the <em>role</em> of the user (Instructor or Student).</p>
+<dl class="method">
+<dt id="consider.HomePage.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/consider.html#HomePage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consider.HomePage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>If a valid <code class="docutils literal"><span class="pre">user</span></code> is logged in, and if the user is an <code class="docutils literal"><span class="pre">Instructor</span></code>, redirect to the Instructor console, which contains a list of courses and sections that instructor is in charge of; if the user is a <code class="docutils literal"><span class="pre">Student</span></code>, retrieves the list of sections that student is enrolled in, and redirects to the student home page populated with that list.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="consider.MainPage">
+<em class="property">class </em><code class="descclassname">consider.</code><code class="descname">MainPage</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/consider.html#MainPage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consider.MainPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the main landing page <code class="docutils literal"><span class="pre">(/)</span></code> of the app.</p>
+<p>If the user is authenticated successfully, redirects to the <code class="docutils literal"><span class="pre">/home</span></code> page, otherwise to the <code class="docutils literal"><span class="pre">login</span></code> page.</p>
+<dl class="method">
+<dt id="consider.MainPage.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/consider.html#MainPage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#consider.MainPage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>The HTTP GET method on the <code class="docutils literal"><span class="pre">MainPage</span></code>.</p>
+<p>Renders or redirects appropriately.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-admin"></span><div class="section" id="admin-py">
+<h2>admin.py<a class="headerlink" href="#admin-py" title="Permalink to this headline">¶</a></h2>
+<p>APIs for handling admin specific tasks of the app, like adding an instructor.</p>
+<ul class="simple">
+<li>Author(s): Rohit Kapoor, Swaroop Joshi</li>
+<li>Last Modified: Dec. 18, 2015</li>
+</ul>
+<hr class="docutils" />
+<dl class="class">
+<dt id="admin.AdminPage">
+<em class="property">class </em><code class="descclassname">admin.</code><code class="descname">AdminPage</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/admin.html#AdminPage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#admin.AdminPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>API for the main page (<code class="docutils literal"><span class="pre">/admin</span></code>) for the admin/developer.</p>
+<dl class="method">
+<dt id="admin.AdminPage.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/admin.html#AdminPage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#admin.AdminPage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the list of instructors currently added to the app.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="admin.AdminPage.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/admin.html#AdminPage.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#admin.AdminPage.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to add an instructor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="admin.AdminToggleInstructor">
+<em class="property">class </em><code class="descclassname">admin.</code><code class="descname">AdminToggleInstructor</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/admin.html#AdminToggleInstructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#admin.AdminToggleInstructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to activate or deactivate an instructor.</p>
+<dl class="method">
+<dt id="admin.AdminToggleInstructor.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/admin.html#AdminToggleInstructor.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#admin.AdminToggleInstructor.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to toggle the instructor&#8217;s status.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-instructor"></span><div class="section" id="instructor-py">
+<h2>instructor.py<a class="headerlink" href="#instructor-py" title="Permalink to this headline">¶</a></h2>
+<p>Implements the APIs for Instructor role in the app.</p>
+<ul class="simple">
+<li>Author(s): Rohit Kapoor, Swaroop Joshi</li>
+<li>Last Modified: Dec. 18, 2015</li>
+</ul>
+<hr class="docutils" />
+<dl class="class">
+<dt id="instructor.ActivateRound">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">ActivateRound</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#ActivateRound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.ActivateRound" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to activate a particular round for this section.</p>
+<p>The instructor can add rounds in advance, but has to activate each round when it is supposed to start.</p>
+<dl class="method">
+<dt id="instructor.ActivateRound.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#ActivateRound.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.ActivateRound.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to activate the round.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.AddCourse">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">AddCourse</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddCourse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddCourse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new course with the given name to the database.</p>
+<p>Course names must be unique.
+If the user tries to add a course with a previously used name again, it flags a message.</p>
+<dl class="method">
+<dt id="instructor.AddCourse.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddCourse.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddCourse.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to add the course.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.AddGroups">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">AddGroups</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to organize students in to groups.</p>
+<p>The user (instructor) can modify the number of groups and then assign each student to one of the groups.</p>
+<dl class="method">
+<dt id="instructor.AddGroups.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddGroups.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddGroups.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to create groups.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.AddRound">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">AddRound</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddRound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddRound" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to add a round to the section.</p>
+<p>Pops open a new <code class="docutils literal"><span class="pre">modal</span></code> which asks for the details of the round, including deadline and question.</p>
+<dl class="method">
+<dt id="instructor.AddRound.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddRound.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddRound.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to add the round.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.AddSection">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">AddSection</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new section to the given course.</p>
+<p>Section names must be unique within a course.
+If a user tries to add a section with a previously used name, it flags a message.</p>
+<dl class="method">
+<dt id="instructor.AddSection.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddSection.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddSection.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to add a section to a course.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.AddStudent">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">AddStudent</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddStudent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddStudent" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to add a student to the given section and course.</p>
+<dl class="method">
+<dt id="instructor.AddStudent.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#AddStudent.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.AddStudent.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to add the student.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.GroupResponses">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">GroupResponses</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#GroupResponses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.GroupResponses" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to retrieve and display responses for each section, organized into groups.</p>
+<dl class="method">
+<dt id="instructor.GroupResponses.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#GroupResponses.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.GroupResponses.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the group responses.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.Groups">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">Groups</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#Groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.Groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to retrieve and display the information of groups formed for the selected course and section.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.RemoveStudent">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">RemoveStudent</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#RemoveStudent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.RemoveStudent" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to remove a student from a section of the course.</p>
+<p>The student still continues to be part of other sections of this course and other courses in the app.</p>
+<dl class="method">
+<dt id="instructor.RemoveStudent.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#RemoveStudent.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.RemoveStudent.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to remove the student.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.Responses">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">Responses</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#Responses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.Responses" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to retrieve and display responses for each section, tabbed into different rounds.</p>
+<dl class="method">
+<dt id="instructor.Responses.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#Responses.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.Responses.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the responses.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.Rounds">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">Rounds</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#Rounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.Rounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to retrieve and display the information of <em>rounds</em> for the selected course and section.</p>
+<p>By default, the alphabetically first course and first section is selected.
+To look at the rounds for other course/sections, the user can select from the given drop down list.</p>
+<dl class="method">
+<dt id="instructor.Rounds.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#Rounds.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.Rounds.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the rounds.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.StudentsPage">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">StudentsPage</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#StudentsPage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.StudentsPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to display the list of students in the selected section.</p>
+<dl class="method">
+<dt id="instructor.StudentsPage.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#StudentsPage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.StudentsPage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the students.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.ToggleCourse">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">ToggleCourse</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#ToggleCourse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.ToggleCourse" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to toggle between <code class="docutils literal"><span class="pre">active</span></code> and <code class="docutils literal"><span class="pre">inactive</span></code> course status. An instructor can call this API.</p>
+<dl class="method">
+<dt id="instructor.ToggleCourse.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#ToggleCourse.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.ToggleCourse.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to toggle the course status.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.ToggleSection">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">ToggleSection</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#ToggleSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.ToggleSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to toggle between <code class="docutils literal"><span class="pre">active</span></code> and <code class="docutils literal"><span class="pre">inactive</span></code> section status. An instructor can call this API.</p>
+<dl class="method">
+<dt id="instructor.ToggleSection.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#ToggleSection.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.ToggleSection.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to toggle the section status.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="instructor.UpdateGroups">
+<em class="property">class </em><code class="descclassname">instructor.</code><code class="descname">UpdateGroups</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#UpdateGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.UpdateGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to update the group assignments.</p>
+<p>The user (instructor) can reassign groups using this API.</p>
+<dl class="method">
+<dt id="instructor.UpdateGroups.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/instructor.html#UpdateGroups.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#instructor.UpdateGroups.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to update the groups.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-student"></span><div class="section" id="student-py">
+<h2>student.py<a class="headerlink" href="#student-py" title="Permalink to this headline">¶</a></h2>
+<p>Implements the APIs for Student role in the app.</p>
+<ul class="simple">
+<li>Author(s): Rohit Kapoor, Swaroop Joshi</li>
+<li>Last Modified: Dec. 18, 2015</li>
+</ul>
+<hr class="docutils" />
+<dl class="class">
+<dt id="student.Discussion">
+<em class="property">class </em><code class="descclassname">student.</code><code class="descname">Discussion</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/student.html#Discussion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#student.Discussion" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to retrieve discussion information, i.e. the responses from previous round and deadline for the current round.</p>
+<dl class="method">
+<dt id="student.Discussion.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/student.html#Discussion.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#student.Discussion.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the discussion information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="student.SectionPage">
+<em class="property">class </em><code class="descclassname">student.</code><code class="descname">SectionPage</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/student.html#SectionPage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#student.SectionPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to redirect a student based on what stage she is in in a particular section:
+lead-in question, discussion or summary round.</p>
+<p>If no round is active for this section, it redirects to an appropriate error page.</p>
+<dl class="method">
+<dt id="student.SectionPage.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/student.html#SectionPage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#student.SectionPage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP GET method to retrieve the sections and rounds under it.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="student.SubmitResponse">
+<em class="property">class </em><code class="descclassname">student.</code><code class="descname">SubmitResponse</code><span class="sig-paren">(</span><em>request=None</em>, <em>response=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/student.html#SubmitResponse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#student.SubmitResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>API to submit a student&#8217;s response to the current round.</p>
+<p>The student can save the response and return again, before the deadline, to modify it.</p>
+<dl class="method">
+<dt id="student.SubmitResponse.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/student.html#SubmitResponse.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#student.SubmitResponse.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP POST method to submit the response.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-utils"></span><div class="section" id="utils-py">
+<h2>utils.py<a class="headerlink" href="#utils-py" title="Permalink to this headline">¶</a></h2>
+<p>Defines the functions and constants which are accessed by different modules of this application.</p>
+<ul class="simple">
+<li>Author(s): Rohit Kapoor, Swaroop Joshi</li>
+<li>Last Modified: Dec. 18, 2015</li>
+</ul>
+<hr class="docutils" />
+<dl class="function">
+<dt id="utils.get_courses_and_sections">
+<code class="descclassname">utils.</code><code class="descname">get_courses_and_sections</code><span class="sig-paren">(</span><em>instructor</em>, <em>course_name</em>, <em>selected_section</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#get_courses_and_sections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.get_courses_and_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches the courses and sections for the given instructor.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>instructor (object): Instructor whose courses are to be retrieved
+course_name (str): Name of the course whose sections are to be retrieved (optional)
+selected_section (str): Name of the selected section (optional)</dd>
+<dt>Returns:</dt>
+<dd>template_values (dict): Courses and sections to be rendered.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.get_role">
+<code class="descclassname">utils.</code><code class="descname">get_role</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#get_role"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.get_role" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks and returns if the user is an Instructor or a Student, False if neither.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>user: The user whose role is to be retrieved.</dd>
+<dt>Returns:</dt>
+<dd>object: Instructor or Student or False.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.is_valid_response">
+<code class="descclassname">utils.</code><code class="descname">is_valid_response</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#is_valid_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.is_valid_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if any of the responses is one of the three valid options: support, neutral or disagree.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>response (list): A list of responses to be checked.</dd>
+<dt>Returns:</dt>
+<dd>bool: <code class="docutils literal"><span class="pre">True</span></code> if all of the responses are valid. <code class="docutils literal"><span class="pre">False</span></code> if any is invalid.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="people.html" class="btn btn-neutral float-right" title="People" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to CONSIDER’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Swaroop Joshi.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

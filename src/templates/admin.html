@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron well">
+        <div class="row">
+            <h2 style="text-align: center">Welcome developer!</h2><br/>
+            <h4 style="text-align: center">Add an Instructor</h4>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Email" id="textEmail">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="submitEmail" onclick="addInstructor()">Add
+                        </button>
+                    </span>
+                </div><!-- /input-group -->
+            </div><!-- /.col-lg-12 -->
+        </div><!-- /.row -->
+    </div><!-- /.jumbotron well -->
+
+    {% if instructors %}
+    <div class="well-lg">
+        <!---->
+        <!--Already Added List -->
+        <h4 style="text-align: center">
+            Enrolled Instructors ({{instructors|length}})
+        </h4>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Toggle</th>
+                </tr>
+                </thead>
+                <tbody style="text-align: left;">
+                {% for instructor in instructors %}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{instructor.email}}</td>
+                    <td>{%- if instructor.is_active -%}Active{%- else -%}Inactive{%- endif -%}</td>
+                    <td>{% if instructor.is_active %}
+                        <button class="btn btn-danger btn-sm" onclick="toggleStatus('{{instructor.email}}')">
+                            Inactivate
+                        </button>
+                        {% else %} <!-- ./if instructor.is_active -->
+                        <button class="btn btn-success btn-sm" onclick="toggleStatus('{{instructor.email}}')">
+                            Activate
+                        </button>
+                        {% endif %} <!-- ./if instructor.is_active -->
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div> <!-- ./well-lg -->
+    {% endif %} <!-- ./if instructors -->
+</div> <!-- container -->
+{% endblock content %}
+
+
+{% block script %}
+<script>
+    function addInstructor() {
+        console.log('In addInstructor');
+        var email = $("#textEmail").val();
+        console.log('Email = ' + email);
+        $.post("/admin", {email: email, action: 'add'}, function (data) {
+            bootbox.alert(data, function () {
+                location.reload();
+            });
+        });
+    }
+
+    function toggleStatus(instructor) {
+        bootbox.confirm("Toggle status of : " + instructor + "?", function (result) {
+            if (result) {
+                // do the POST and get the callback
+                $.post("/admin", {email: instructor, action: 'toggle'}, function (data) {
+                    bootbox.alert(data, function () {
+                        location.reload();
+                    });
+                });
+            }
+        });
+    }
+</script>
+{% endblock script %}}

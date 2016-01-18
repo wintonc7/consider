@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block topnavbar %}
+<li><a href="/home">Home</a></li>
+{% endblock %}
+
+{% set show_sidenavbar = False %}
+{% block sidenavbar %}
+<ul class="nav nav-sidebar">
+    <li><a href="/home">Home</a></li>
+</ul>
+<h1>Testing!!</h1>
+{% endblock %}
+
+{% block content %}
+
+{% if type_discussion %}
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--<a class="navbar-brand" href="/home"></a>-->
+        </div>
+        <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
+            <ul class="nav navbar-nav">
+                {% for i in range(1,rounds) %}
+                <li {% if i==curr_page-1 -%}class="active"><a href="#">{%- else -%}><a
+                        href="/discussion?section={{sectionKey}}&round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>
+{% else %} <!-- regular rounds -->
+<div class="row">
+    <div id="count-container" class="alert alert-warning col-md-18">
+        <p>Time left to complete: {% if expired -%} Time is over {%- else -%} <span id="countdown"> </span> {%- endif -%}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock content %}
+
+{% block script %}
+{% if not expired -%}
+<script src="/js/countdown.min.js"></script>
+
+<script>
+    var clock = document.getElementById("countdown");
+    targetDate = new Date("{{deadline}}Z");
+    console.log("targetDate = " + targetDate);
+    clock.innerHTML = countdown(targetDate).toString();
+    setInterval(function () {
+        clock.innerHTML = countdown(targetDate).toString();
+    }, 1000);
+</script>
+{% endif %}
+{% endblock script %}

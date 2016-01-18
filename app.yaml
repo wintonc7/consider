@@ -6,22 +6,22 @@ threadsafe: true
 
 handlers:
 - url: /css
-  static_dir: css
+  static_dir: src/static/css
 
 - url: /js
-  static_dir: js
+  static_dir: src/static/js
 
 - url: /fonts
-  static_dir: fonts
+  static_dir: src/static/fonts
 
-- url: /secretlandingpage
-  script: manadmin.application
-
-- url: /toggleInstructor
-  script: manadmin.application
+- url: /admin
+  script: src.consider.application
+  login: admin
+  auth_fail_action: redirect
 
 - url: /.*
-  script: consider.application
+  script: src.consider.application
+  login: required
 
 libraries:
 - name: webapp2

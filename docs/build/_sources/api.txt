@@ -1,0 +1,31 @@
+==================
+API Documentation
+==================
+
+
+.. automodule:: src
+   :members:
+
+
+.. automodule:: model
+   :members:
+
+.. automodule:: consider
+   :members:
+
+
+.. automodule:: admin
+   :members:
+
+
+.. automodule:: instructor
+   :members:
+
+
+.. automodule:: student
+   :members:
+
+
+.. automodule:: utils
+   :members:
+
