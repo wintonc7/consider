@@ -78,7 +78,7 @@ class Rounds(webapp2.RequestHandler):
                     else:
                         self.redirect('/home')
                 except Exception as e:
-                    utils.error('Got exception: ' + e.message)
+                    utils.error('Got exception: ' + e.message, handler=self)
                     self.redirect('/home')
             else:
                 self.redirect('/')
@@ -105,17 +105,18 @@ class Rounds(webapp2.RequestHandler):
                             response = models.Response(parent=current_round.key, id=student.email)
                             if current_round.is_quiz:
                                 if not (option and comment):
-                                    utils.error('Invalid Parameters: option or comment is null')
+                                    utils.error('Invalid Parameters: option or comment is null', handler=self)
                                     return
                                 if current_round.number != 1 and not summary:
-                                    utils.error('Invalid Parameters: round is 1 or summary is null')
+                                    utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
                                     return
                                 response.option = option
                                 response.summary = summary if summary else ''
                             else:
                                 res = json.loads(res)
                                 if not (res and comment) or not utils.is_valid_response(res):
-                                    utils.error('Invalid Parameters: comment is null or res is not a valid response')
+                                    utils.error('Invalid Parameters: comment is null or res is not a valid response',
+                                                handler=self)
                                     return
                                 for i in range(1, len(res)):
                                     response.response.append(res[i])
@@ -136,15 +137,16 @@ class Rounds(webapp2.RequestHandler):
                         else:
                             utils.error('Sorry! The round is not visible, please try again later.', handler=self)
                     else:
-                        utils.error('Section is null')
+                        utils.error('Section is null', handler=self)
                 except:
                     utils.error(
                             'Sorry! There was some error submitting your response please try again later.',
                             handler=self)
             else:
-                utils.error('Invalid Parameters: section_key is null')
+                utils.error('Invalid Parameters: section_key is null', handler=self)
         else:
             utils.error('user is null or not student', handler=self)
+            self.redirect('/')
 
 
 class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
@@ -231,11 +233,12 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                                     else:
                                         utils.error(
                                                 'Group not found for {0} Section: {1}'.format(str(student), str(
-                                                        section)))
+                                                        section)), handler=self)
                                         self.redirect('/error?code=105')
                                 else:
                                     utils.error(
-                                            'Group not found for {0} Section: {1}'.format(str(student), str(section)))
+                                            'Group not found for {0} Section: {1}'.format(str(student), str(section)),
+                                            handler=self)
                                     self.redirect('/error?code=105')
                             else:
                                 utils.log(
@@ -280,4 +283,5 @@ class HomePage(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('student_home.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user is null or not student')
+            utils.error('user is null or not student', handler=self)
+            self.redirect('/')
