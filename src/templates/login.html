@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block head %}
+{{ super() }}
+<link href="/css/login.css">
+{% endblock head %}
+
+{% set loginpage = True %}
+
+{% block content %}
+<div class="container" align="center">
+    <div class="jumbotron well">
+        <h1>Welcome to CONSIDER</h1>
+        <!--<h2 class="form-signin-heading">Please sign in to continue:</h2>-->
+        <a class="btn btn-lg btn-primary sign-btn" href="{{loginurl}}">
+            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Sign in</a>
+    </div>
+</div>
+{% endblock content %}

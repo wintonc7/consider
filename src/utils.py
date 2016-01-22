@@ -32,13 +32,12 @@ def jinja_env():
 
 def error_codes():
     """
-
     Returns a dictionary of error codes in <code: message> format.
 
     """
     return {
         '100': "Oops! Something went wrong please try again.",
-        '101': "Sorry you are not registered with this application, please contact your Instructor.",
+        '101': "Sorry you are not registered with this application, please contact your instructor.",
         '102': "Sorry you are not an instructor.",
         '103': "Sorry no rounds are active for this section, please try again later.",
         '104': "Sorry the round was not found, please contact your Instructor.",
@@ -75,7 +74,7 @@ def error(message, handler=None):
           Handler to post the same message back to user.
 
     """
-    log(message, type='Error', handler=handler)
+    log(message, type='E', handler=handler)
 
 
 def get_role_user():
@@ -90,12 +89,17 @@ def get_role_user():
     """
     user = users.get_current_user()
     if user:
+        log('Logged in: user = ' + str(user))
+        if users.is_current_user_admin():
+            return models.Role.admin, user
         instructor = models.Instructor.query(models.Instructor.email == user.email().lower()).get()
         if instructor:
             return models.Role.instructor, instructor
         student = models.Student.query(models.Student.email == user.email().lower()).get()
         if student:
             return models.Role.student, student
+    else:
+        log('No one logged in')
     return None, None
 
 

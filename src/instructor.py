@@ -37,12 +37,12 @@ class Courses(webapp2.RequestHandler):
         """
         course = models.Course.get_by_id(course_name, parent=instructor.key)
         if course:
-            utils.error(course_name + ' already exists')
+            utils.error(course_name + ' already exists', handler=self)
         else:
             course = models.Course(parent=instructor.key, id=course_name)
             course.name = course_name
             course.put()
-            utils.log(course_name + ' added', type='S')
+            utils.log(course_name + ' added', type='S',handler=self)
 
     def toggle_course(self, instructor, course_name):
         """
@@ -59,7 +59,7 @@ class Courses(webapp2.RequestHandler):
         if course:
             course.is_active = not course.is_active
             course.put()
-            utils.log('Status changed for ' + course_name, type='S')
+            utils.log('Status changed for ' + course_name, type='S',handler=self)
         else:
             utils.error('Course ' + course_name + ' not found', handler=self)
 
@@ -78,9 +78,9 @@ class Courses(webapp2.RequestHandler):
                 elif action == 'toggle':
                     self.toggle_course(user, course_name.upper())
                 else:
-                    utils.error('Unexpected action: ' + action)
+                    utils.error('Unexpected action: ' + action,handler=self)
             else:
-                utils.error('Invalid argument: course_name or action is null')
+                utils.error('Invalid argument: course_name or action is null', handler=self)
         else:
             utils.error('user is null or not Instructor', handler=self)
 
@@ -101,7 +101,8 @@ class Courses(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('instructor_courses.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user is None or not Instructor')
+            utils.error('user is None or not Instructor', handler=self)
+            self.redirect('/')
 
 
 class Section(webapp2.RequestHandler):
@@ -173,6 +174,9 @@ class Section(webapp2.RequestHandler):
                 utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
             utils.error('user is null or not instructor', handler=self)
+
+    def get(self):
+        self.redirect('/courses')
 
 
 class Students(webapp2.RequestHandler):
@@ -255,15 +259,16 @@ class Students(webapp2.RequestHandler):
                             email = self.request.get('email').lower()
                             self.remove_student(section, email)
                         else:
-                            utils.error('Unexpected action: ' + action)
+                            utils.error('Unexpected action: ' + action, handler=self)
                     else:
-                        utils.error(section_name + ' section does not exist!')
+                        utils.error(section_name + ' section does not exist!', handler=self)
                 else:
-                    utils.error(course_name + ' course does not exist!')
+                    utils.error(course_name + ' course does not exist!', handler=self)
             else:
-                utils.error('Invalid arguments: course_name or section_name or actoin is null')
+                utils.error('Invalid arguments: course_name or section_name or actoin is null', handler=self)
         else:
-            utils.error('user is null or not instructor')
+            utils.error('user is null or not instructor', handler=self)
+            self.redirect('/')
 
     def get(self):
         """
@@ -279,7 +284,7 @@ class Students(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('instructor_list_students.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user null or not instructor')
+            utils.error('user null or not instructor', handler=self)
             self.redirect('/')
 
 
@@ -324,7 +329,7 @@ class Rounds(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('instructor_rounds.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user null or not instructor')
+            utils.error('user null or not instructor', handler=self)
             self.redirect('/')
 
     def add_round(self, section):
@@ -348,7 +353,7 @@ class Rounds(webapp2.RequestHandler):
             description = self.request.get('description')
             round_obj.description = description
         else:
-            utils.error('Unknown round_type passed.')
+            utils.error('Unknown round_type passed.', handler=self)
         round_obj.put()
         # Only update the value of total rounds if a new round is created,
         # not when we edit an old round is edited
@@ -391,15 +396,16 @@ class Rounds(webapp2.RequestHandler):
                         elif action == 'activate':
                             self.activate_round(section)
                         else:
-                            utils.error('Unexpected action: ' + action)
+                            utils.error('Unexpected action: ' + action, handler=self)
                     else:
-                        utils.error('Section {s} does not exist!'.format(s=section_name))
+                        utils.error('Section {s} does not exist!'.format(s=section_name), handler=self)
                 else:
-                    utils.error('Course {c} does not exist!'.format(c=course_name))
+                    utils.error('Course {c} does not exist!'.format(c=course_name), handler=self)
             else:
-                utils.error('Invalid arguments: course_name or section_name or action is null')
+                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
-            utils.error('user null or not instructor')
+            utils.error('user null or not instructor', handler=self)
+            self.redirect('/')
 
 
 class Groups(webapp2.RequestHandler):
@@ -488,7 +494,7 @@ class Groups(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('instructor_groups.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user not instructor')
+            utils.error('user not instructor', handler=self)
             self.redirect('/')
 
     def post(self):
@@ -513,15 +519,16 @@ class Groups(webapp2.RequestHandler):
                             groups = json.loads(self.request.get('groups'))
                             self.update_groups(section, groups)
                         else:
-                            utils.error('Unknown action' + action if action else 'None')
+                            utils.error('Unknown action' + action if action else 'None', handler=self)
                     else:
-                        utils.error(section_name + ' section does not exist!')
+                        utils.error(section_name + ' section does not exist!', handler=self)
                 else:
-                    utils.error(course_name + ' course does not exist!')
+                    utils.error(course_name + ' course does not exist!', handler=self)
             else:
-                utils.error('Invalid arguments: course_name or section_name or action is null')
+                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
-            utils.error('user is null or not instructor')
+            utils.error('user is null or not instructor', handler=self)
+            self.redirect('/')
 
 
 class Responses(webapp2.RequestHandler):
@@ -555,7 +562,7 @@ class Responses(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('instructor_responses.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user is null or not instructor')
+            utils.error('user is null or not instructor', handler=self)
             self.redirect('/')
 
 
@@ -599,5 +606,5 @@ class GroupResponses(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('instructor_groups_responses.html')
             self.response.write(template.render(template_values))
         else:
-            utils.error('user is null or not instructor')
+            utils.error('user is null or not instructor', handler=self)
             self.redirect('/')

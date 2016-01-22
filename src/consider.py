@@ -14,9 +14,9 @@ from google.appengine.api import users
 
 import admin
 import instructor
-import models
 import student
 import utils
+from models import Role
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -63,10 +63,11 @@ class ErrorPage(webapp2.RequestHandler):
 
 class MainPage(webapp2.RequestHandler):
     """
-    Handles the main landing page ``(/)`` of the app.
+    Handles the main landing page ``(/)`` of the app. Redirects to appropriate pages based on the logged in user's role.
 
-    If the user is logged in, and is an admin, redirects to the ``/admin`` page, if not an admin, redirects to the ``/home`` page.
-    If not logged in, shows the ``login`` page.
+    If the user is logged in, and is an admin, redirects to the ``/admin`` page. If the user is an instructor,
+    redirects to the ``/courses`` page. If the user is a student, redirects to the ``/student_home`` page.
+    If not logged in, shows the login page.
     """
 
     def get(self):
@@ -75,42 +76,26 @@ class MainPage(webapp2.RequestHandler):
 
         Renders or redirects appropriately.
         """
-        user = users.get_current_user()
-        if user:
-            if users.is_current_user_admin():
-                self.redirect('/admin')
-            else:
-                self.redirect('/home')
+        role, _ = utils.get_role_user()
+        if role == Role.admin:
+            self.redirect('/admin')
+        elif role == Role.instructor:
+            self.redirect('/courses')
+        elif role == Role.student:
+            self.redirect('/student_home')
         else:
             login_url = users.create_login_url(self.request.uri)
             template_values = {
-                'url': login_url
+                'loginurl': login_url
             }
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
 
 
-class HomePage(webapp2.RequestHandler):
-    """
-    Handles the ``/home`` page. Redirects based on the *role* of the user (Instructor or Student).
-    """
-
-    def get(self):
-        """
-        If a valid ``user`` is logged in, and if the user is an ``Instructor``, redirect to the Instructor console, which contains a list of courses and sections that instructor is in charge of; if the user is a ``Student``, retrieves the list of sections that student is enrolled in, and redirects to the student home page populated with that list.
-        """
-        role, user = utils.get_role_user()
-        if role and user:
-            utils.log(str(user) + ' logged in as: ' + role)
-            self.redirect('/courses') if role == models.Role.instructor else self.redirect('/student_home')
-        else:
-            self.redirect('/error?code=101')
-
-
 application = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/home', MainPage),
     ('/error', ErrorPage),
-    ('/home', HomePage),
     ('/admin', admin.AdminPage),
     ('/courses', instructor.Courses),
     ('/sections', instructor.Section),
