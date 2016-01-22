@@ -123,7 +123,7 @@ class Section(webapp2.RequestHandler):
         """
         section = models.Section.get_by_id(section_name, parent=course.key)
         if section:
-            utils.error(section_name + ' already exists')
+            utils.error(section_name + ' already exists', handler=self)
         else:
             section = models.Section(parent=course.key, id=section_name)
             section.name = section_name

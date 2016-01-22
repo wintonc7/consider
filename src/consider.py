@@ -76,13 +76,17 @@ class MainPage(webapp2.RequestHandler):
 
         Renders or redirects appropriately.
         """
-        role, _ = utils.get_role_user()
-        if role == Role.admin:
-            self.redirect('/admin')
-        elif role == Role.instructor:
-            self.redirect('/courses')
-        elif role == Role.student:
-            self.redirect('/student_home')
+        role, user = utils.get_role_user()
+        if user:
+            if role == Role.admin:
+                self.redirect('/admin')
+            elif role == Role.instructor:
+                self.redirect('/courses')
+            elif role == Role.student:
+                self.redirect('/student_home')
+            else:
+                utils.log(str(user) + ' navigated to Error')
+                self.redirect('/error?code=101')
         else:
             login_url = users.create_login_url(self.request.uri)
             template_values = {

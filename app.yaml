@@ -21,7 +21,6 @@ handlers:
 
 - url: /.*
   script: src.consider.application
-  login: required
 
 libraries:
 - name: webapp2

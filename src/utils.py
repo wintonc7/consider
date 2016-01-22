@@ -98,6 +98,8 @@ def get_role_user():
         student = models.Student.query(models.Student.email == user.email().lower()).get()
         if student:
             return models.Role.student, student
+        else:
+            return None, user
     else:
         log('No one logged in')
     return None, None

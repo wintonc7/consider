@@ -1,16 +1,11 @@
 {% extends "base.html" %}
 
-{% block topnavbar %}
-<li><a href="/home">Home</a></li>
+{% block head %}
+{{super()}}
+<link href="/css/home.css" rel="stylesheet">
 {% endblock %}
 
 {% set show_sidenavbar = False %}
-{% block sidenavbar %}
-<ul class="nav nav-sidebar">
-    <li><a href="/home">Home</a></li>
-</ul>
-<h1>Testing!!</h1>
-{% endblock %}
 
 {% block content %}
 
