@@ -87,7 +87,7 @@ class Student(ndb.Model):
     An object to represent the Student in the app.
     """
     email = ndb.StringProperty(required=True)
-    """ String. Must be non-empty and unique. Retrieved from Gmail automatically """
+    """ String. Must be non-empty and unique. Retrieved from Google automatically """
     sections = ndb.KeyProperty(kind=Section, repeated=True, indexed=False)
     """ List of active `Section`_ s this student is enrolled in. """
 
@@ -137,6 +137,8 @@ class Round(ndb.Model):
     """ Integer. Index of the round."""
     description = ndb.StringProperty(indexed=False)
     """ String. Description or brief instructions for the round."""
+    is_anonymous = ndb.BooleanProperty(default=True, indexed=False)
+    """ Boolean. If ``True``, this is an anonymous round; if ``False``, identities will be revealed."""
     is_quiz = ndb.BooleanProperty(default=False, indexed=False)
     """ Boolean. If ``True``, this is a quiz round (e.g., lead-in question); if ``False``, a discussion round."""
     quiz = ndb.StructuredProperty(Question, indexed=False)

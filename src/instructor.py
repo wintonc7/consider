@@ -351,7 +351,11 @@ class Rounds(webapp2.RequestHandler):
                                              options=options)
         elif round_type == 'discussion':
             description = self.request.get('description')
+            anonymity = self.request.get('anonymity')
             round_obj.description = description
+            if anonymity != "yes":
+                round_obj.is_anonymous = False
+
         else:
             utils.error('Unknown round_type passed.', handler=self)
         round_obj.put()

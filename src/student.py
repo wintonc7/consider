@@ -197,6 +197,7 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                                                     if s.email == _student:
                                                         comment = {
                                                             'alias': s.alias,
+                                                            'email': s.email,
                                                             'response': response.comment,
                                                             'opinion': response.response
                                                         }
@@ -223,6 +224,8 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                                             template_values['expired'] = True
                                         if d_round.is_quiz:
                                             template_values['expired'] = True
+                                        if not d_round.is_anonymous:
+                                            template_values['show_name'] = True
                                         template_values['deadline'] = d_round.deadline
                                         template_values['rounds'] = section.current_round
                                         template_values['curr_page'] = requested_round

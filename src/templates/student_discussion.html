@@ -25,7 +25,7 @@
     {% endif %}
     {% for comment in comments %}
     <div class="jumbotron" id="jum_{{loop.index}}">
-        <h2>{{comment.alias}}</h2>
+        <h2>{{comment.alias}} {% if show_name -%} ({{comment.email}}) {%- endif -%}</h2>
         {% if comment.option %}
         <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
         {% endif %}
