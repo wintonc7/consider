@@ -175,6 +175,9 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                                 return
                             requested_round = self.request.get('round')
                             requested_round = int(requested_round) if requested_round else section.current_round
+                            # grab the round one object to pull the question to display on dicussion pages
+                            q_question = models.Round.get_by_id(requested_round - (requested_round -1),
+                                                                                    parent=section.key)
                             d_round = models.Round.get_by_id(requested_round, parent=section.key)
                             if d_round:
                                 group = 0
@@ -231,6 +234,8 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                                         template_values['curr_page'] = requested_round
                                         template_values['description'] = d_round.description
                                         template_values['sectionKey'] = section_key
+                                        # Add question for discussion rounds
+                                        template_values['question'] = q_question.quiz.question
                                         template = utils.jinja_env().get_template('student_discussion.html')
                                         self.response.write(template.render(template_values))
                                     else:
