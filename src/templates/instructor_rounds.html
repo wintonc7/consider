@@ -198,7 +198,7 @@
                     <div class="form-group">
                         <label for="endTime" class="col-sm-2 control-label">End time</label>
                         <div class="col-sm-10">
-                            <input id="endTime" type="datetime-local" class="form-control" name="time" required="true">
+                            <input id="endTime" class="form-control dateTimePicker" name="endTime" required="true" />
                         </div>
                     </div>
                     <div class="form-group">
@@ -260,8 +260,7 @@
                     <div class="form-group">
                         <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
                         <div class="col-sm-10">
-                            <input id="discussionEndTime" type="datetime-local" class="form-control"
-                                   name="discussionTime" required="true">
+                            <input id="discussionEndTime" class="form-control dateTimePicker" name="discussionEndTime" required="true" />
                         </div>
                     </div>
                     <div class="form-group">
@@ -297,7 +296,11 @@
 {% endblock %}
 
 {% block script %}
+<script src="/js/moment.js"></script>
+<script src="/js/bootstrap-datetimepicker.js"></script>
+<link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <script>
+
     $('#courseSelector').on('change', function () {
         location.href = "/rounds?course=" + this.value;
     });
@@ -339,8 +342,13 @@
         });
     }
 
+    $(".dateTimePicker").on('mouseenter', function() {
+        $(this).datetimepicker();
+    });
+
     $("#modalForm").submit(function (event) {
         event.preventDefault();
+        // First we need to check that a date has been selected
         var $form = $(this),
                 question = $form.find("textarea").val(),
                 options = $form.find("select").val(),
@@ -353,7 +361,7 @@
         }
         optionVals = JSON.stringify(optionVals);
 
-        var time_val = $("#endTime").val();
+        var time_val = moment($("#endTime").val()).format("YYYY-DD-MM[T]HH:MM");
 
         console.log(question + options + time_val + optionVals);
 
