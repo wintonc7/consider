@@ -176,8 +176,7 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                             requested_round = self.request.get('round')
                             requested_round = int(requested_round) if requested_round else section.current_round
                             # grab the round one object to pull the question to display on dicussion pages
-                            q_question = models.Round.get_by_id(requested_round - (requested_round -1),
-                                                                                    parent=section.key)
+                            q_question = models.Round.get_by_id(1, parent=section.key)
                             d_round = models.Round.get_by_id(requested_round, parent=section.key)
                             if d_round:
                                 group = 0
