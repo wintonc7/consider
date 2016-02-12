@@ -23,10 +23,6 @@
     {% if description %}
     <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
     {% endif %}
-    <!-- Added to display question on all dicussion rounds -->
-    <div class="jumbotron">
-        <p> {{question}} </p>
-    </div>
     {% for comment in comments %}
     <div class="jumbotron" id="jum_{{loop.index}}">
         <h2>{{comment.alias}} {% if show_name -%} ({{comment.email}}) {%- endif -%}</h2>
