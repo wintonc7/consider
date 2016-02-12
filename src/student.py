@@ -315,10 +315,7 @@ class QuestionDisplay(webapp2.RequestHandler):
                             requested_round = self.request.get('round')
                             requested_round = int(requested_round) if requested_round else section.current_round
                             d_round = models.Round.get_by_id(requested_round, parent=section.key)
-                            deadline = datetime.datetime.strptime(d_round.deadline,
-                                                                              '%Y-%m-%dT%H:%M')
                             round_one = models.Round.get_by_id(1, parent=section.key)
-                            current_time = datetime.datetime.now()
                             template_values = {
                                             'logouturl': logout_url,
                                             'expired': True
