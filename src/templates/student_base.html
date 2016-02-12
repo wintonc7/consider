@@ -25,8 +25,15 @@
         <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
             <ul class="nav navbar-nav">
                 {% for i in range(0,rounds) %}
-                <li {% if i==0 %}><a href="/student_question?section={{sectionKey}}">{% elif i==curr_page-1 -%}class="active"><a href="#">{%- else -%}><a
-                        href="/discussion?section={{sectionKey}}&round={{i+1}}">{%- endif -%}Round {{i+1}}</a></li>
+                    <li {% if i == curr_page-1 %}class="active"{% endif %}>
+                        {% if curr_page != 1 and i == 0 %}
+                            <a href="/student_question?section={{sectionKey}}&round=1">Round {{i+1}}</a>
+                        {% elif i==curr_page-1 -%}
+                            <a href="#">Round {{i+1}}</a>
+                        {%- else -%}
+                            <a href="/discussion?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
+                        {%- endif -%}
+                    </li>
                 {% endfor %}
             </ul>
         </div>
