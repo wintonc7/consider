@@ -188,7 +188,10 @@ class Discussion(webapp2.RequestHandler):  # FIXME Aliases mixed up.
                                     group = models.Group.get_by_id(group, parent=section.key)
                                     if group:
                                         comments = []
-                                        previous_round = models.Round.get_by_id(requested_round - 1,
+                                        if requested_round-1 == 0:
+                                            previous_round = models.Round.get_by_id(1, parent=section.key)
+                                        else:
+                                            previous_round = models.Round.get_by_id(requested_round - 1,
                                                                                 parent=section.key)
                                         for _student in group.members:
                                             response = models.Response.get_by_id(_student, parent=previous_round.key)
@@ -287,4 +290,51 @@ class HomePage(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
         else:
             utils.error('user is null or not student', handler=self)
+            self.redirect('/')
+
+
+class QuestionDisplay(webapp2.RequestHandler):
+    def get(self):
+        """
+        Display the lead-in question and possible answers for the round 1 tab
+        during the student discussions rounds
+        """
+
+        role, student = utils.get_role_user()
+        if student and role == models.Role.student:
+            logout_url = users.create_logout_url(self.request.uri)
+            utils.log('Student navigated to question page ' + str(student))
+            section_key = self.request.get('section')
+            if section_key:
+                try:
+                    section = ndb.Key(urlsafe=section_key).get()
+                    if section:
+                        if section.current_round == 0:
+                            self.redirect('/error?code=103')
+                        else:
+                            requested_round = self.request.get('round')
+                            requested_round = int(requested_round) if requested_round else section.current_round
+                            d_round = models.Round.get_by_id(requested_round, parent=section.key)
+                            round_one = models.Round.get_by_id(1, parent=section.key)
+                            template_values = {
+                                            'logouturl': logout_url,
+                                            'expired': True
+                                        }
+                            template_values['deadline'] = d_round.deadline
+                            template_values['rounds'] = section.current_round
+                            template_values['curr_page'] = requested_round
+                            template_values['question'] = round_one.quiz.question
+                            template_values['options'] = round_one.quiz.options
+                            template_values['sectionKey'] = section_key
+                            template = utils.jinja_env().get_template('student_question.html')
+                            self.response.write(template.render(template_values))
+                    else:
+                        utils.log('Section not found for key: ' + section_key)
+                        self.redirect('/home')
+                except Exception as e:
+                    utils.log('Found exception ' + e.message)
+                    self.redirect('/home')
+            else:
+                self.redirect('/home')
+        else:
             self.redirect('/')

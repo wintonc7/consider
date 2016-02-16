@@ -111,4 +111,5 @@ application = webapp2.WSGIApplication([
     ('/discussion', student.Discussion),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
+    ('/student_question', student.QuestionDisplay),
 ], debug=True)
