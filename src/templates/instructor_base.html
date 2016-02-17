@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block head %}
+{{ super() }}
+<link href="/css/admin.css" rel="stylesheet">
+{% endblock head %}
+
 {% set show_sidenavbar = True %}
 
 {% block topnavbar %}
