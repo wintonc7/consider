@@ -1,17 +1,22 @@
-{% extends "student_base.html" %}
+{% extends "base.html" %}
 {% block title %}| Home{% endblock %}
 
+{% block head %}
+{{ super() }}
+<link href="/css/home.css" rel="stylesheet">
+{% endblock head %}
+
 {% block content %}
-<div class="well">
+<div class="jumbotron">
     <h2>Welcome {{nickname}}!</h2>
 
-    <h4 class="form-signin-heading">Please select a section to continue:</h4>
+    <h4 class="form-signin-heading">Select a section to continue</h4>
 
     {% if sections %}
     <div class="list-group">
         {% for section in sections %}
-        <button type="button" onclick="redirect('{{section.key}}')" class="list-group-item btn-block">{{section.course}}
-            - {{section.name}}
+        <button type="button" onclick="redirect('{{section.key}}')" class="list-group-item btn-block">
+            {{section.course}} - {{section.name}}
         </button>
         {% endfor %}
     </div>

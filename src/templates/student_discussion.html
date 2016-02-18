@@ -11,14 +11,7 @@
 
 {% block content %}
 {{ super() }}
-
 <div class="container">
-    <div class="row">
-        <div id="count-container" class="alert alert-warning col-md-12">
-            <p>Time left to complete: {% if expired -%} Time
-            is over {%- else -%} <span id="countdown"></span> {%- endif -%}</p>
-        </div>
-    </div>
     <h1 class="lead">Welcome {{alias}}</h1>
     {% if description %}
     <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
@@ -83,8 +76,8 @@
 
 {% block script %}
 {{ super() }}
-<script src="/js/countdown.min.js"></script>
-<script type="text/javascript">
+<!--<script src="/js/countdown.min.js"></script>-->
+<script>
     var l = {{comments | length}}
     var resp = [];
     resp[0] = null;
@@ -109,12 +102,6 @@
     }
 
     {%- if not expired -%}
-//    var clock = document.getElementById("countdown");
-//    targetDate = new Date("{{deadline}}Z");
-//    clock.innerHTML = countdown(targetDate).toString();
-//    setInterval(function () {
-//        clock.innerHTML = countdown(targetDate).toString();
-//    }, 1000);
 
     $('.alert .close').on('click', function (e) {
         $(this).parent().hide();

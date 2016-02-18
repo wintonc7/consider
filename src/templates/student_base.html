@@ -2,51 +2,36 @@
 
 {% block head %}
 {{super()}}
-<link href="/css/home.css" rel="stylesheet">
 {% endblock %}
 
 {% set show_sidenavbar = False %}
 
-{% block content %}
+{% block topnavbar %}
+{{ super() }}
+{% for i in range(0,rounds) %}
+<li {% if i== curr_page-1 %}class="active" {% endif %}>
+    {% if curr_page != 1 and i == 0 %}
+    <a href="/student_question?section={{sectionKey}}&round=1">Round {{i+1}}</a>
+    {% elif i==curr_page-1 -%}
+    <a href="#">Round {{i+1}}</a>
+    {%- else -%}
+    <a href="/discussion?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
+    {%- endif -%}
+</li>
+{% endfor %}
+{% endblock topnavbar %}
 
-{% if type_discussion %}
-<nav class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--<a class="navbar-brand" href="/home"></a>-->
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div id="count-container" class="alert alert-warning">
+            <p>
+                {% if expired -%} Time is over {%- else -%} Time left to complete: <span id="countdown"> </span> {%-
+                endif -%}
+            </p>
         </div>
-        <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
-            <ul class="nav navbar-nav">
-                {% for i in range(0,rounds) %}
-                    <li {% if i == curr_page-1 %}class="active"{% endif %}>
-                        {% if curr_page != 1 and i == 0 %}
-                            <a href="/student_question?section={{sectionKey}}&round=1">Round {{i+1}}</a>
-                        {% elif i==curr_page-1 -%}
-                            <a href="#">Round {{i+1}}</a>
-                        {%- else -%}
-                            <a href="/discussion?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
-                        {%- endif -%}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</nav>
-{% else %} <!-- regular rounds -->
-<div class="row">
-    <div id="count-container" class="alert alert-warning col-md-18">
-        <p>Time left to complete: {% if expired -%} Time is over {%- else -%} <span id="countdown"> </span> {%- endif
-            -%}</p>
     </div>
 </div>
-{% endif %}
 {% endblock content %}
 
 {% block script %}
