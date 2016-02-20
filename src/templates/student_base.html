@@ -8,21 +8,11 @@
 
 {% block topnavbar %}
 {{ super() }}
-{% if rounds == 1 %}
-<li class="active"><a href="#">Round 1</a></li>
-{% else %} <!-- ./if rounds == 1 -->
 {% for i in range(0,rounds) %}
-<li {% if i== curr_page-1 %}class="active" {% endif %}>
-    {% if curr_page != 1 and i == 0 %}
-    <a href="/student_question?section={{sectionKey}}&round=1">Round {{i+1}}</a>
-    {% elif i==curr_page-1 -%}
-    <a href="#">Round {{i+1}}</a>
-    {%- else -%}
-    <a href="/discussion?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
-    {%- endif -%}
+<li>
+    <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
 </li>
 {% endfor %}
-{% endif %} <!-- ./if rounds == 1 -->
 {% endblock topnavbar %}
 
 {% block content %}
