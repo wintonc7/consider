@@ -9,7 +9,11 @@
 {% block topnavbar %}
 {{ super() }}
 {% for i in range(0,rounds) %}
+{%- if curr_page == i+1 -%}
+<li class="active">
+{%- else -%}
 <li>
+{%- endif -%}
     <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
 </li>
 {% endfor %}

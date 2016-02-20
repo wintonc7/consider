@@ -43,7 +43,6 @@ class StudentInfo(ndb.Model):
     """ String. Identifies a student within a discussion round. Takes values S1, S2, etc. """
     group = ndb.IntegerProperty(default=0)
     """ Integer. The group this student is part of. """
-    # FIXME: How is it handled when the student is part of more than one sections?
 
 
 class Section(ndb.Model):

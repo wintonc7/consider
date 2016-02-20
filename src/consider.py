@@ -108,8 +108,6 @@ application = webapp2.WSGIApplication([
     ('/responses', instructor.Responses),
     ('/group_responses', instructor.GroupResponses),
     ('/groups', instructor.Groups),
-    # ('/discussion', student.Discussion),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
-    # ('/student_question', student.QuestionDisplay),
 ], debug=True)

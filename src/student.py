@@ -57,9 +57,10 @@ class Rounds(webapp2.RequestHandler):
                             template_values['show_name'] = not requested_round.is_anonymous
                             logout_url = users.create_logout_url(self.request.uri)
                             template_values['logouturl'] = logout_url
+                            template_values['last_round'] = requested_round.is_quiz and requested_round_number > 1
+                            template_values['curr_page'] = requested_round_number
 
                             if requested_round.is_quiz:
-                                # template_values = self.get_quiz_template(student=student, round=requested_round)
                                 response = models.Response.get_by_id(student.email, parent=requested_round.key)
                                 if response:
                                     template_values['option'] = response.option
@@ -68,7 +69,6 @@ class Rounds(webapp2.RequestHandler):
                                 template_values['question'] = requested_round.quiz.question
                                 template_values['options'] = requested_round.quiz.options
                                 template_values['number'] = requested_round.quiz.options_total
-                                template_values['curr_page'] = requested_round.number
                                 template = utils.jinja_env().get_template('student_round.html')
                                 self.response.write(template.render(template_values))
                             else:
@@ -125,7 +125,6 @@ class Rounds(webapp2.RequestHandler):
             self.redirect('/home')
 
     def post(self):
-    # FIXME: posting from non leadin rounds is changed since we moved from Discussions to Rounds
         """
         HTTP POST method to submit the response.
         """
@@ -147,9 +146,9 @@ class Rounds(webapp2.RequestHandler):
                                 if not (option and comment):
                                     utils.error('Invalid Parameters: option or comment is null', handler=self)
                                     return
-                                if current_round.number != 1 and not summary:
-                                    utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
-                                    return
+                                # if current_round.number != 1 and not summary:
+                                #     utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
+                                #     return
                                 response.option = option
                                 response.summary = summary if summary else ''
                             else:
@@ -188,123 +187,6 @@ class Rounds(webapp2.RequestHandler):
             utils.error('user is null or not student', handler=self)
             self.redirect('/')
 
-'''
-class Discussion(webapp2.RequestHandler):
-    """
-    API to retrieve discussion information, i.e. the responses from previous round and deadline for the current round.
-    """
-
-    def get(self):
-        """
-        HTTP GET method to retrieve the discussion information.
-        """
-        role, student = utils.get_role_user()
-        if student and role == models.Role.student:
-            logout_url = users.create_logout_url(self.request.uri)
-            utils.log('Student navigated to discussion ' + str(student))
-            section_key = self.request.get('section')
-            if section_key:
-                try:
-                    section = ndb.Key(urlsafe=section_key).get()
-                    if section:
-                        if section.current_round == 0:
-                            self.redirect('/error?code=103')
-                        else:
-                            if section.current_round == 1:
-                                self.redirect('/home')
-                                return
-                            requested_round = self.request.get('round')
-                            requested_round = int(requested_round) if requested_round else section.current_round
-                            d_round = models.Round.get_by_id(requested_round, parent=section.key)
-                            if d_round:
-                                group = 0
-                                alias = None
-                                for _student in section.students:
-                                    if _student.email == student.email:
-                                        group = _student.group
-                                        alias = _student.alias
-                                        break
-                                if group != 0 and alias:
-                                    group = models.Group.get_by_id(group, parent=section.key)
-                                    if group:
-                                        comments = []
-                                        if requested_round - 1 == 0:
-                                            previous_round = models.Round.get_by_id(1, parent=section.key)
-                                        else:
-                                            previous_round = models.Round.get_by_id(requested_round - 1,
-                                                                                    parent=section.key)
-                                        for _student in group.members:
-                                            response = models.Response.get_by_id(_student, parent=previous_round.key)
-                                            if response:
-                                                for s in section.students:
-                                                    if s.email == _student:
-                                                        comment = {
-                                                            'alias': s.alias,
-                                                            'email': s.email,
-                                                            'response': response.comment,
-                                                            'opinion': response.response
-                                                        }
-                                                        if response.option != 'NA':
-                                                            comment['option'] = previous_round.quiz.options[
-                                                                int(response.option[-1] - 1)]
-                                                        comments.append(comment)
-                                                        break
-                                        template_values = {
-                                            'logouturl': logout_url,
-                                            'alias': alias,
-                                            'comments': comments
-                                        }
-                                        stu_response = models.Response.get_by_id(student.email,
-                                                                                 parent=d_round.key)
-                                        if stu_response:
-                                            template_values['comment'] = stu_response.comment
-                                            template_values['response'] = ','.join(
-                                                str(item) for item in stu_response.response)
-                                        deadline = datetime.datetime.strptime(d_round.deadline,
-                                                                              '%Y-%m-%dT%H:%M')
-                                        current_time = datetime.datetime.now()
-                                        if deadline < current_time or requested_round != section.current_round:
-                                            template_values['expired'] = True
-                                        # if d_round.is_quiz:
-                                        #     template_values['expired'] = True
-                                        if not d_round.is_anonymous:
-                                            template_values['show_name'] = True
-                                        template_values['deadline'] = d_round.deadline
-                                        template_values['rounds'] = section.current_round
-                                        template_values['curr_page'] = requested_round
-                                        template_values['description'] = d_round.description
-                                        template_values['sectionKey'] = section_key
-                                        if d_round.is_quiz:
-                                            template = utils.jinja_env().get_template('student_round.html')
-                                        else:
-                                            template = utils.jinja_env().get_template('student_discussion.html')
-                                        self.response.write(template.render(template_values))
-                                    else:
-                                        utils.error(
-                                            'Group not found for {0} Section: {1}'.format(str(student), str(
-                                                section)), handler=self)
-                                        self.redirect('/error?code=105')
-                                else:
-                                    utils.error(
-                                        'Group not found for {0} Section: {1}'.format(str(student), str(section)),
-                                        handler=self)
-                                    self.redirect('/error?code=105')
-                            else:
-                                utils.log(
-                                    'Requested round not found for {0} Section: {1}'.format(str(student), str(
-                                        section)))
-                                self.redirect('/home')
-                    else:
-                        utils.log('Section not found for key: ' + section_key)
-                        self.redirect('/home')
-                except Exception as e:
-                    utils.log('Found exception ' + e.message)
-                    self.redirect('/home')
-            else:
-                self.redirect('/home')
-        else:
-            self.redirect('/')
-'''
 
 class HomePage(webapp2.RequestHandler):
     def get(self):
