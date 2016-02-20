@@ -1,13 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="alert alert-danger" role="alert" align="center">
-    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-    <span class="sr-only">Error:</span>{{text}}
+<div class="container">
+    <div class="alert alert-danger" role="alert" align="center" style="margin-top: 100px">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>{{text}}
+    </div>
 </div>
-<!--<a class="btn btn-default" href="/home">-->
-    <!--<span class="glyphicon glyphicon-home" aria-hidden="true"></span> Back to Home Page-->
-<!--</a>-->
-<!--<a class="btn btn-warning sign-out-btn" href="{{logouturl}}">-->
-    <!--<span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Sign out-->
-<!--</a>-->
-{% endblock content %}}
+{% endblock content %}

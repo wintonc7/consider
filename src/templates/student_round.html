@@ -2,25 +2,15 @@
 
 {% block title %}| Rounds{% endblock %}
 
-{% set type_discussion = False %}
 
 {% block head %}
 {{ super() }}
-<link href="/css/home.css" rel="stylesheet">
+<link href="/css/discussion.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
     <div class="container">
-
-        {%- if last_round -%}
-        <div class="row">
-            <a class="btn btn-primary col-md-4" style="margin-top: 10px;" href="/discussion?section={{sectionKey}}" target="_blank">
-                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Go to Discussions</a>
-        </div> {%- endif -%}
-        <div class="header">
-            <h3 class="text-muted">{%- if last_round -%}Post Discussion Question{%- endif -%}</h3>
-        </div>
         <div class="jumbotron">
             <p> {{question}} </p>
         </div>

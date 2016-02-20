@@ -380,7 +380,6 @@ class Rounds(webapp2.RequestHandler):
         """
 
         # TODO Markdown support
-        # TODO Time picker suitable to all browsers (currently works only on Chrome)
         # TODO Timezone support in deadlines
 
         role, instructor = utils.get_role_user()
