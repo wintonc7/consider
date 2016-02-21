@@ -143,6 +143,12 @@ class Round(ndb.Model):
     quiz = ndb.StructuredProperty(Question, indexed=False)
     """ A `Question`_ property. Contains the question if this is a quiz round."""
 
+    #NEW ATTRIBUTES FOR DYNAMIC ROUNDS: PART 1
+    #start = ndb.StringProperty(required=True, indexed=False)
+    """ String. Represents the start of the round in the format %Y-%m-%dT%H:%M """
+    duration = ndb.IntegerProperty(required=True, indexed=False)
+    """ Integer. Represents how long the round will last **IN HOURS**
+
 
 class Response(ndb.Model):
     """
