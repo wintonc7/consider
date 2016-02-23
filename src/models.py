@@ -147,7 +147,7 @@ class Round(ndb.Model):
     #start = ndb.StringProperty(required=True, indexed=False)
     """ String. Represents the start of the round in the format %Y-%m-%dT%H:%M """
     duration = ndb.IntegerProperty(required=True, indexed=False)
-    """ Integer. Represents how long the round will last **IN HOURS**
+    """ Integer. Represents how long the round will last **IN HOURS** """
 
 
 class Response(ndb.Model):
