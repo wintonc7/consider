@@ -361,8 +361,7 @@
         }
         optionVals = JSON.stringify(optionVals);
 
-        var time_val = moment($("#endTime").val()).format("YYYY-MM-DD[T]HH:MM");
-
+        var time_val = moment(new Date($("#endTime").val())).format("YYYY-MM-DD[T]HH:MM");
         console.log(question + options + time_val + optionVals);
 
         if (!lastQuestion) {
@@ -414,7 +413,7 @@
 
         //collect form elements
         var $form = $(this),
-        time_val = moment($("#discussionEndTime").val()).format("YYYY-MM-DD[T]HH:MM"),
+        time_val = moment(new Date($("#discussionEndTime")).val()).format("YYYY-MM-DD[T]HH:MM"),
                 description = $form.find("textarea").val(),
                 anonymity = $('input[name="anonymousDiscussion"]:checked').val();
                 url = $form.attr("action");
