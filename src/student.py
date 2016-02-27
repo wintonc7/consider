@@ -61,9 +61,7 @@ class Rounds(webapp2.RequestHandler):
                         self.redirect('/error?code=103')
                     else:
                         # Otherwise, we need to set our template values
-                        # Send the current section and round number
-                        current_round = self.request.get('round')
-                        self.render_template(student, section, current_round)
+                        self.render_template(student, section)
                     #end
                 #end
             #end
@@ -116,19 +114,23 @@ class Rounds(webapp2.RequestHandler):
         #end
     #end post
 
-    def render_template(self, student, section, round_number):
+    def render_template(self, student, section):
+        # First, get the round number from the page
+        current_round = self.request.get('round')
         # Now check that the round number passed in actually exists, and set
         # the requested round number appropriately if not
-        if round_number:
-            requested_round_number = int(round_number)
+        if current_round:
+            requested_round_number = int(current_round)
         else:
             requested_round_number = section.current_round
         #end
 
         # Grab the requested round
         requested_round = models.Round.get_by_id(requested_round_number, parent=section.key)
-        # And check that it's not null, redirect to error if so
-        if not requested_round: self.redirect('/error?code=104')
+        # And check that it's not null
+        if not requested_round:
+            # Error if so
+            self.redirect('/error?code=104')
         else:
             # Otherwise we need to set up our template values, create empty dict
             template_values = {}
@@ -215,10 +217,10 @@ class Rounds(webapp2.RequestHandler):
                 #end
                 # Now grab all the group comments for the previous round
                 comments = group_comments(group, previous_round, template_values)
-
-
                 # Set the template value for all the group comments
                 template_values['comments'] = comments
+                # Grab the requested round
+                requested_round = models.Round.get_by_id(round_number, parent=section.key)
                 # And grab the logged in student's response
                 stu_response = models.Response.get_by_id(student.email, parent=requested_round.key)
                 # Check that they actually answered
