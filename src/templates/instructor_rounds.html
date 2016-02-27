@@ -413,7 +413,7 @@
 
         //collect form elements
         var $form = $(this),
-        time_val = moment(new Date($("#discussionEndTime")).val()).format("YYYY-MM-DD[T]HH:MM"),
+        time_val = moment(new Date($("#discussionEndTime").val())).format("YYYY-MM-DD[T]HH:MM"),
                 description = $form.find("textarea").val(),
                 anonymity = $('input[name="anonymousDiscussion"]:checked').val();
                 url = $form.attr("action");
