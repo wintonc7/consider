@@ -74,64 +74,47 @@ class Rounds(webapp2.RequestHandler):
         """
         HTTP POST method to submit the response.
         """
+        # First, grab the information for the currently logged in user
         role, student = utils.get_role_user()
-        if student and role == models.Role.student:
-            option = self.request.get('option').lower()
-            comment = self.request.get('comm')
-            summary = self.request.get('summary')
-            res = self.request.get('response')
+        # Check that they're a student
+        if not student or role != models.Role.student:
+            # Error if not
+            utils.error('user is null or not student', handler=self)
+            self.redirect('/')
+        else:
+            # First, grab the section key from the page
             section_key = self.request.get('section')
-            if section_key:
+            # Double check that we actually got a section key
+            if not section_key:
+                # Error if not
+                utils.error('Invalid Parameters: section_key is null', handler=self)
+            else:
                 try:
+                    # Grab the section from the database
                     section = ndb.Key(urlsafe=section_key).get()
-                    if section:
-                        current_round = models.Round.get_by_id(section.current_round, parent=section.key)
-                        if current_round:
-                            response = models.Response(parent=current_round.key, id=student.email)
-                            if current_round.is_quiz:
-                                if not (option and comment):
-                                    utils.error('Invalid Parameters: option or comment is null', handler=self)
-                                    return
-                                # if current_round.number != 1 and not summary:
-                                #     utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
-                                #     return
-                                response.option = option
-                                response.summary = summary if summary else ''
-                            else:
-                                res = json.loads(res)
-                                if not (res and comment) or not utils.is_valid_response(res):
-                                    utils.error('Invalid Parameters: comment is null or res is not a valid response',
-                                                handler=self)
-                                    return
-                                for i in range(1, len(res)):
-                                    response.response.append(res[i])
-                            deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
-                            current_time = datetime.datetime.now()
-                            if deadline >= current_time:
-                                response.comment = comment
-                                response.student = student.email
-                                response.put()
-                                utils.log(
-                                    'Your response have been saved. You can edit it any time before the deadline.',
-                                    type='S', handler=self)
-                            else:
-                                utils.error(
-                                    'Sorry, the time for submission for this round has expired \
-                                       and your response was not saved, please wait for the next round.',
-                                    handler=self)
-                        else:
-                            utils.error('Sorry! The round is not visible, please try again later.', handler=self)
-                    else:
+                    # And double check that it's valid
+                    if not section:
+                        # Error if not
                         utils.error('Section is null', handler=self)
+                    else:
+                        # Grab the current round from the database
+                        current_round = models.Round.get_by_id(section.current_round, parent=section.key)
+                        # And double check that it's valid
+                        if not current_round:
+                            # Error if not
+                            utils.error('Sorry! The round is not visible, please try again later.', handler=self)
+                        else:
+                            self.save_submission(student, current_round)
+                        #end
+                    #end
                 except:
                     utils.error(
                         'Sorry! There was some error submitting your response please try again later.',
                         handler=self)
-            else:
-                utils.error('Invalid Parameters: section_key is null', handler=self)
-        else:
-            utils.error('user is null or not student', handler=self)
-            self.redirect('/')
+                #end
+            #end
+        #end
+    #end post
 
     def render_template(self, student, section, round_number):
         # Now check that the round number passed in actually exists, and set
@@ -283,6 +266,64 @@ class Rounds(webapp2.RequestHandler):
         return comments
     #end group_comments
 
+    def save_submission(self, student, current_round):
+        # Create a new response object
+        response = models.Response(parent=current_round.key, id=student.email)
+        # Start by grabbing data from the page
+        option = self.request.get('option').lower()
+        comment = self.request.get('comm')
+        summary = self.request.get('summary')
+        res = self.request.get('response')
+        # Now check whether we're on a lead-in or summary or discussion round
+        if current_round.is_quiz:
+            # If it is, double check that they selected an answer and commented
+            if not (option and comment):
+                # Error if not
+                utils.error('Invalid Parameters: option or comment is null', handler=self)
+                return
+            #end
+            # if current_round.number != 1 and not summary:
+            #     utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
+            #     return
+            # And set the values in the response object
+            response.option = option
+            response.summary = summary if summary else ''
+        else:
+            # If a discussion question, grab the array of agree/disagree/neutral
+            res = json.loads(res)
+            # And double check that we have a comment and valid response
+            if not (res and comment) or not utils.is_valid_response(res):
+                # Error if not
+                utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
+                return
+            #end
+            # Now loop over the agree, etc. responses
+            for i in range(1, len(res)):
+                # And save them in our response object for the db
+                response.response.append(res[i])
+            #end
+        #end
+        # Grab the deadline and the current time
+        deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
+        current_time = datetime.datetime.now()
+        # And double check that they've submitted before the deadline ended
+        if deadline >= current_time:
+            # Set the comment and email, and save in the database
+            response.comment = comment
+            response.student = student.email
+            response.put()
+            utils.log(
+                'Your response have been saved. You can edit it any time before the deadline.',
+                type='S', handler=self)
+        else:
+            # Otherwise alert them that time has passed to submit for this round
+            utils.error(
+                'Sorry, the time for submission for this round has expired \
+                   and your response was not saved, please wait for the next round.',
+                handler=self)
+        #end
+    #end save_submission
+
 #end class Rounds
 
 
@@ -291,29 +332,49 @@ class HomePage(webapp2.RequestHandler):
         """
         Display a list of active ``Section``_\ s this ``Student``_ is enrolled in.
         """
+        # First, grab the information for the currently logged in user
         role, student = utils.get_role_user()
-        if student and role == models.Role.student:
+        # Double check that they're a student
+        if not student or role != models.Role.student:
+            # Error if not
+            utils.error('user is null or not student', handler=self)
+            self.redirect('/')
+        else:
+            # Create a url for the user to logout
             logout_url = users.create_logout_url(self.request.uri)
+            # Set up the template
             template_values = {'logouturl': logout_url, 'nickname': student.email}
+            # Grab the sections the student is a part of
             sections = student.sections
+            # Create a new list for holding the section objects from the db
             section_list = []
+            # Double check that the student is actually enrolled in a section
             if sections:
+                # Loop over all the sections they're in
                 for section in sections:
+                    # Grab it from the db
                     section_obj = section.get()
+                    # Get the parent course for the section
                     course_obj = section.parent().get()
+                    # Double check that both exist
                     if section_obj and course_obj:
+                        # Grab the section key, section name, and course name
                         sec = {
                             'key': section.urlsafe(),
                             'name': section_obj.name,
                             'course': course_obj.name
                         }
+                        # And throw it in the list
                         section_list.append(sec)
+                    #end
+                #end
+            #end
+            # Add the list of sections the student is in to our template
             template_values['sections'] = section_list
+            # Set the template html page
             template = utils.jinja_env().get_template('student_home.html')
+            # And render it
             self.response.write(template.render(template_values))
-        else:
-            utils.error('user is null or not student', handler=self)
-            self.redirect('/')
         #end
     #end get
 
