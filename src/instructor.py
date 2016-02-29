@@ -35,14 +35,20 @@ class Courses(webapp2.RequestHandler):
                 Name of the course; must be unique across the app.
 
         """
+        # Start by trying to grab the course from the database
         course = models.Course.get_by_id(course_name, parent=instructor.key)
+        # Check to see if it already exists
         if course:
+            # And error if so
             utils.error(course_name + ' already exists', handler=self)
         else:
+            # Otherwise, create it, store it in the database, and log it
             course = models.Course(parent=instructor.key, id=course_name)
             course.name = course_name
             course.put()
             utils.log(course_name + ' added', type='S',handler=self)
+        #end
+    #end add_course
 
     def toggle_course(self, instructor, course_name):
         """
@@ -55,6 +61,7 @@ class Courses(webapp2.RequestHandler):
                 Name of the course to be toggled.
 
         """
+        # First, grab the course from the database
         course = models.Course.get_by_id(course_name, parent=instructor.key)
         if course:
             course.is_active = not course.is_active
@@ -62,47 +69,78 @@ class Courses(webapp2.RequestHandler):
             utils.log('Status changed for ' + course_name, type='S',handler=self)
         else:
             utils.error('Course ' + course_name + ' not found', handler=self)
+        #end
+    #end toggle_course
 
     def post(self):
         """
         HTTP POST method for handling course requests.
         """
+        # First, check that the logged in user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        if not user or role != models.Role.instructor:
+            # Error if not
+            utils.error('user is null or not Instructor', handler=self)
+        else:
+            # Otherwise, get the course name and action from the webpage
             course_name = self.request.get('name')
             action = self.request.get('action')
-
-            if course_name and action:
+            # Double check that they were actually supplied
+            if not course_name or not action:
+                # Error if not
+                utils.error('Invalid argument: course_name or action is null', handler=self)
+            else:
+                # Now switch based on the action
                 if action == 'add':
+                    # Add course if add
                     self.add_course(user, course_name.upper())
                 elif action == 'toggle':
+                    # Or toggle if toggle
                     self.toggle_course(user, course_name.upper())
                 else:
+                    # If any other action, log it as an error
                     utils.error('Unexpected action: ' + action,handler=self)
-            else:
-                utils.error('Invalid argument: course_name or action is null', handler=self)
-        else:
-            utils.error('user is null or not Instructor', handler=self)
+                #end
+            #end
+        #end
+    #end post
 
     def get(self):
         """
         Display the Course list for this Instructor.
         """
+        # Start by checking that the logged in user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
-            logout_url = users.create_logout_url(self.request.uri)
-            utils.log('Instructor logged in ' + str(user))
-            template_values = {'logouturl': logout_url, 'expand': self.request.get('course')}
-            courses = models.Course.query(ancestor=user.key).fetch()
-            if courses:
-                for course in courses:
-                    course.sections = models.Section.query(ancestor=course.key).fetch()
-                template_values['courses'] = courses
-            template = utils.jinja_env().get_template('instructor_courses.html')
-            self.response.write(template.render(template_values))
-        else:
+        if not user or role != models.Role.instructor:
+            # Error if not
             utils.error('user is None or not Instructor', handler=self)
             self.redirect('/')
+        else:
+            # Otherwise, generate a logout url
+            logout_url = users.create_logout_url(self.request.uri)
+            # Log that the current instructor is logged in
+            utils.log('Instructor logged in ' + str(user))
+            # And start building the template values
+            template_values = {'logouturl': logout_url, 'expand': self.request.get('course')}
+            # Grab the list of courses attributed to the logged in instructor
+            courses = models.Course.query(ancestor=user.key).fetch()
+            # Double check that they actually have courses
+            if courses:
+                # Then loop over them
+                for course in courses:
+                    # And grab all the sections attributed to that course
+                    course.sections = models.Section.query(ancestor=course.key).fetch()
+                #end
+                # Add all the instructor's courses to the template values
+                template_values['courses'] = courses
+            #end
+            # And set the template and render the page
+            template = utils.jinja_env().get_template('instructor_courses.html')
+            self.response.write(template.render(template_values))
+        #end
+    #end get
+
+#end class Courses
 
 
 class Section(webapp2.RequestHandler):
@@ -121,14 +159,20 @@ class Section(webapp2.RequestHandler):
                 Name of the section; must be unique within the course.
 
         """
+        # First, start by grabbing the section passed in from the database
         section = models.Section.get_by_id(section_name, parent=course.key)
+        # Double check that it doesn't already exist
         if section:
+            # And send an error if it does
             utils.error(section_name + ' already exists', handler=self)
         else:
+            # Otherwise, create it, save it to the database, and log it
             section = models.Section(parent=course.key, id=section_name)
             section.name = section_name
             section.put()
             utils.log(section_name + ' added', type='S')
+        #end
+    #end add_section
 
     def toggle_section(self, course, section_name):
         """
@@ -141,42 +185,67 @@ class Section(webapp2.RequestHandler):
                 Name of the section to be toggled.
 
         """
+        # First, start by grabbing the section from the passed in value
         section = models.Section.get_by_id(section_name, parent=course.key)
+        # Double check that it actually exists
         if section:
+            # Toggle the section to active, save it to the database, and log it
             section.is_active = not section.is_active
             section.put()
             utils.log('Status changed for ' + section_name, type='S')
         else:
+            # Send an error if the section passed in doesn't exist
             utils.error('Section ' + section_name + ' not found', handler=self)
+        #end
+    #end toggle_section
 
     def post(self):
         """
         HTTP POST method to add a section to a course.
         """
+        # Start by checking the logged in user is an instructor
         role, instructor = utils.get_role_user()
-        if instructor and role == models.Role.instructor:
+        if not instructor or role != models.Role.instructor:
+            # Error if not
+            utils.error('user is null or not instructor', handler=self)
+        else:
+            # Otherwise, grab the course, section, and action from the webpage
             course_name = self.request.get('course')
             section_name = self.request.get('section')
             action = self.request.get('action')
-
-            if course_name and section_name and action:
+            # Double check that all three were supplied
+            if not course_name or not section_name or not action:
+                # Error if not
+                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
+            else:
+                # Otherwise, grab the course from the database
                 course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
-                if course and course.is_active:
+                # And check that it exists and is active
+                if not course or not course.is_active:
+                    # Error if not
+                    utils.error(course_name + ' does not exist OR is not active!', handler=self)
+                else:
+                    # Otherwise, switch on the action
                     if action == 'add':
+                        # Add a new section if action is add
                         self.add_section(course, section_name.upper())
                     elif action == 'toggle':
+                        # Or toggle
                         self.toggle_section(course, section_name.upper())
                     else:
+                        # Error if the action is neither toggle or add
                         utils.error('Unexpected action:' + action, handler=self)
-                else:
-                    utils.error(course_name + ' does not exist OR is not active!', handler=self)
-            else:
-                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
-        else:
-            utils.error('user is null or not instructor', handler=self)
+                    #end
+                #end
+            #end
+        #end
+    #end post
 
     def get(self):
         self.redirect('/courses')
+    #end get
+
+#end class Section
 
 
 class Students(webapp2.RequestHandler):
@@ -195,23 +264,39 @@ class Students(webapp2.RequestHandler):
                 Emails (IDs) of students to be added.
 
         """
-
+        # Start by looping over the list of emails supplied
         for email in emails:
+            # Transform the supplied email to lowercase
             email = email.lower()
+            # Then make a list of all the emails currently in the section
             student_emails = [s.email for s in section.students]
+            # Check that the supplied email isn't already in the section
             if email not in student_emails:
+                # And add them to the list of students for the section
                 info = models.StudentInfo()
                 info.email = email
                 section.students.append(info)
+            #end
+            # Now grab the student from the database
             student = models.Student.get_by_id(email)
+            # And if they don't already have a db entry
             if not student:
+                # Create a new student and assign the email address
                 student = models.Student(id=email)
                 student.email = email
+            #end
+            # Now check if the current student is subscribed to this section
             if section.key not in student.sections:
+                # And add them if they weren't already
                 student.sections.append(section.key)
+            #end
+            # Save the student data back to the database
             student.put()
+        #end
+        # Now save all the section data back to the database and log it
         section.put()
         utils.log('Students added to Section ' + str(section), type='S')
+    #end add_students
 
     def remove_student(self, section, email):
         """
@@ -224,68 +309,110 @@ class Students(webapp2.RequestHandler):
                 Email (ID) of the student to be removed.
 
         """
+        # First, grab the student from the db by the email passed in
         student = models.Student.get_by_id(email)
-        if student:
+        # Check that there is actually a record for that email
+        if not student:
+            # And error if not
+            utils.error('Student does not exist!', handler=self)
+        else:
+            # Create a new list for the section removing the student
             section.students = [s for s in section.students if s.email != email]  # TODO better? use remove?
+            # Check if the student is enrolled in this section
             if section.key in student.sections:
+                # And remove them if so
                 student.sections.remove(section.key)
+            #end
+            # And save both the student and section back to the db and log it
             student.put()
             section.put()
             utils.log(
-                    'Student {0} has been removed from Section {1}'.format(str(student), str(section)), handler=self,
-                    type='S')
-        else:
-            utils.error('Student does not exist!', handler=self)
+                    'Student {0} has been removed from Section {1}'.format(str(student),
+                    str(section)), handler=self, type='S')
+        #end
+    #end remove_student
 
     def post(self):
         """
         HTTP POST method to add the student.
         """
+        # First, grab the logged in user
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        # And check that they're an instructor
+        if not user or role != models.Role.instructor:
+            # Error if not
+            utils.error('user is null or not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Now grab the course, section, and action from the webpage
             course_name = self.request.get('course')
             section_name = self.request.get('section')
             action = self.request.get('action')
-
-            if course_name and section_name and action:
+            # Check that all three were actually supplied
+            if not course_name or not section_name or not action:
+                # Error if not
+                utils.error('Invalid arguments: course_name or section_name or actoin is null', handler=self)
+            else:
+                # Now try to grab the course from the database
                 course = models.Course.get_by_id(course_name.upper(), parent=user.key)
-                if course:
+                # Check if it already exists
+                if not course:
+                    # Error if it doesn't
+                    utils.error(course_name + ' course does not exist!', handler=self)
+                else:
+                    # Now grab the section from the database
                     section = models.Section.get_by_id(section_name.upper(), parent=course.key)
-                    if section:
+                    if not section:
+                        # And error if it doesn't exist
+                        utils.error(section_name + ' section does not exist!', handler=self)
+                    else:
+                        # Now switch on the action
                         if action == 'add':
-                            emails = json.loads(self.request.get('emails'))  # retrieve emails
+                            # Grab a list of the emails from the page
+                            emails = json.loads(self.request.get('emails'))
+                            # And create new students from that list
                             self.add_students(section, emails)
                         elif action == 'remove':
+                            # Grab the email from the page to remove
                             email = self.request.get('email').lower()
+                            # And remove it
                             self.remove_student(section, email)
                         else:
+                            # Send an error if any other action is supplied
                             utils.error('Unexpected action: ' + action, handler=self)
-                    else:
-                        utils.error(section_name + ' section does not exist!', handler=self)
-                else:
-                    utils.error(course_name + ' course does not exist!', handler=self)
-            else:
-                utils.error('Invalid arguments: course_name or section_name or actoin is null', handler=self)
-        else:
-            utils.error('user is null or not instructor', handler=self)
-            self.redirect('/')
+                        #end
+                    #end
+                #end
+            #end
+        #end
+    #end post
 
     def get(self):
         """
         HTTP GET method to retrieve the list of students from the datastore.
         """
+        # First, check that the logged in user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
-            logout_url = users.create_logout_url(self.request.uri)
-            course_name = self.request.get('course')
-            selected_section_name = self.request.get('section')
-            template_values = utils.get_courses_and_sections(user, course_name.upper(), selected_section_name.upper())
-            template_values['logouturl'] = logout_url
-            template = utils.jinja_env().get_template('instructor_list_students.html')
-            self.response.write(template.render(template_values))
-        else:
+        if not user or role != models.Role.instructor:
+            # And send an error if not
             utils.error('user null or not instructor', handler=self)
             self.redirect('/')
+        else:
+            # Otherwise, create a logout url
+            logout_url = users.create_logout_url(self.request.uri)
+            # Get the course and section name from the webpage
+            course_name = self.request.get('course')
+            selected_section_name = self.request.get('section')
+            # And start building the template values
+            template_values = utils.get_courses_and_sections(user, course_name.upper(), selected_section_name.upper())
+            template_values['logouturl'] = logout_url
+            # Set the template and render the page
+            template = utils.jinja_env().get_template('instructor_list_students.html')
+            self.response.write(template.render(template_values))
+        #end
+    #end get
+
+#end class Students
 
 
 class Rounds(webapp2.RequestHandler):
@@ -300,79 +427,126 @@ class Rounds(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the rounds.
         """
+        #First check that the logged in user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        if not user or role != models.Role.instructor:
+            # Error if not
+            utils.error('user null or not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Now create a logout url
             logout_url = users.create_logout_url(self.request.uri)
+            # Grab the course and section name from the webpage
             course_name = self.request.get('course')
             selected_section_name = self.request.get('section')
+            # And get all the courses and sections for this instructor
             template_values = utils.get_courses_and_sections(user, course_name.upper(), selected_section_name.upper())
+            # Now check that the section from the webpage actually corresponded
+            # to an actual section in this course, and that the template was set
             if 'selectedSectionObject' in template_values:
+                # If so, grab that section from the template values
                 current_section = template_values['selectedSectionObject']
+                # Set the current active round
                 template_values['activeRound'] = current_section.current_round
+                # And grab all the rounds for this section
                 rounds = models.Round.query(ancestor=current_section.key).fetch()
+                # Double check that there are actually rounds already created
                 if rounds:
+                    # And set the template values
                     template_values['rounds'] = rounds
+                    # Create an empty list to hold the discussion rounds
                     discussion_rounds = []
+                    # And loop over all of the rounds for this section
                     for r in rounds:
+                        # Set the lead-in question
                         if r.number == 1:
                             template_values['leadInQuestion'] = r
                         elif r.is_quiz:
+                            # And if not the lead-in question, but still a quiz
+                            # it must be the summary round
                             template_values['summaryQuestion'] = r
                         else:
+                            # Otherwise, it's just a discussion round
                             discussion_rounds.append(r)
+                        #end
+                    #end
+                    # Set the discussion round template values
                     template_values['discussionRounds'] = discussion_rounds
+                #end
+                # Check to see if the summary round was set in the template
                 if 'summaryQuestion' in template_values:
+                    # If so, set the next round to the total number of rounds
                     template_values['nextRound'] = current_section.rounds
                 else:
+                    # Otherwise, it must be set to the number of rounds plus
+                    # one (to account for the eventual summary round)
                     template_values['nextRound'] = current_section.rounds + 1
+                #end
+            #end
+            # Set the template and render the page
             template_values['logouturl'] = logout_url
             template = utils.jinja_env().get_template('instructor_rounds.html')
             self.response.write(template.render(template_values))
-        else:
-            utils.error('user null or not instructor', handler=self)
-            self.redirect('/')
+        #end
+    #end get
 
     def add_round(self, section):
+        # Grab the current round and time from the webpage
         curr_round = int(self.request.get('round'))
         time = self.request.get('time')
-
+        #Create a new round object with those parameters
         round_obj = models.Round(parent=section.key, id=curr_round)
         round_obj.deadline = time
         round_obj.number = curr_round
-
+        # Grab the type of round from the webpage
         round_type = self.request.get('roundType')
+        # And check if it's a lead-in or summary round (i.e. a quiz)
         if round_type == 'leadin' or round_type == 'summary':
+            # If so, grab the question from the form
             question = self.request.get('question')
-
+            # Set the object to be a quiz type
             round_obj.is_quiz = True
+            # And grab the number of options and list of options from the page
             num_options = int(self.request.get('number'))
             options = json.loads(self.request.get('options'))
-            round_obj.quiz = models.Question(options_total=num_options, question=question,
-                                             options=options)
+            # And create and store the question
+            round_obj.quiz = models.Question(options_total=num_options,
+                                             question=question, options=options)
         elif round_type == 'discussion':
+            # Otherwise, if the round is set as discussion,
+            # Grab the description and anonymity settings from the page
             description = self.request.get('description')
             anonymity = self.request.get('anonymity')
+            # And set those properties in the round object
             round_obj.description = description
             if anonymity != "yes":
                 round_obj.is_anonymous = False
-
+            #end
         else:
+            # And send an error if any other round type is sent
             utils.error('Unknown round_type passed.', handler=self)
+        #end
+        # And save the round object into the database
         round_obj.put()
         # Only update the value of total rounds if a new round is created,
         # not when we edit an old round is edited
         if curr_round > section.rounds:
             section.rounds = curr_round
             section.put()
+        #end
         utils.log('Success, round added.', type='S', handler=self)
+    #end add_round
 
     def activate_round(self, section):
+        # Grab the number for the next round from the page
         next_round = int(self.request.get('round'))
         if section.current_round != next_round:
             # If the selected round is not currently active make it active
             section.current_round = next_round
             section.put()
             utils.log('Success, round active.', type='S', handler=self)
+        #end
+    #end activate_round
 
     def post(self):
         """
@@ -382,33 +556,54 @@ class Rounds(webapp2.RequestHandler):
         # TODO Markdown support
         # TODO Timezone support in deadlines
 
+        # First, check that the logged in user is an instructor
         role, instructor = utils.get_role_user()
-        if instructor and role == models.Role.instructor:
+        if not instructor or role != models.Role.instructor:
+            # Error if so
+            utils.error('user null or not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Otherwise, grab the course name, section name, and action
             course_name = self.request.get('course').upper()
             section_name = self.request.get('section').upper()
             action = self.request.get('action')
-
-            # get course and section from datastore
-            if course_name and section_name and action:
+            # Check that all three are supplied
+            if not course_name or not section_name or not action:
+                # Error if not
+                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
+            else:
+                # Otherwise, grab the course from the database
                 course = models.Course.get_by_id(course_name, parent=instructor.key)
-                if course:
+                # And check that it actually exists
+                if not course:
+                    # Error if not
+                    utils.error('Course {c} does not exist!'.format(c=course_name), handler=self)
+                else:
+                    # Then grab the section from the database
                     section = models.Section.get_by_id(section_name, parent=course.key)
-                    if section:
+                    # And check that it actually exists
+                    if not section:
+                        # Error if not
+                        utils.error('Section {s} does not exist!'.format(s=section_name), handler=self)
+                    else:
+                        # Switch on the action
                         if action == 'add':
+                            # Add
                             self.add_round(section)
                         elif action == 'activate':
+                            # Or turn on
                             self.activate_round(section)
                         else:
+                            # And error if any other action is provided
                             utils.error('Unexpected action: ' + action, handler=self)
-                    else:
-                        utils.error('Section {s} does not exist!'.format(s=section_name), handler=self)
-                else:
-                    utils.error('Course {c} does not exist!'.format(c=course_name), handler=self)
-            else:
-                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
-        else:
-            utils.error('user null or not instructor', handler=self)
-            self.redirect('/')
+                        #end
+                    #end
+                #end
+            #end
+        #end
+    #end post
+
+#end class Rounds
 
 
 class Groups(webapp2.RequestHandler):
