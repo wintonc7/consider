@@ -415,6 +415,14 @@ class Students(webapp2.RequestHandler):
 
 #end class Students
 
+class RoundsTest(webapp2.RequestHandler):
+    def get(self):
+        role, user = utils.get_role_user()
+        course_name = self.request.get('course')
+        selected_section_name = self.request.get('section')
+        template_values = utils.get_courses_and_sections(user, course_name.upper(), selected_section_name.upper())
+        template = utils.jinja_env().get_template('instructor/rounds_test.html')
+        self.response.write(template.render(template_values))
 
 class Rounds(webapp2.RequestHandler):
     """
