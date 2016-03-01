@@ -623,14 +623,19 @@ class Groups(webapp2.RequestHandler):
                 The new total number of groups.
 
         """
-        if group_count:
+        # Double check that the passed in number of groups isn't null
+        if not group_count:
+            # Error if so
+            utils.error('Groups count not available.', handler=self)
+        else:
             if section.groups != group_count and group_count > 0:
                 # If the total number of groups are not as requested change them
                 section.groups = group_count
                 section.put()
+            #end
             utils.log('Groups modified.', type='S', handler=self)
-        else:
-            utils.error('Groups count not available.', handler=self)
+        #end
+    #end modify_group_count
 
     def update_groups(self, section, groups):
         """
@@ -644,89 +649,155 @@ class Groups(webapp2.RequestHandler):
                 and ``n`` is the group-id that student is to be assigned to.
 
         """
-        if groups:
+        # Double check that the passed in groups is non-null
+        if not groups:
+            # Error if so
+            utils.error('Groups information not available.', handler=self)
+        else:
+            # Loop over the students in the passed in section
             for student in section.students:
+                # Check if the current student's email is in the groups
                 if student.email in groups:
+                    # Set the student's group number to the index of the group
                     student.group = int(groups[student.email])
+                    # And then grab that group model from the database
                     group = models.Group.get_by_id(student.group, parent=section.key)
+                    # Double check that it actually exists
                     if not group:
+                        # And create it if not, giving it the proper number
                         group = models.Group(parent=section.key, id=student.group)
                         group.number = student.group
+                    #end
+                    # Now check if the student is listed in the correct group
                     if student.email not in group.members:
+                        # If not, add that student in to the group
                         group.members.append(student.email)
+                        # Update the size
                         group.size += 1
+                        # Set the student's alias for that group
                         student.alias = 'S' + str(group.size)
+                        # And commit the changes to the group
                         group.put()
+                    #end
+                #end
+            #end
+            # Commit the changes to the section and log it
             section.put()
             utils.log('Groups updated.', handler=self)
-        else:
-            utils.error('Groups information not available.', handler=self)
+        #end
+    #end update_groups
 
     def get(self):
         """
         HTTP GET Method to render the ``/groups`` page for the logged in Instructor.
 
         """
+        # Check that the logged in user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        if not user or role != models.Role.instructor:
+            # Error if not
+            utils.error('user not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Otherwise, create a logout url
             logout_url = users.create_logout_url(self.request.uri)
+            # And get the course and section names from the page
             course_name = self.request.get('course')
             selected_section_name = self.request.get('section')
-
+            # Grab all the courses and sections for the logged in instructor
             template_values = utils.get_courses_and_sections(user, course_name.upper(),
                                                              selected_section_name.upper())
+            # Now check that the section from the webpage actually corresponded
+            # to an actual section in this course, and that the template was set
             if 'selectedSectionObject' in template_values:
+                # If so, grab that section from the template values
                 current_section = template_values['selectedSectionObject']
+                # Check that the current section has at least one round
                 if current_section.rounds > 0:
+                    # Grab the responses from the lead-in question
                     response = models.Response.query(
                             ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
-                    groups = current_section.groups
-                    student = current_section.students
+                    # 
+                    # Loop over the responses
                     for res in response:
-                        for stu in student:
+                        # And loop over the students in this section
+                        for stu in current_section.students:
+                            # And check when the response matches the student
                             if res.student == stu.email:
+                                # And set the group of the response to the
+                                # group of the student who made that response
                                 res.group = stu.group
+                            #end
+                        #end
+                    #end
                     template_values['responses'] = response
-                    template_values['group'] = groups
+                    template_values['group'] = current_section.groups
+                #end
+            #end
+            # Set the template and render the page
             template_values['logouturl'] = logout_url
             template = utils.jinja_env().get_template('instructor_groups.html')
             self.response.write(template.render(template_values))
-        else:
-            utils.error('user not instructor', handler=self)
-            self.redirect('/')
+        #end
+    #end get
 
     def post(self):
         """
         HTTP POST method to create groups.
         """
+        # First, check that the logged in user is an instructor
         role, instructor = utils.get_role_user()
-        if instructor and role == models.Role.instructor:
+        if not instructor or role != models.Role.instructor:
+            # Error if not
+            utils.error('user is null or not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Get the course and section name and the action from the page
             course_name = self.request.get('course')
             section_name = self.request.get('section')
             action = self.request.get('action')
-            if course_name and section_name and action:
+            # Check that all three are actually supplied
+            if not course_name or not section_name or not action:
+                # Error if not
+                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
+            else:
+                # Otherwise, grab the course from the database
                 course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
-                if course:
+                # Double check that it actually existed
+                if not course:
+                    # Error if not
+                    utils.error(course_name + ' course does not exist!', handler=self)
+                else:
+                    # Now grab the section
                     section = models.Section.get_by_id(section_name.upper(), parent=course.key)
-                    if section:
+                    # And double check that it exists
+                    if not section:
+                        #Error if not
+                        utils.error(section_name + ' section does not exist!', handler=self)
+                    else:
+                        # Switch on the action
                         utils.log('action = ' + action)
                         if action == 'add':
+                            # If add, grab the number of groups from the page
                             group_count = int(self.request.get('groups'))
+                            # And modify the database
                             self.modify_group_count(section, group_count)
                         elif action == 'update':
+                            # For update, grab the group settings from the page
                             groups = json.loads(self.request.get('groups'))
+                            # And modify the database
                             self.update_groups(section, groups)
                         else:
+                            # Send an error if a different action is supplied
                             utils.error('Unknown action' + action if action else 'None', handler=self)
-                    else:
-                        utils.error(section_name + ' section does not exist!', handler=self)
-                else:
-                    utils.error(course_name + ' course does not exist!', handler=self)
-            else:
-                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
-        else:
-            utils.error('user is null or not instructor', handler=self)
-            self.redirect('/')
+                        #end
+                    #end
+                #end
+            #end
+        #end
+    #end post
+
+#end class Groups
 
 
 class Responses(webapp2.RequestHandler):
@@ -738,30 +809,50 @@ class Responses(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the responses.
         """
+        # First, check that the user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        if not user or role != models.Role.instructor:
+            # Error if not
+            utils.error('user is null or not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Create logout url
             logout_url = users.create_logout_url(self.request.uri)
+            # And grab the course and section name from the page
             course_name = self.request.get('course')
             selected_section_name = self.request.get('section')
+            # And grab all the other courses and sections for this instructor
             template_values = utils.get_courses_and_sections(user, course_name.upper(),
                                                              selected_section_name.upper())
+            # Now check that the section from the webpage actually corresponded
+            # to an actual section in this course, and that the template was set
             if 'selectedSectionObject' in template_values:
+                # If so, grab that section from the template values
                 current_section = template_values['selectedSectionObject']
+                # And set the round
                 template_values['round'] = current_section.rounds
+                # Create a new dict for the responses
                 resp = {}
+                # And loop over the number of rounds (indexed at 1 for lead-in)
                 for i in range(1, current_section.rounds + 1):
                     response = models.Response.query(
                             ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
                     # response is a list of all the responses for the round i
                     if response:
                         resp[str(i)] = response
+                    #end
+                #end
+                # Add the responses to the template values
                 template_values['responses'] = resp
+            #end
+            # And set the template and render the page
             template_values['logouturl'] = logout_url
             template = utils.jinja_env().get_template('instructor_responses.html')
             self.response.write(template.render(template_values))
-        else:
-            utils.error('user is null or not instructor', handler=self)
-            self.redirect('/')
+        #end
+    #end get
+
+#end class Responses
 
 
 class GroupResponses(webapp2.RequestHandler):
@@ -773,36 +864,77 @@ class GroupResponses(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the group responses.
         """
+        # First, check that the logged in user is an instructor
         role, user = utils.get_role_user()
-        if user and role == models.Role.instructor:
+        if not user or role != models.Role.instructor:
+            # Error if so
+            utils.error('user is null or not instructor', handler=self)
+            self.redirect('/')
+        else:
+            # Otherwise, create a logout url
             logout_url = users.create_logout_url(self.request.uri)
+            # And get the course and section name from the page
             course_name = self.request.get('course')
             selected_section_name = self.request.get('section')
+            # And grab the other courses and sections from this instructor
             template_values = utils.get_courses_and_sections(user, course_name.upper(),
                                                              selected_section_name.upper())
+            # Now check that the section from the webpage actually corresponded
+            # to an actual section in this course, and that the template was set
             if 'selectedSectionObject' in template_values:
+                # If so, grab the current section from the template values
                 current_section = template_values['selectedSectionObject']
+                # Set the rounds and groups
                 template_values['round'] = current_section.rounds
                 template_values['groups'] = current_section.groups
+                # And check that groups have actually been assigned
                 if current_section.groups > 0:
+                    # Create a new dict for responses
                     resp = {}
+                    # Loop over the groups (indexed by 1)
                     for g in range(1, current_section.groups + 1):
+                        # And loop over the rounds (indexed by 1)
                         for r in range(1, current_section.rounds + 1):
+                            # Now set an empty list for each group and round
                             resp['group_' + str(g) + '_' + str(r)] = []
+                        #end
+                    #end
+                    # Loop over the number of rounds (indexed by 1)
                     for r in range(1, current_section.rounds + 1):
+                        # Grab the responses for that round from the db
                         responses = models.Response.query(
                                 ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
+                        # Double check that the responses actually exist
                         if responses:
+                            # And loop over the responses
                             for res in responses:
+                                # And loop over the students in this section
                                 for s in current_section.students:
+                                    # Check that the email of the student
+                                    # and the email of the response match
+                                    # and that the student is in a group
                                     if s.email == res.student and s.group != 0:
+                                        # Set the alias of the response
                                         res.alias = s.alias
+                                        # Append the response to the appropriate
+                                        # group and round
                                         resp['group_' + str(s.group) + '_' + str(r)].append(res)
                                         break
+                                    #end
+                                #end
+                            #end
+                        #end
+                    #end
+                    # And set the template values for all the responses
                     template_values['responses'] = resp
+                #end
+            #end
+            # And set the template and render the page
             template_values['logouturl'] = logout_url
             template = utils.jinja_env().get_template('instructor_groups_responses.html')
             self.response.write(template.render(template_values))
-        else:
-            utils.error('user is null or not instructor', handler=self)
-            self.redirect('/')
+        #end
+    #end get
+
+#end class GroupResponses
+
