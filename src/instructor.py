@@ -77,30 +77,31 @@ class Courses(webapp2.RequestHandler):
         HTTP POST method for handling course requests.
         """
         # First, check that the logged in user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
+            self.redirect('/')
+            return
+        #end
+
+        # Otherwise, get the course name and action from the webpage
+        course_name = self.request.get('name')
+        action = self.request.get('action')
+        # Double check that they were actually supplied
+        if not course_name or not action:
             # Error if not
-            utils.error('user is null or not Instructor', handler=self)
+            utils.error('Invalid argument: course_name or action is null', handler=self)
         else:
-            # Otherwise, get the course name and action from the webpage
-            course_name = self.request.get('name')
-            action = self.request.get('action')
-            # Double check that they were actually supplied
-            if not course_name or not action:
-                # Error if not
-                utils.error('Invalid argument: course_name or action is null', handler=self)
+            # Now switch based on the action
+            if action == 'add':
+                # Add course if add
+                self.add_course(instructor, course_name.upper())
+            elif action == 'toggle':
+                # Or toggle if toggle
+                self.toggle_course(instructor, course_name.upper())
             else:
-                # Now switch based on the action
-                if action == 'add':
-                    # Add course if add
-                    self.add_course(user, course_name.upper())
-                elif action == 'toggle':
-                    # Or toggle if toggle
-                    self.toggle_course(user, course_name.upper())
-                else:
-                    # If any other action, log it as an error
-                    utils.error('Unexpected action: ' + action,handler=self)
-                #end
+                # If any other action, log it as an error
+                utils.error('Unexpected action: ' + action,handler=self)
             #end
         #end
     #end post
@@ -109,35 +110,35 @@ class Courses(webapp2.RequestHandler):
         """
         Display the Course list for this Instructor.
         """
-        # Start by checking that the logged in user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
-            # Error if not
-            utils.error('user is None or not Instructor', handler=self)
+        # First, check that the logged in user is an instructor
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
-        else:
-            # Otherwise, generate a logout url
-            logout_url = users.create_logout_url(self.request.uri)
-            # Log that the current instructor is logged in
-            utils.log('Instructor logged in ' + str(user))
-            # And start building the template values
-            template_values = {'logouturl': logout_url, 'expand': self.request.get('course')}
-            # Grab the list of courses attributed to the logged in instructor
-            courses = models.Course.query(ancestor=user.key).fetch()
-            # Double check that they actually have courses
-            if courses:
-                # Then loop over them
-                for course in courses:
-                    # And grab all the sections attributed to that course
-                    course.sections = models.Section.query(ancestor=course.key).fetch()
-                #end
-                # Add all the instructor's courses to the template values
-                template_values['courses'] = courses
-            #end
-            # And set the template and render the page
-            template = utils.jinja_env().get_template('instructor_courses.html')
-            self.response.write(template.render(template_values))
+            return
         #end
+
+        # Otherwise, generate a logout url
+        logout_url = users.create_logout_url(self.request.uri)
+        # Log that the current instructor is logged in
+        utils.log('Instructor logged in ' + str(instructor))
+        # And start building the template values
+        template_values = {'logouturl': logout_url, 'expand': self.request.get('course')}
+        # Grab the list of courses attributed to the logged in instructor
+        courses = models.Course.query(ancestor=instructor.key).fetch()
+        # Double check that they actually have courses
+        if courses:
+            # Then loop over them
+            for course in courses:
+                # And grab all the sections attributed to that course
+                course.sections = models.Section.query(ancestor=course.key).fetch()
+            #end
+            # Add all the instructor's courses to the template values
+            template_values['courses'] = courses
+        #end
+        # And set the template and render the page
+        template = utils.jinja_env().get_template('instructor_courses.html')
+        self.response.write(template.render(template_values))
     #end get
 
 #end class Courses
@@ -203,39 +204,40 @@ class Section(webapp2.RequestHandler):
         """
         HTTP POST method to add a section to a course.
         """
-        # Start by checking the logged in user is an instructor
-        role, instructor = utils.get_role_user()
-        if not instructor or role != models.Role.instructor:
+        # First, check that the logged in user is an instructor
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
+            self.redirect('/')
+            return
+        #end
+
+        # Otherwise, grab the course, section, and action from the webpage
+        course_name = self.request.get('course')
+        section_name = self.request.get('section')
+        action = self.request.get('action')
+        # Double check that all three were supplied
+        if not course_name or not section_name or not action:
             # Error if not
-            utils.error('user is null or not instructor', handler=self)
+            utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
-            # Otherwise, grab the course, section, and action from the webpage
-            course_name = self.request.get('course')
-            section_name = self.request.get('section')
-            action = self.request.get('action')
-            # Double check that all three were supplied
-            if not course_name or not section_name or not action:
+            # Otherwise, grab the course from the database
+            course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
+            # And check that it exists and is active
+            if not course or not course.is_active:
                 # Error if not
-                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
+                utils.error(course_name + ' does not exist OR is not active!', handler=self)
             else:
-                # Otherwise, grab the course from the database
-                course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
-                # And check that it exists and is active
-                if not course or not course.is_active:
-                    # Error if not
-                    utils.error(course_name + ' does not exist OR is not active!', handler=self)
+                # Otherwise, switch on the action
+                if action == 'add':
+                    # Add a new section if action is add
+                    self.add_section(course, section_name.upper())
+                elif action == 'toggle':
+                    # Or toggle
+                    self.toggle_section(course, section_name.upper())
                 else:
-                    # Otherwise, switch on the action
-                    if action == 'add':
-                        # Add a new section if action is add
-                        self.add_section(course, section_name.upper())
-                    elif action == 'toggle':
-                        # Or toggle
-                        self.toggle_section(course, section_name.upper())
-                    else:
-                        # Error if the action is neither toggle or add
-                        utils.error('Unexpected action:' + action, handler=self)
-                    #end
+                    # Error if the action is neither toggle or add
+                    utils.error('Unexpected action:' + action, handler=self)
                 #end
             #end
         #end
@@ -336,51 +338,50 @@ class Students(webapp2.RequestHandler):
         """
         HTTP POST method to add the student.
         """
-        # First, grab the logged in user
-        role, user = utils.get_role_user()
-        # And check that they're an instructor
-        if not user or role != models.Role.instructor:
-            # Error if not
-            utils.error('user is null or not instructor', handler=self)
+        # First, check that the logged in user is an instructor
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
+            return
+        #end
+
+        # Now grab the course, section, and action from the webpage
+        course_name = self.request.get('course')
+        section_name = self.request.get('section')
+        action = self.request.get('action')
+        # Check that all three were actually supplied
+        if not course_name or not section_name or not action:
+            # Error if not
+            utils.error('Invalid arguments: course_name or section_name or actoin is null', handler=self)
         else:
-            # Now grab the course, section, and action from the webpage
-            course_name = self.request.get('course')
-            section_name = self.request.get('section')
-            action = self.request.get('action')
-            # Check that all three were actually supplied
-            if not course_name or not section_name or not action:
-                # Error if not
-                utils.error('Invalid arguments: course_name or section_name or actoin is null', handler=self)
+            # Now try to grab the course from the database
+            course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
+            # Check if it already exists
+            if not course:
+                # Error if it doesn't
+                utils.error(course_name + ' course does not exist!', handler=self)
             else:
-                # Now try to grab the course from the database
-                course = models.Course.get_by_id(course_name.upper(), parent=user.key)
-                # Check if it already exists
-                if not course:
-                    # Error if it doesn't
-                    utils.error(course_name + ' course does not exist!', handler=self)
+                # Now grab the section from the database
+                section = models.Section.get_by_id(section_name.upper(), parent=course.key)
+                if not section:
+                    # And error if it doesn't exist
+                    utils.error(section_name + ' section does not exist!', handler=self)
                 else:
-                    # Now grab the section from the database
-                    section = models.Section.get_by_id(section_name.upper(), parent=course.key)
-                    if not section:
-                        # And error if it doesn't exist
-                        utils.error(section_name + ' section does not exist!', handler=self)
+                    # Now switch on the action
+                    if action == 'add':
+                        # Grab a list of the emails from the page
+                        emails = json.loads(self.request.get('emails'))
+                        # And create new students from that list
+                        self.add_students(section, emails)
+                    elif action == 'remove':
+                        # Grab the email from the page to remove
+                        email = self.request.get('email').lower()
+                        # And remove it
+                        self.remove_student(section, email)
                     else:
-                        # Now switch on the action
-                        if action == 'add':
-                            # Grab a list of the emails from the page
-                            emails = json.loads(self.request.get('emails'))
-                            # And create new students from that list
-                            self.add_students(section, emails)
-                        elif action == 'remove':
-                            # Grab the email from the page to remove
-                            email = self.request.get('email').lower()
-                            # And remove it
-                            self.remove_student(section, email)
-                        else:
-                            # Send an error if any other action is supplied
-                            utils.error('Unexpected action: ' + action, handler=self)
-                        #end
+                        # Send an error if any other action is supplied
+                        utils.error('Unexpected action: ' + action, handler=self)
                     #end
                 #end
             #end
@@ -392,24 +393,24 @@ class Students(webapp2.RequestHandler):
         HTTP GET method to retrieve the list of students from the datastore.
         """
         # First, check that the logged in user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
-            # And send an error if not
-            utils.error('user null or not instructor', handler=self)
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
-        else:
-            # Otherwise, create a logout url
-            logout_url = users.create_logout_url(self.request.uri)
-            # Get the course and section name from the webpage
-            course_name = self.request.get('course')
-            selected_section_name = self.request.get('section')
-            # And start building the template values
-            template_values = utils.get_courses_and_sections(user, course_name.upper(), selected_section_name.upper())
-            template_values['logouturl'] = logout_url
-            # Set the template and render the page
-            template = utils.jinja_env().get_template('instructor_list_students.html')
-            self.response.write(template.render(template_values))
+            return
         #end
+
+        # Otherwise, create a logout url
+        logout_url = users.create_logout_url(self.request.uri)
+        # Get the course and section name from the webpage
+        course_name = self.request.get('course')
+        selected_section_name = self.request.get('section')
+        # And start building the template values
+        template_values = utils.get_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
+        template_values['logouturl'] = logout_url
+        # Set the template and render the page
+        template = utils.jinja_env().get_template('instructor_list_students.html')
+        self.response.write(template.render(template_values))
     #end get
 
 #end class Students
@@ -427,67 +428,67 @@ class Rounds(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the rounds.
         """
-        #First check that the logged in user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
-            # Error if not
-            utils.error('user null or not instructor', handler=self)
+        # First, check that the logged in user is an instructor
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
-        else:
-            # Now create a logout url
-            logout_url = users.create_logout_url(self.request.uri)
-            # Grab the course and section name from the webpage
-            course_name = self.request.get('course')
-            selected_section_name = self.request.get('section')
-            # And get all the courses and sections for this instructor
-            template_values = utils.get_courses_and_sections(user, course_name.upper(), selected_section_name.upper())
-            # Now check that the section from the webpage actually corresponded
-            # to an actual section in this course, and that the template was set
-            if 'selectedSectionObject' in template_values:
-                # If so, grab that section from the template values
-                current_section = template_values['selectedSectionObject']
-                # Set the current active round
-                template_values['activeRound'] = current_section.current_round
-                # And grab all the rounds for this section
-                rounds = models.Round.query(ancestor=current_section.key).fetch()
-                # Double check that there are actually rounds already created
-                if rounds:
-                    # And set the template values
-                    template_values['rounds'] = rounds
-                    # Create an empty list to hold the discussion rounds
-                    discussion_rounds = []
-                    # And loop over all of the rounds for this section
-                    for r in rounds:
-                        # Set the lead-in question
-                        if r.number == 1:
-                            template_values['leadInQuestion'] = r
-                        elif r.is_quiz:
-                            # And if not the lead-in question, but still a quiz
-                            # it must be the summary round
-                            template_values['summaryQuestion'] = r
-                        else:
-                            # Otherwise, it's just a discussion round
-                            discussion_rounds.append(r)
-                        #end
-                    #end
-                    # Set the discussion round template values
-                    template_values['discussionRounds'] = discussion_rounds
-                #end
-                # Check to see if the summary round was set in the template
-                if 'summaryQuestion' in template_values:
-                    # If so, set the next round to the total number of rounds
-                    template_values['nextRound'] = current_section.rounds
-                else:
-                    # Otherwise, it must be set to the number of rounds plus
-                    # one (to account for the eventual summary round)
-                    template_values['nextRound'] = current_section.rounds + 1
-                #end
-            #end
-            # Set the template and render the page
-            template_values['logouturl'] = logout_url
-            template = utils.jinja_env().get_template('instructor_rounds.html')
-            self.response.write(template.render(template_values))
+            return
         #end
+
+        # Now create a logout url
+        logout_url = users.create_logout_url(self.request.uri)
+        # Grab the course and section name from the webpage
+        course_name = self.request.get('course')
+        selected_section_name = self.request.get('section')
+        # And get all the courses and sections for this instructor
+        template_values = utils.get_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
+        # Now check that the section from the webpage actually corresponded
+        # to an actual section in this course, and that the template was set
+        if 'selectedSectionObject' in template_values:
+            # If so, grab that section from the template values
+            current_section = template_values['selectedSectionObject']
+            # Set the current active round
+            template_values['activeRound'] = current_section.current_round
+            # And grab all the rounds for this section
+            rounds = models.Round.query(ancestor=current_section.key).fetch()
+            # Double check that there are actually rounds already created
+            if rounds:
+                # And set the template values
+                template_values['rounds'] = rounds
+                # Create an empty list to hold the discussion rounds
+                discussion_rounds = []
+                # And loop over all of the rounds for this section
+                for r in rounds:
+                    # Set the lead-in question
+                    if r.number == 1:
+                        template_values['leadInQuestion'] = r
+                    elif r.is_quiz:
+                        # And if not the lead-in question, but still a quiz
+                        # it must be the summary round
+                        template_values['summaryQuestion'] = r
+                    else:
+                        # Otherwise, it's just a discussion round
+                        discussion_rounds.append(r)
+                    #end
+                #end
+                # Set the discussion round template values
+                template_values['discussionRounds'] = discussion_rounds
+            #end
+            # Check to see if the summary round was set in the template
+            if 'summaryQuestion' in template_values:
+                # If so, set the next round to the total number of rounds
+                template_values['nextRound'] = current_section.rounds
+            else:
+                # Otherwise, it must be set to the number of rounds plus
+                # one (to account for the eventual summary round)
+                template_values['nextRound'] = current_section.rounds + 1
+            #end
+        #end
+        # Set the template and render the page
+        template_values['logouturl'] = logout_url
+        template = utils.jinja_env().get_template('instructor_rounds.html')
+        self.response.write(template.render(template_values))
     #end get
 
     def add_round(self, section):
@@ -557,46 +558,46 @@ class Rounds(webapp2.RequestHandler):
         # TODO Timezone support in deadlines
 
         # First, check that the logged in user is an instructor
-        role, instructor = utils.get_role_user()
-        if not instructor or role != models.Role.instructor:
-            # Error if so
-            utils.error('user null or not instructor', handler=self)
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
+            return
+        #end
+
+        # Otherwise, grab the course name, section name, and action
+        course_name = self.request.get('course').upper()
+        section_name = self.request.get('section').upper()
+        action = self.request.get('action')
+        # Check that all three are supplied
+        if not course_name or not section_name or not action:
+            # Error if not
+            utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
-            # Otherwise, grab the course name, section name, and action
-            course_name = self.request.get('course').upper()
-            section_name = self.request.get('section').upper()
-            action = self.request.get('action')
-            # Check that all three are supplied
-            if not course_name or not section_name or not action:
+            # Otherwise, grab the course from the database
+            course = models.Course.get_by_id(course_name, parent=instructor.key)
+            # And check that it actually exists
+            if not course:
                 # Error if not
-                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
+                utils.error('Course {c} does not exist!'.format(c=course_name), handler=self)
             else:
-                # Otherwise, grab the course from the database
-                course = models.Course.get_by_id(course_name, parent=instructor.key)
+                # Then grab the section from the database
+                section = models.Section.get_by_id(section_name, parent=course.key)
                 # And check that it actually exists
-                if not course:
+                if not section:
                     # Error if not
-                    utils.error('Course {c} does not exist!'.format(c=course_name), handler=self)
+                    utils.error('Section {s} does not exist!'.format(s=section_name), handler=self)
                 else:
-                    # Then grab the section from the database
-                    section = models.Section.get_by_id(section_name, parent=course.key)
-                    # And check that it actually exists
-                    if not section:
-                        # Error if not
-                        utils.error('Section {s} does not exist!'.format(s=section_name), handler=self)
+                    # Switch on the action
+                    if action == 'add':
+                        # Add
+                        self.add_round(section)
+                    elif action == 'activate':
+                        # Or turn on
+                        self.activate_round(section)
                     else:
-                        # Switch on the action
-                        if action == 'add':
-                            # Add
-                            self.add_round(section)
-                        elif action == 'activate':
-                            # Or turn on
-                            self.activate_round(section)
-                        else:
-                            # And error if any other action is provided
-                            utils.error('Unexpected action: ' + action, handler=self)
-                        #end
+                        # And error if any other action is provided
+                        utils.error('Unexpected action: ' + action, handler=self)
                     #end
                 #end
             #end
@@ -692,53 +693,53 @@ class Groups(webapp2.RequestHandler):
         HTTP GET Method to render the ``/groups`` page for the logged in Instructor.
 
         """
-        # Check that the logged in user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
-            # Error if not
-            utils.error('user not instructor', handler=self)
+        # First, check that the logged in user is an instructor
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
-        else:
-            # Otherwise, create a logout url
-            logout_url = users.create_logout_url(self.request.uri)
-            # And get the course and section names from the page
-            course_name = self.request.get('course')
-            selected_section_name = self.request.get('section')
-            # Grab all the courses and sections for the logged in instructor
-            template_values = utils.get_courses_and_sections(user, course_name.upper(),
-                                                             selected_section_name.upper())
-            # Now check that the section from the webpage actually corresponded
-            # to an actual section in this course, and that the template was set
-            if 'selectedSectionObject' in template_values:
-                # If so, grab that section from the template values
-                current_section = template_values['selectedSectionObject']
-                # Check that the current section has at least one round
-                if current_section.rounds > 0:
-                    # Grab the responses from the lead-in question
-                    response = models.Response.query(
-                            ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
-                    # 
-                    # Loop over the responses
-                    for res in response:
-                        # And loop over the students in this section
-                        for stu in current_section.students:
-                            # And check when the response matches the student
-                            if res.student == stu.email:
-                                # And set the group of the response to the
-                                # group of the student who made that response
-                                res.group = stu.group
-                            #end
+            return
+        #end
+
+        # Otherwise, create a logout url
+        logout_url = users.create_logout_url(self.request.uri)
+        # And get the course and section names from the page
+        course_name = self.request.get('course')
+        selected_section_name = self.request.get('section')
+        # Grab all the courses and sections for the logged in instructor
+        template_values = utils.get_courses_and_sections(instructor,
+                            course_name.upper(), selected_section_name.upper())
+        # Now check that the section from the webpage actually corresponded
+        # to an actual section in this course, and that the template was set
+        if 'selectedSectionObject' in template_values:
+            # If so, grab that section from the template values
+            current_section = template_values['selectedSectionObject']
+            # Check that the current section has at least one round
+            if current_section.rounds > 0:
+                # Grab the responses from the lead-in question
+                response = models.Response.query(
+                        ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                # Loop over the responses
+                for res in response:
+                    # And loop over the students in this section
+                    for stu in current_section.students:
+                        # And check when the response matches the student
+                        if res.student == stu.email:
+                            # And set the group of the response to the
+                            # group of the student who made that response
+                            res.group = stu.group
                         #end
                     #end
-                    template_values['responses'] = response
-                    template_values['group'] = current_section.groups
                 #end
+                # Add the responses and current group to the template values
+                template_values['responses'] = response
+                template_values['group'] = current_section.groups
             #end
-            # Set the template and render the page
-            template_values['logouturl'] = logout_url
-            template = utils.jinja_env().get_template('instructor_groups.html')
-            self.response.write(template.render(template_values))
         #end
+        # Set the template and render the page
+        template_values['logouturl'] = logout_url
+        template = utils.jinja_env().get_template('instructor_groups.html')
+        self.response.write(template.render(template_values))
     #end get
 
     def post(self):
@@ -746,51 +747,51 @@ class Groups(webapp2.RequestHandler):
         HTTP POST method to create groups.
         """
         # First, check that the logged in user is an instructor
-        role, instructor = utils.get_role_user()
-        if not instructor or role != models.Role.instructor:
-            # Error if not
-            utils.error('user is null or not instructor', handler=self)
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
+            return
+        #end
+
+        # Get the course and section name and the action from the page
+        course_name = self.request.get('course')
+        section_name = self.request.get('section')
+        action = self.request.get('action')
+        # Check that all three are actually supplied
+        if not course_name or not section_name or not action:
+            # Error if not
+            utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
-            # Get the course and section name and the action from the page
-            course_name = self.request.get('course')
-            section_name = self.request.get('section')
-            action = self.request.get('action')
-            # Check that all three are actually supplied
-            if not course_name or not section_name or not action:
+            # Otherwise, grab the course from the database
+            course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
+            # Double check that it actually existed
+            if not course:
                 # Error if not
-                utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
-            else:
-                # Otherwise, grab the course from the database
-                course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
-                # Double check that it actually existed
-                if not course:
-                    # Error if not
                     utils.error(course_name + ' course does not exist!', handler=self)
                 else:
-                    # Now grab the section
-                    section = models.Section.get_by_id(section_name.upper(), parent=course.key)
-                    # And double check that it exists
-                    if not section:
-                        #Error if not
-                        utils.error(section_name + ' section does not exist!', handler=self)
+                # Now grab the section
+                section = models.Section.get_by_id(section_name.upper(), parent=course.key)
+                # And double check that it exists
+                if not section:
+                    #Error if not
+                    utils.error(section_name + ' section does not exist!', handler=self)
+                else:
+                    # Switch on the action
+                    utils.log('action = ' + action)
+                    if action == 'add':
+                        # If add, grab the number of groups from the page
+                        group_count = int(self.request.get('groups'))
+                        # And modify the database
+                        self.modify_group_count(section, group_count)
+                    elif action == 'update':
+                        # For update, grab the group settings from the page
+                        groups = json.loads(self.request.get('groups'))
+                        # And modify the database
+                        self.update_groups(section, groups)
                     else:
-                        # Switch on the action
-                        utils.log('action = ' + action)
-                        if action == 'add':
-                            # If add, grab the number of groups from the page
-                            group_count = int(self.request.get('groups'))
-                            # And modify the database
-                            self.modify_group_count(section, group_count)
-                        elif action == 'update':
-                            # For update, grab the group settings from the page
-                            groups = json.loads(self.request.get('groups'))
-                            # And modify the database
-                            self.update_groups(section, groups)
-                        else:
-                            # Send an error if a different action is supplied
-                            utils.error('Unknown action' + action if action else 'None', handler=self)
-                        #end
+                        # Send an error if a different action is supplied
+                        utils.error('Unknown action' + action if action else 'None', handler=self)
                     #end
                 #end
             #end
@@ -809,47 +810,47 @@ class Responses(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the responses.
         """
-        # First, check that the user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
-            # Error if not
-            utils.error('user is null or not instructor', handler=self)
+        # First, check that the logged in user is an instructor
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
-        else:
-            # Create logout url
-            logout_url = users.create_logout_url(self.request.uri)
-            # And grab the course and section name from the page
-            course_name = self.request.get('course')
-            selected_section_name = self.request.get('section')
-            # And grab all the other courses and sections for this instructor
-            template_values = utils.get_courses_and_sections(user, course_name.upper(),
-                                                             selected_section_name.upper())
-            # Now check that the section from the webpage actually corresponded
-            # to an actual section in this course, and that the template was set
-            if 'selectedSectionObject' in template_values:
-                # If so, grab that section from the template values
-                current_section = template_values['selectedSectionObject']
-                # And set the round
-                template_values['round'] = current_section.rounds
-                # Create a new dict for the responses
-                resp = {}
-                # And loop over the number of rounds (indexed at 1 for lead-in)
-                for i in range(1, current_section.rounds + 1):
-                    response = models.Response.query(
-                            ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
-                    # response is a list of all the responses for the round i
-                    if response:
-                        resp[str(i)] = response
-                    #end
-                #end
-                # Add the responses to the template values
-                template_values['responses'] = resp
-            #end
-            # And set the template and render the page
-            template_values['logouturl'] = logout_url
-            template = utils.jinja_env().get_template('instructor_responses.html')
-            self.response.write(template.render(template_values))
+            return
         #end
+
+        # Create logout url
+        logout_url = users.create_logout_url(self.request.uri)
+        # And grab the course and section name from the page
+        course_name = self.request.get('course')
+        selected_section_name = self.request.get('section')
+        # And grab all the other courses and sections for this instructor
+        template_values = utils.get_courses_and_sections(instructor,
+                            course_name.upper(), selected_section_name.upper())
+        # Now check that the section from the webpage actually corresponded
+        # to an actual section in this course, and that the template was set
+        if 'selectedSectionObject' in template_values:
+            # If so, grab that section from the template values
+            current_section = template_values['selectedSectionObject']
+            # And set the round
+            template_values['round'] = current_section.rounds
+            # Create a new dict for the responses
+            resp = {}
+            # And loop over the number of rounds (indexed at 1 for lead-in)
+            for i in range(1, current_section.rounds + 1):
+                response = models.Response.query(
+                        ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
+                # response is a list of all the responses for the round i
+                if response:
+                    resp[str(i)] = response
+                #end
+            #end
+            # Add the responses to the template values
+            template_values['responses'] = resp
+        #end
+        # And set the template and render the page
+        template_values['logouturl'] = logout_url
+        template = utils.jinja_env().get_template('instructor_responses.html')
+        self.response.write(template.render(template_values))
     #end get
 
 #end class Responses
@@ -865,75 +866,75 @@ class GroupResponses(webapp2.RequestHandler):
         HTTP GET method to retrieve the group responses.
         """
         # First, check that the logged in user is an instructor
-        role, user = utils.get_role_user()
-        if not user or role != models.Role.instructor:
-            # Error if so
-            utils.error('user is null or not instructor', handler=self)
+        instructor = utils.check_instructor_privilege()
+        if not instructor:
+            # Send them home and short circuit all other logic
             self.redirect('/')
-        else:
-            # Otherwise, create a logout url
-            logout_url = users.create_logout_url(self.request.uri)
-            # And get the course and section name from the page
-            course_name = self.request.get('course')
-            selected_section_name = self.request.get('section')
-            # And grab the other courses and sections from this instructor
-            template_values = utils.get_courses_and_sections(user, course_name.upper(),
-                                                             selected_section_name.upper())
-            # Now check that the section from the webpage actually corresponded
-            # to an actual section in this course, and that the template was set
-            if 'selectedSectionObject' in template_values:
-                # If so, grab the current section from the template values
-                current_section = template_values['selectedSectionObject']
-                # Set the rounds and groups
-                template_values['round'] = current_section.rounds
-                template_values['groups'] = current_section.groups
-                # And check that groups have actually been assigned
-                if current_section.groups > 0:
-                    # Create a new dict for responses
-                    resp = {}
-                    # Loop over the groups (indexed by 1)
-                    for g in range(1, current_section.groups + 1):
-                        # And loop over the rounds (indexed by 1)
-                        for r in range(1, current_section.rounds + 1):
-                            # Now set an empty list for each group and round
-                            resp['group_' + str(g) + '_' + str(r)] = []
-                        #end
-                    #end
-                    # Loop over the number of rounds (indexed by 1)
+            return
+        #end
+
+        # Otherwise, create a logout url
+        logout_url = users.create_logout_url(self.request.uri)
+        # And get the course and section name from the page
+        course_name = self.request.get('course')
+        selected_section_name = self.request.get('section')
+        # And grab the other courses and sections from this instructor
+        template_values = utils.get_courses_and_sections(instructor,
+                            course_name.upper(), selected_section_name.upper())
+        # Now check that the section from the webpage actually corresponded
+        # to an actual section in this course, and that the template was set
+        if 'selectedSectionObject' in template_values:
+            # If so, grab the current section from the template values
+            current_section = template_values['selectedSectionObject']
+            # Set the rounds and groups
+            template_values['round'] = current_section.rounds
+            template_values['groups'] = current_section.groups
+            # And check that groups have actually been assigned
+            if current_section.groups > 0:
+                # Create a new dict for responses
+                resp = {}
+                # Loop over the groups (indexed by 1)
+                for g in range(1, current_section.groups + 1):
+                    # And loop over the rounds (indexed by 1)
                     for r in range(1, current_section.rounds + 1):
-                        # Grab the responses for that round from the db
-                        responses = models.Response.query(
-                                ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
-                        # Double check that the responses actually exist
-                        if responses:
-                            # And loop over the responses
-                            for res in responses:
-                                # And loop over the students in this section
-                                for s in current_section.students:
-                                    # Check that the email of the student
-                                    # and the email of the response match
-                                    # and that the student is in a group
-                                    if s.email == res.student and s.group != 0:
-                                        # Set the alias of the response
-                                        res.alias = s.alias
-                                        # Append the response to the appropriate
-                                        # group and round
-                                        resp['group_' + str(s.group) + '_' + str(r)].append(res)
-                                        break
-                                    #end
+                        # Now set an empty list for each group and round
+                        resp['group_' + str(g) + '_' + str(r)] = []
+                    #end
+                #end
+                # Loop over the number of rounds (indexed by 1)
+                for r in range(1, current_section.rounds + 1):
+                    # Grab the responses for that round from the db
+                    responses = models.Response.query(
+                            ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
+                    # Double check that the responses actually exist
+                    if responses:
+                        # And loop over the responses
+                        for res in responses:
+                            # And loop over the students in this section
+                            for s in current_section.students:
+                                # Check that the email of the student
+                                # and the email of the response match
+                                # and that the student is in a group
+                                if s.email == res.student and s.group != 0:
+                                    # Set the alias of the response
+                                    res.alias = s.alias
+                                    # Append the response to the appropriate
+                                    # group and round
+                                    resp['group_' + str(s.group) + '_' + str(r)].append(res)
+                                    break
                                 #end
                             #end
                         #end
                     #end
-                    # And set the template values for all the responses
-                    template_values['responses'] = resp
                 #end
+                # And set the template values for all the responses
+                template_values['responses'] = resp
             #end
-            # And set the template and render the page
-            template_values['logouturl'] = logout_url
-            template = utils.jinja_env().get_template('instructor_groups_responses.html')
-            self.response.write(template.render(template_values))
         #end
+        # And set the template and render the page
+        template_values['logouturl'] = logout_url
+        template = utils.jinja_env().get_template('instructor_groups_responses.html')
+        self.response.write(template.render(template_values))
     #end get
 
 #end class GroupResponses

@@ -105,6 +105,17 @@ def get_role_user():
     return None, None
 
 
+def check_instructor_privilege():
+    # First, check that the logged in user is an instructor
+    role, user = get_role_user()
+    if not user or role != models.Role.instructor:
+        # Error if not
+        error('user is null or not Instructor')
+        return False
+    return user
+#end
+
+
 def get_courses_and_sections(instructor, course_name, selected_section):
     """
     Fetches the courses and sections for the given instructor.
