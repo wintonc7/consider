@@ -777,7 +777,7 @@ class Groups(webapp2.RequestHandler):
             if not course:
                 # Error if not
                     utils.error(course_name + ' course does not exist!', handler=self)
-                else:
+            else:
                 # Now grab the section
                 section = models.Section.get_by_id(section_name.upper(), parent=course.key)
                 # And double check that it exists
