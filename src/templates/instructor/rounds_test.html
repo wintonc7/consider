@@ -67,10 +67,6 @@
     <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> 
     Edit Question
 </button>
-<button type="button" class="btn btn-default" onclick="">
-    <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-    Start Rounds
-</button>
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -111,21 +107,8 @@
 <!-- THIS IS THE START OF THE DISCUSSIONS BLOCK -->
 <h4 class="sub-header">Discussions:</h4>
 	<div class="row">
-		<div class="col-xs-12 col-sm-4">
-
-			<!--<button type="button" class="btn btn-default" onclick="addDiscussion()"
-			        aria-label="Add Discussion">
-			    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
-			</button>-->
-
-            <button id="add_disc" type="button" class="btn btn-default" onclick=""
-                    aria-label="Add Discussion">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Rows
-            </button>
-
-		</div>
 		
-		<div class="col-xs-6 col-sm-3 col-sm-offset-2">
+		<div class="col-xs-6 col-sm-3">
 			<label for="total_disc">Total Discussions</label>
             <input class="form-control" id="total_disc" value="{{(discussionRounds|length)}}" name="total_disc" type="tel">
             <div id="total_dis_error" class="alert alert-danger" role="alert">
@@ -136,14 +119,29 @@
  
 		<div class="col-xs-6 col-sm-3">
 			<label for="durration">Duration (hours)</label>
-            <input class="form-control" id="duration" type="tel">
+            <input class="form-control" id="duration" type="tel" value="24">
             <div id="duration_error" class="alert alert-danger" role="alert">
                 <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <strong>Invalid Duration!</strong>
             </div>
 		</div>
-		
+    </div>
+    <div class="row">
+
+        <div class="col-xs-12 col-sm-12">
+            <!--<button type="button" class="btn btn-default" onclick="addDiscussion()"
+                    aria-label="Add Discussion">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
+            </button>-->
+            
+            <button style="margin-top: 5px" id="add_disc" type="button" class="btn btn-default" onclick=""
+                    aria-label="Add Discussion">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Rows
+            </button>
+
+        </div>
 	</div>
+
     <br>
 	<div class="table-responsive">
 	    <table class="table table-striped" id="round-table">
@@ -161,7 +159,7 @@
             {% if discussionRounds %}
 		        {% for obj in discussionRounds %}
 		        <tr>
-                    <td><button class="btn btn-default" aria-label="Edit Discussion"><span class="glyphicon glyphicon-remove"></span></button></td>
+                    <td></td>
 		            <td>{{obj.number}}</td>
                     <td>{{obj.starttime|default('n/a')}}</td>
 		            <td>{{obj.deadline}}</td>
@@ -219,6 +217,17 @@
         aria-label="Add Question">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
 </button>
+
+<div class="row">
+    <div class="col-sm-12">
+        <h2>Round Activation Control</h2>
+        <hr>
+        <button type="button" class="btn btn-warning btn-lg" onclick="">
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            Start Rounds
+        </button>
+    </div>
+</div>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -345,7 +354,6 @@
     });
 
     //Logic to add new discussion round to UI
-    var disc = $('#total_disc').val();
     var $duration_error = $('#duration_error');
 
     $('.remove-round').click(function () {
@@ -354,7 +362,7 @@
         $parent.remove();
         $('#total_disc').val($('#total_disc').val()-1);
         num_rounds -= 1;
-        updateRoundNums(1);
+        updateRoundNums(2);
         updateRoundTimes(duration);
     });
 
@@ -368,15 +376,16 @@
     });
 
     $("#add_disc").click(function(){
-        var new_disc = $('#total_disc').val();
+        var dics_num = $('#total_disc').val();
         var duration = $('#duration').val();
+        var disc = $('#round-table tr').length;  // number of rounds = rows - header row
 
         if(duration === '' || duration < 0){
             $duration_error.show();
             return;
         }
 
-        while(new_disc > disc){
+        while(dics_num > disc){
             disc++;
             var _row = $('<tr></tr>');
 
@@ -388,7 +397,7 @@
                 $parent.remove();
                 $('#total_disc').val($('#total_disc').val()-1);
                 num_rounds -= 1;
-                updateRoundNums(1);
+                updateRoundNums(2);
                 updateRoundTimes(duration);
             });
             _button.append($('<span class="glyphicon glyphicon-remove"></span>'));
