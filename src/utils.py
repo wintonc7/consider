@@ -105,18 +105,36 @@ def get_role_user():
     return None, None
 
 
-def check_instructor_privilege():
+def check_privilege(expected_role):
+    """
+    Checks if the currently logged in user meets the expected role passed in.
+
+    Args:
+        expected_role (object):
+          The role we're checking against from the models.
+
+    Returns:
+        user (object):
+          The currently logged in user object or False if user doesn't meet
+          the specified role.
+
+    """
     # First, check that the logged in user is an instructor
     role, user = get_role_user()
-    if not user or role != models.Role.instructor:
+    if not user or role != expected_role:
         # Error if not
-        error('user is null or not Instructor')
+        if expected_role == models.Role.instructor:
+            error('user is null or not Instructor')
+        elif expected_role == models.Role.student:
+            error('user is null or not Student')
+        #end
         return False
+    #end
     return user
 #end
 
 
-def get_courses_and_sections(instructor, course_name, selected_section):
+def get_template_all_courses_and_sections(instructor, course_name, selected_section):
     """
     Fetches the courses and sections for the given instructor.
 
@@ -133,33 +151,107 @@ def get_courses_and_sections(instructor, course_name, selected_section):
             Courses and sections to be rendered.
 
     """
+    # First, built an empty dict to hold all the template values
     template_values = {}
+    # Try and grab all the courses for this particular instructor
     courses = models.Course.query(ancestor=instructor.key).fetch()
+    # Double check that this instructor actually has courses
     if courses:
+        # If so, set assign that list to the template values
         course = None
         template_values['courses'] = courses
+        # If a particular course name was passed in
         if course_name:
+            # Convert it to upper case and try and grab it from the db
             course_name = course_name.upper()
             course = models.Course.get_by_id(course_name, parent=instructor.key)
+        #end
+        # If it doesn't exist, just set the active course to the first
         if not course:
             course = courses[0]
-        sections = models.Section.query(ancestor=course.key).fetch()
+        #end
+        # And set the name in the template values
         template_values['selectedCourse'] = course.name
+        # Now try and grab the sections from the db
+        sections = models.Section.query(ancestor=course.key).fetch()
+        # If there are no sections and a course name wasn't passed in
         if not sections and not course_name:
+            # Grab all sections of the "default" course
             sections = models.Section.query(ancestor=courses[0].key).fetch()
+        #end
+        # And add them to the template values
         template_values['sections'] = sections
+        # And if there are sections
         if sections:
             section = None
+            # And if a particular section name was passed in
             if selected_section:
+                # Try and grab that section from the database
                 selected_section = selected_section.upper()
                 section = models.Section.get_by_id(selected_section, parent=course.key)
+            #end
+            # If it wasn't found, set a default section
             if not section:
                 section = sections[0]
+            #end
+            # And set the rest of the template values
             template_values['selectedSection'] = section.name
             template_values['selectedSectionObject'] = section
             template_values['students'] = section.students
+        #end
+    #end
+    # And finally return the template values
     return template_values
+#end get_template_all_courses_and_sections
 
+
+def get_course_and_section_objs(page_handler, instructor):
+    """
+    Given the page handler and the currently logged in instructor, returns the
+    course and section objects from the database from their keys on the page.
+
+    Args:
+        page_handler (webapp2.RequestHandler object):
+          The current request handler for the page the instructor is on.
+        instructor (object):
+          The currently logged in instructor object.
+
+    Returns:
+        <course, section>:
+          A tuple where the course and section object have been retrieved from
+          the database given their id keys from the request handler.
+
+    """
+    # First, grab the course and section from the page
+    course_name = page_handler.get('course').upper()
+    section_name = page_handler.get('section').upper()
+    # And set the course and section to null
+    course, section = None, None
+
+    # Check that we actually get them
+    if not course_name or not section_name:
+        # Error if not
+        error('Invalid arguments: course_name or section_name is null', handler=page_handler)
+    else:
+        # Now grab the course from the database
+        course = models.Course.get_by_id(course_name, parent=instructor.key)
+        # And check that it actually exists
+        if not course:
+            # Error if not
+            error('Course {c} does not exist!'.format(c=course_name), handler=page_handler)
+        else:
+            # Now grab the section from the database
+            section = models.Section.get_by_id(section_name, parent=course.key)
+            # And check that it actually exists
+            if not section:
+                # Error if not
+                error('Section {s} does not exist!'.format(s=section_name), handler=page_handler)
+            #end
+        #end
+    #end
+    # And finally return the course and section
+    return course, section
+#end get_course_and_section_objs
 
 def is_valid_response(response):
     """

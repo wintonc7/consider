@@ -31,38 +31,37 @@ class Rounds(webapp2.RequestHandler):
     """
 
     def get(self):
-        # First, grab the information for the currently logged in user
-        role, student = utils.get_role_user()
-        # And check that they're a student
-        if not student or role != models.Role.student:
+        # First, check that the logged in user is a student
+        student = utils.check_privilege(models.Role.student)
+        if not student:
             # Redirect home if not a student
+            return self.redirect('/home')
+        #end
+
+        # Otherwise, log which student made the get
+        utils.log('Student logged in: ' + str(student))
+        # And grab the key for the section
+        section_key = self.request.get('section')
+        # Make sure that it isn't null
+        if not section_key:
+            # Error if so, and redirect home
+            utils.error('Section_key is null')
             self.redirect('/home')
         else:
-            # Otherwise, log which student made the get
-            utils.log('Student logged in: ' + str(student))
-            # And grab the key for the section
-            section_key = self.request.get('section')
-            # Make sure that it isn't null
-            if not section_key:
-                # Error if so, and redirect home
-                utils.error('Section_key is null')
-                self.redirect('/home')
+            # And then grab the section from the key
+            section = ndb.Key(urlsafe=section_key).get()
+            # Making sure it's not null
+            if not section:
+                # Error if so
+                utils.error('Section is null')
             else:
-                # And then grab the section from the key
-                section = ndb.Key(urlsafe=section_key).get()
-                # Making sure it's not null
-                if not section:
-                    # Error if so
-                    utils.error('Section is null')
+                # Now check if the current round is 0
+                if section.current_round == 0:
+                    # And redirect to an error if so
+                    self.redirect('/error?code=103')
                 else:
-                    # Now check if the current round is 0
-                    if section.current_round == 0:
-                        # And redirect to an error if so
-                        self.redirect('/error?code=103')
-                    else:
-                        # Otherwise, we need to set our template values
-                        self.render_template(student, section)
-                    #end
+                    # Otherwise, we need to set our template values
+                    self.render_template(student, section)
                 #end
             #end
         #end
@@ -72,43 +71,40 @@ class Rounds(webapp2.RequestHandler):
         """
         HTTP POST method to submit the response.
         """
-        # First, grab the information for the currently logged in user
-        role, student = utils.get_role_user()
-        # Check that they're a student
-        if not student or role != models.Role.student:
+        # First, check that the logged in user is a student
+        student = utils.check_privilege(models.Role.student)
+        if not student:
+            # Redirect home if not a student
+            return self.redirect('/home')
+        #end
+
+        # First, grab the section key from the page
+        section_key = self.request.get('section')
+        # Double check that we actually got a section key
+        if not section_key:
             # Error if not
-            utils.error('user is null or not student', handler=self)
-            self.redirect('/')
+            utils.error('Invalid Parameters: section_key is null', handler=self)
         else:
-            # First, grab the section key from the page
-            section_key = self.request.get('section')
-            # Double check that we actually got a section key
-            if not section_key:
-                # Error if not
-                utils.error('Invalid Parameters: section_key is null', handler=self)
-            else:
-                try:
-                    # Grab the section from the database
-                    section = ndb.Key(urlsafe=section_key).get()
+            try:
+                # Grab the section from the database
+                section = ndb.Key(urlsafe=section_key).get()
+                # And double check that it's valid
+                if not section:
+                    # Error if not
+                    utils.error('Section is null', handler=self)
+                else:
+                    # Grab the current round from the database
+                    current_round = models.Round.get_by_id(section.current_round, parent=section.key)
                     # And double check that it's valid
-                    if not section:
+                    if not current_round:
                         # Error if not
-                        utils.error('Section is null', handler=self)
+                        utils.error('Sorry! The round is not visible, please try again later.', handler=self)
                     else:
-                        # Grab the current round from the database
-                        current_round = models.Round.get_by_id(section.current_round, parent=section.key)
-                        # And double check that it's valid
-                        if not current_round:
-                            # Error if not
-                            utils.error('Sorry! The round is not visible, please try again later.', handler=self)
-                        else:
-                            self.save_submission(student, current_round)
-                        #end
+                        self.save_submission(student, current_round)
                     #end
-                except:
-                    utils.error(
-                        'Sorry! There was some error submitting your response please try again later.',
-                        handler=self)
+                #end
+            except:
+                utils.error('Sorry! There was some error submitting your response please try again later.', handler=self)
                 #end
             #end
         #end
@@ -216,7 +212,7 @@ class Rounds(webapp2.RequestHandler):
                     previous_round = models.Round.get_by_id(round_number - 1, parent=section.key)
                 #end
                 # Now grab all the group comments for the previous round
-                comments = group_comments(group, previous_round, template_values)
+                comments = self.group_comments(group, section, previous_round)
                 # Set the template value for all the group comments
                 template_values['comments'] = comments
                 # Grab the requested round
@@ -227,13 +223,14 @@ class Rounds(webapp2.RequestHandler):
                 if stu_response:
                     # And set template values to show their previous response
                     template_values['comment'] = stu_response.comment
+                    utils.log("{0}".format(str(stu_response.comment)))
                     template_values['response'] = ','.join(str(item) for item in stu_response.response)
                 #end
             #end
         #end
     #end discussion_view_template
 
-    def group_comments(self, group, previous_round):
+    def group_comments(self, group, section, previous_round):
         # Init an empty list for holding the comments
         comments = []
         # Now loop over the members in the group
@@ -334,50 +331,48 @@ class HomePage(webapp2.RequestHandler):
         """
         Display a list of active ``Section``_\ s this ``Student``_ is enrolled in.
         """
-        # First, grab the information for the currently logged in user
-        role, student = utils.get_role_user()
-        # Double check that they're a student
-        if not student or role != models.Role.student:
-            # Error if not
-            utils.error('user is null or not student', handler=self)
-            self.redirect('/')
-        else:
-            # Create a url for the user to logout
-            logout_url = users.create_logout_url(self.request.uri)
-            # Set up the template
-            template_values = {'logouturl': logout_url, 'nickname': student.email}
-            # Grab the sections the student is a part of
-            sections = student.sections
-            # Create a new list for holding the section objects from the db
-            section_list = []
-            # Double check that the student is actually enrolled in a section
-            if sections:
-                # Loop over all the sections they're in
-                for section in sections:
-                    # Grab it from the db
-                    section_obj = section.get()
-                    # Get the parent course for the section
-                    course_obj = section.parent().get()
-                    # Double check that both exist
-                    if section_obj and course_obj:
-                        # Grab the section key, section name, and course name
-                        sec = {
+        # First, check that the logged in user is a student
+        student = utils.check_privilege(models.Role.student)
+        if not student:
+            # Redirect home if not a student
+            return self.redirect('/')
+        #end
+
+        # Create a url for the user to logout
+        logout_url = users.create_logout_url(self.request.uri)
+        # Set up the template
+        template_values = {'logouturl': logout_url, 'nickname': student.email}
+        # Grab the sections the student is a part of
+        sections = student.sections
+        # Create a new list for holding the section objects from the db
+        section_list = []
+        # Double check that the student is actually enrolled in a section
+        if sections:
+            # Loop over all the sections they're in
+            for section in sections:
+                # Grab it from the db
+                section_obj = section.get()
+                # Get the parent course for the section
+                course_obj = section.parent().get()
+                # Double check that both exist
+                if section_obj and course_obj:
+                    # Grab the section key, section name, and course name
+                    sec = {
                             'key': section.urlsafe(),
                             'name': section_obj.name,
                             'course': course_obj.name
                         }
-                        # And throw it in the list
-                        section_list.append(sec)
-                    #end
+                    # And throw it in the list
+                    section_list.append(sec)
                 #end
             #end
-            # Add the list of sections the student is in to our template
-            template_values['sections'] = section_list
-            # Set the template html page
-            template = utils.jinja_env().get_template('student_home.html')
-            # And render it
-            self.response.write(template.render(template_values))
         #end
+        # Add the list of sections the student is in to our template
+        template_values['sections'] = section_list
+        # Set the template html page
+        template = utils.jinja_env().get_template('student_home.html')
+        # And render it
+        self.response.write(template.render(template_values))
     #end get
 
 #end class HomePage

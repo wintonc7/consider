@@ -389,6 +389,39 @@
             return;
         }
 
+
+        /* rasor 2016-03-04
+         * Let's just send the number of rounds and duration to the back end
+         * here before any of the js mangles it.  We'll remove the js code used
+         * to fill out the table and eventually hook the table completely to
+         * the controller... sometime later...
+         */
+        var url = '/test-rounds'
+        /* TODO: Figure out how the start time is going to be determined.
+         * As it currently stands, there is nowhere to enter a "start-time"
+         * or "end-time" for the rounds.
+         */
+        /* For now, I'll just use moment.js to fill an array of times starting
+         * with {duration} from NOW.
+         */
+        var start_times = [];
+        for(var i = 0; i < dics_num; i++) {
+            start_times.push(moment().add(duration * i, 'hours').format("YYYY-MM-DD[T]HH:MM"))
+        }
+        /* And stupidly I don't know how to pass an array if not in JSON,
+         * which is how they did it originally
+         */
+        start_times = JSON.stringify(start_times);
+        /* Do the post and get the callback */
+        $.post(url, {
+            dics_num: dics_num, duration: duration, action: 'add',
+            round: "{{nextRound}}", times: start_times,
+            course: "{{selectedCourse}}", section: "{{selectedSection}}"
+        }, function (data) {
+            bootbox.alert(data.substring(1));
+        });
+
+
         while(dics_num > disc){
             disc++;
             var _row = $('<tr></tr>');
