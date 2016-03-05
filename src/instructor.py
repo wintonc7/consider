@@ -80,8 +80,7 @@ class Courses(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, get the course name and action from the webpage
@@ -114,8 +113,7 @@ class Courses(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, generate a logout url
@@ -208,8 +206,7 @@ class Section(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, grab the course, section, and action from the webpage
@@ -342,8 +339,7 @@ class Students(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Now grab the course, section, and action from the webpage
@@ -396,8 +392,7 @@ class Students(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, create a logout url
@@ -424,6 +419,9 @@ class RoundsTest(webapp2.RequestHandler):
         template = utils.jinja_env().get_template('instructor/rounds_test.html')
         self.response.write(template.render(template_values))
 
+    def add_rounds(self):
+        return self.redirect('/')
+
 class Rounds(webapp2.RequestHandler):
     """
     API to retrieve and display the information of *rounds* for the selected course and section.
@@ -440,8 +438,7 @@ class Rounds(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Now create a logout url
@@ -569,8 +566,7 @@ class Rounds(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, grab the course name, section name, and action
@@ -705,8 +701,7 @@ class Groups(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, create a logout url
@@ -758,8 +753,7 @@ class Groups(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Get the course and section name and the action from the page
@@ -822,8 +816,7 @@ class Responses(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Create logout url
@@ -877,8 +870,7 @@ class GroupResponses(webapp2.RequestHandler):
         instructor = utils.check_instructor_privilege()
         if not instructor:
             # Send them home and short circuit all other logic
-            self.redirect('/')
-            return
+            return self.redirect('/')
         #end
 
         # Otherwise, create a logout url
