@@ -95,7 +95,7 @@ class GroupResponses(webapp2.RequestHandler):
         #end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
-        template = utils.jinja_env().get_template('instructor_groups_responses.html')
+        template = utils.jinja_env().get_template('instructor/groups_responses.html')
         self.response.write(template.render(template_values))
     #end get
 

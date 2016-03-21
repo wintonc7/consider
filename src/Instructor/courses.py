@@ -135,7 +135,7 @@ class Courses(webapp2.RequestHandler):
             template_values['courses'] = courses
         #end
         # And set the template and render the page
-        template = utils.jinja_env().get_template('instructor_courses.html')
+        template = utils.jinja_env().get_template('instructor/courses.html')
         self.response.write(template.render(template_values))
     #end get
 
