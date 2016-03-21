@@ -135,7 +135,7 @@ class Courses(webapp2.RequestHandler):
             template_values['courses'] = courses
         #end
         # And set the template and render the page
-        template = utils.jinja_env().get_template('instructor_courses.html')
+        template = utils.jinja_env().get_template('instructor/courses.html')
         self.response.write(template.render(template_values))
     #end get
 
@@ -389,7 +389,7 @@ class Students(webapp2.RequestHandler):
         template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
         template_values['logouturl'] = logout_url
         # Set the template and render the page
-        template = utils.jinja_env().get_template('instructor_list_students.html')
+        template = utils.jinja_env().get_template('instructor/list_students.html')
         self.response.write(template.render(template_values))
     #end get
 
@@ -596,7 +596,7 @@ class Rounds(webapp2.RequestHandler):
         #end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
-        template = utils.jinja_env().get_template('instructor_rounds.html')
+        template = utils.jinja_env().get_template('instructor/rounds.html')
         self.response.write(template.render(template_values))
     #end get
 
@@ -829,7 +829,7 @@ class Groups(webapp2.RequestHandler):
         #end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
-        template = utils.jinja_env().get_template('instructor_groups.html')
+        template = utils.jinja_env().get_template('instructor/groups.html')
         self.response.write(template.render(template_values))
     #end get
 
@@ -922,7 +922,7 @@ class Responses(webapp2.RequestHandler):
         #end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
-        template = utils.jinja_env().get_template('instructor_responses.html')
+        template = utils.jinja_env().get_template('instructor/responses.html')
         self.response.write(template.render(template_values))
     #end get
 
@@ -1005,7 +1005,7 @@ class GroupResponses(webapp2.RequestHandler):
         #end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
-        template = utils.jinja_env().get_template('instructor_groups_responses.html')
+        template = utils.jinja_env().get_template('instructor/groups_responses.html')
         self.response.write(template.render(template_values))
     #end get
 
