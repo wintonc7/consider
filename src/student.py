@@ -157,12 +157,12 @@ class Rounds(webapp2.RequestHandler):
                 # And set template values for quiz round
                 self.quiz_view_template(student, requested_round, template_values)
                 # And set the right template
-                template = utils.jinja_env().get_template('student_round.html')
+                template = utils.jinja_env().get_template('students/round.html')
             else:
                 # Otherwise, set up template values for discussion round
                 self.discussion_view_template(student, section, requested_round_number, template_values)
                 # And set the right template
-                template = utils.jinja_env().get_template('student_discussion.html')
+                template = utils.jinja_env().get_template('students/discussion.html')
             #end
             # Now, render it.
             self.response.write(template.render(template_values))
@@ -370,7 +370,7 @@ class HomePage(webapp2.RequestHandler):
         # Add the list of sections the student is in to our template
         template_values['sections'] = section_list
         # Set the template html page
-        template = utils.jinja_env().get_template('student_home.html')
+        template = utils.jinja_env().get_template('students/home.html')
         # And render it
         self.response.write(template.render(template_values))
     #end get
