@@ -11,6 +11,7 @@ Implements the APIs for Instructor control of adding discussion rounds.
 
 """
 import json
+import datetime
 
 import webapp2
 from google.appengine.api import users
@@ -123,28 +124,54 @@ class RoundsTest(webapp2.RequestHandler):
     def add_rounds(self, num_of_rounds, duration, instructor):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
-        # And grab the current round
-        current_round = int(self.request.get('round'))
 
-        # TODO: Figure out how the start time is going to be determined.
-        # As it currently stands, there is nowhere to enter a "start-time"
-        # or "end-time" for the rounds.
-        # This needs fixed in the view.
-        start_times = json.loads(self.request.get('times'))
+        # First, grab all the rounds for this current section
+        rounds = models.Round.query(ancestor=section.key).fetch()
+        # The view requires at least a lead-in question to add rounds, but check
+        if not rounds:
+            # Send an error if no rounds exist for this section
+            utils.error('No lead-in question exists; cannot add new rounds yet.', handler=self)
+            # And redirect
+            return self.redirect('/')
+        #end
+
+        # Now grab the current last round
+        current_last_round = rounds[-1].number
+        # We need the end time of the last round currently in this section
+        last_time = rounds[-1].deadline
+        # Now we need to compute new start and end times for the new rounds
+        end_times = self.get_end_times(last_time, num_of_rounds, duration, 0)
 
         # Now let's just loop over the number of rounds
-        for i in range(num_of_rounds - 1):
-            # Start by creating a new round object with the correct parameters
+        for i in range(num_of_rounds):
             # TODO: Description and anonymity will only be set during an edit
-            new_round = models.Round(parent=section.key, id=current_round)
-            new_round.deadline = start_times[i]
-            new_round.number = current_round
+
+            # And increment the current round for this iteration
+            current_last_round += 1
+            # Create a new rounds object
+            new_round = models.Round(parent=section.key, id=current_last_round)
+            # Set the deadline
+            new_round.deadline = end_times[i]
+            # And the round number
+            new_round.number = current_last_round
             # And save our object
             new_round.put()
-            # And increment the current round for next iteration
-            current_round += 1
         #end
-        utils.log('Success, {0} rounds added.'.format(num_of_rounds - 1), type='S', handler=self)
+        utils.log('Success, {0} rounds added.'.format(num_of_rounds), type='S', handler=self)
     #end add_rounds
+
+    def get_end_times(self, start, num, duration, delay):
+        # First, we need to get the start time into something we can work with
+        start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M")
+
+        # Ok, now we need to create our new end times list
+        end_times = list()
+        # And loop the correct number of times
+        for i in range(1,num+1):
+            end_time = start + datetime.timedelta(hours = i * duration + delay)
+            end_times.append(end_time.isoformat()[:-3])
+        #end
+        return end_times
+    #end
 
 #end class RoundsTest
