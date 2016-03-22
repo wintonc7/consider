@@ -106,75 +106,75 @@
 
 <!-- THIS IS THE START OF THE DISCUSSIONS BLOCK -->
 <h4 class="sub-header">Discussions:</h4>
-	<div class="row">
-		
-		<div class="col-xs-6 col-sm-2">
-			<label for="total_disc">Total Discussions</label>
-            <input class="form-control" id="total_disc" value="{{(discussionRounds|length)}}" name="total_disc" type="tel">
+<form method="POST" action="/test-rounds">
+    <input type="hidden" name="course" value="{{selectedCourse}}" />
+    <input type="hidden" name="section" value="{{selectedSection}}" />
+    <input type="hidden" name="action" value="add_disc" />
+    <div class="row">
+    	<div class="col-xs-6 col-sm-2">
+    		<label for="total_disc">Total Discussions</label>
+            <input class="form-control" id="total_disc" value="{{(discussionRounds|length)}}" name="total_discussions" type="tel">
             <div id="total_dis_error" class="alert alert-danger" role="alert">
                 <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <strong>Invalid Duration!</strong>
             </div>
-		</div>
- 
-		<div class="col-xs-6 col-sm-2">
-			<label for="durration">Duration (hours)</label>
-            <input class="form-control" id="duration" type="tel" value="24">
+    	</div>
+    	<div class="col-xs-6 col-sm-2">
+    		<label for="durration">Duration (hours)</label>
+            <input class="form-control" id="duration" name="duration" type="tel" value="24">
             <div id="duration_error" class="alert alert-danger" role="alert">
                 <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <strong>Invalid Duration!</strong>
             </div>
-		</div>
+    	</div>
     </div>
     <div class="row">
-
         <div class="col-xs-12 col-sm-12">
             <!--<button type="button" class="btn btn-default" onclick="addDiscussion()"
                     aria-label="Add Discussion">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
             </button>-->
-            
-            <button style="margin-top: 5px" id="add_disc" type="button" class="btn btn-default" onclick=""
+            <button style="margin-top: 5px" id="add_disc" type="submit" class="btn btn-default" onclick=""
                     aria-label="Add Discussion">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Rows
             </button>
-
         </div>
-	</div>
+    </div>
+</form>
 
-    <br>
-	<div class="table-responsive">
-	    <table class="table table-striped" id="round-table">
-	        <thead>
+<br>
+<div class="table-responsive">
+    <table class="table table-striped" id="round-table">
+        <thead>
+        <tr>
+            <th>Remove</th>
+            <th>Round</th>
+            <th>Start Time (GMT)</th>
+            <th>Deadline (GMT)</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if discussionRounds %}
+	        {% for obj in discussionRounds %}
 	        <tr>
-                <th>Remove</th>
-	            <th>Round</th>
-                <th>Start Time (GMT)</th>
-	            <th>Deadline (GMT)</th>
-	            <th>Description</th>
-	            <th></th>
+                <td></td>
+	            <td>{{obj.number}}</td>
+                <td>{{obj.starttime|default('n/a')}}</td>
+	            <td>{{obj.deadline}}</td>
+	            <td>{{obj.description}}</td>
+	            <td>
+	                <button class="btn btn-default" aria-label="Edit Discussion">
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    </button>
+	            </td>
 	        </tr>
-	        </thead>
-	        <tbody>
-            {% if discussionRounds %}
-		        {% for obj in discussionRounds %}
-		        <tr>
-                    <td></td>
-		            <td>{{obj.number}}</td>
-                    <td>{{obj.starttime|default('n/a')}}</td>
-		            <td>{{obj.deadline}}</td>
-		            <td>{{obj.description}}</td>
-		            <td>
-		                <button class="btn btn-default" aria-label="Edit Discussion">
-                            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-                        </button>
-		            </td>
-		        </tr>
-		        {% endfor %}
-            {% endif %}
-	        </tbody>
-	    </table>
-	</div>
+	        {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+</div>
 <!-- END OF THE DISCUSSION BLOCK -->
 
 <h4 class="sub-header">Summary Question:</h4>
