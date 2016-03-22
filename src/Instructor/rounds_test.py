@@ -95,7 +95,7 @@ class RoundsTest(webapp2.RequestHandler):
         #end
 
         # Now, let's grab the number of rounds and duration from the page
-        num_of_rounds = int(self.request.get('dics_num'))
+        num_of_rounds = int(self.request.get('total_discussions'))
         action = self.request.get('action')
 
         if not action:
@@ -103,7 +103,7 @@ class RoundsTest(webapp2.RequestHandler):
             utils.error('Invalid arguments: action is null', handler=self)
         else:
             # Now switch on the action
-            if action == 'add':
+            if action == 'add_disc':
                 # Grab the duration
                 duration_of_round = int(self.request.get('duration'))
                 # Send the number and duration to the add rounds function
