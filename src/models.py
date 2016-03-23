@@ -13,7 +13,6 @@ All the entities derive from ``ndb`` class of Google App Engine.
 
 """
 from google.appengine.ext import ndb
-import json
 
 class Course(ndb.Model):
     """
