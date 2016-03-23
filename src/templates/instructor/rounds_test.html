@@ -109,7 +109,7 @@
 <div class="row">
 	<div class="col-xs-6 col-sm-2">
 		<label for="total_disc">Discussions</label>
-        <input class="form-control" id="total_discussions" value="{{(discussionRounds|length)}}" name="total_discussions" type="tel">
+        <input class="form-control" id="total_discussions" value="" name="total_discussions" type="tel">
         <div id="total_dis_error" class="alert alert-danger" role="alert">
             <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <strong>Invalid Duration!</strong>
@@ -153,14 +153,18 @@
         <tbody>
         {% if discussionRounds %}
 	        {% for obj in discussionRounds %}
-	        <tr>
-                <td></td>
+	        <tr id="round_{{obj.number}}">
+                <td>
+                    <button data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Edit Discussion">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
 	            <td>{{obj.number}}</td>
-                <td>{{obj.starttime|default('n/a')}}</td>
-	            <td>{{obj.deadline}}</td>
-	            <td>{{obj.description}}</td>
+                <td class="round_starttime">{{obj.starttime|default('n/a')}} <input type="hidden" value="{{obj.starttime|default('n/a')}}" /></td>
+	            <td class="round_deadline">{{obj.deadline}} <input type="hidden" value="{{obj.deadline}}" /></td>
+	            <td class="round_description">{{obj.description}} <input type="hidden" value="{{obj.description}}" /></td>
 	            <td>
-	                <button class="btn btn-default" aria-label="Edit Discussion">
+	                <button class="btn btn-default edit-round" aria-label="Edit Discussion">
                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                     </button>
 	            </td>
@@ -349,7 +353,7 @@
                     <input type="hidden" name="action" value="edit_round" />
                     <input type="hidden" name="round_id" value="" />
                     <div class="form-group">
-                        <label for="discussionEndTime" class="col-sm-2 control-label">Start time</label>
+                        <label for="discussionStartTime" class="col-sm-2 control-label">Start time</label>
                         <div class="col-sm-10">
                             <input id="discussionStartTime" class="form-control dateTimePicker" name="discussionStartTime" required="true" />
                         </div>
@@ -361,9 +365,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputDiscussionQuestion" class="col-sm-2 control-label">Description</label>
+                        <label for="inputEditDiscussionDescription" class="col-sm-2 control-label">Description</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" rows="3" id="inputDiscussionQuestion"
+                            <textarea class="form-control" rows="3" id="inputEditDiscussionDescription"
                                       name="discussionQuestion" placeholder="Please enter a description..."
                                       required></textarea>
                         </div>
@@ -373,7 +377,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="submitDiscussion()">Submit Round</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditDiscussion()">Update Round</button>
             </div>
         </div>
     </div>
@@ -410,9 +414,57 @@ $(document).ready(function () {
             },
             success: function (res){
                 //do stuff with res
-                addRoundRows(res);
+                console.log(res);
+                //addRoundRows(res);
+                location.reload();
             },
             error: function (xhr, status, error) {
+                console.log(status);
+            }
+        });
+    });
+
+    $('.edit-round').click(function () {
+        var modal = $('#editDiscussionModal');
+        var self = $(this);
+
+        //get values
+        var description = self.closest('td').siblings('.round_description').find('input').val();
+        var deadline = self.closest('td').siblings('.round_deadline').find('input').val();
+        var start = self.closest('td').siblings('.round_starttime').find('input').val();
+        var id = self.closest('tr').attr('id').split('_')[1];
+
+        //populate fields with this rounds data
+        modal.find('#discussionStartTime').val(moment(start).format("YYYY-MM-DD[T]HH:MM"));
+        modal.find('#discussionEndTime').val(moment(deadline).format("YYYY-MM-DD[T]HH:MM"));
+        modal.find('#inputEditDiscussionDescription').val(description);
+        modal.find('#roundId').val(id);
+
+        //show modal
+        modal.modal('show');
+    });
+
+    $('.remove-round').click(function(e){
+        var round_key = $(this).data('round-key');
+
+        console.log('Trying to remove round: ' + round_key);
+
+        //Remove the round on the server side
+        $.ajax({
+            url: '/test-rounds',
+            method: 'POST',
+            data: {
+                course: "{{selectedCourse}}",
+                section: "{{selectedSection}}",
+                round: round_key,
+                action: 'delete'
+            },
+            success: function (res){
+                console.log(res);
+                //$('#round-table tbody').find('#round_' + round_key).remove();
+                //TODO: need to update the round numbers of the proceeding rounds
+            },
+            error: function (xhr, status, error){
                 console.log(error);
             }
         });
@@ -462,14 +514,14 @@ $(document).ready(function () {
         //for each returned round add it to the rounds table
         for(var i = 0, len = data.length; i < len; i++){
             var round = data[i];
-            var _row = $('<tr></tr>').attr('id', 'round_' + data.key);
+            var _row = $('<tr></tr>').attr('id', 'round_' + data.number);
             var _remove_button = null;
             var _edit_button = null;
 
             //add remove icon
             _remove_button = $('<button class="btn btn-default remove-round" aria-label="Edit Discussion"></button>');
             //pass the round id to the button so we can grab it below
-            _remove_button.data('round_key', data.key);
+            _remove_button.data('round_key', data.number);
             _remove_button.click(function(e){
                 var round_key = $(this).data('round_key');
 
@@ -506,7 +558,7 @@ $(document).ready(function () {
             _row.append($('<td class="round_num"></td>').text(current_num_rounds+i+1).attr('round_num', current_num_rounds+i+1));
 
             //add start time
-            _row.append($('<td class="round_start_time"></td>').append($('<input type="hidden" name="startime">')));
+            _row.append($('<td class="round_start_time"></td>').test(round.starttime).append($('<input type="hidden" name="startime">')));
 
             //add deadline
             _row.append($('<td class="round_deadline"></td>').text(round.deadline).append($('<input type="hidden" name="deadline">')));
@@ -559,15 +611,15 @@ $(document).ready(function () {
     //Logic to add new discussion round to UI
     var $duration_error = $('#duration_error');
 
-    $('.remove-round').click(function () {
-        var $parent = $(this).closest('tr');
-        var duration = $('#duration').val();
-        $parent.remove();
-        $('#total_disc').val($('#total_disc').val()-1);
-        num_rounds -= 1;
-        updateRoundNums(2);
-        updateRoundTimes(duration);
-    });
+    // $('.remove-round').click(function () {
+    //     var $parent = $(this).closest('tr');
+    //     var duration = $('#duration').val();
+    //     $parent.remove();
+    //     $('#total_disc').val($('#total_disc').val()-1);
+    //     num_rounds -= 1;
+    //     updateRoundNums(2);
+    //     updateRoundTimes(duration);
+    // });
 
     $('#total_disc').change(function (e){
         var val = $(this).val();
@@ -578,98 +630,98 @@ $(document).ready(function () {
         }
     });
 
-    $("#add_disc").click(function(){
-        var dics_num = $('#total_disc').val();
-        var duration = $('#duration').val();
-        var disc = $('#round-table tr').length;  // number of rounds = rows - header row
+    // $("#add_disc").click(function(){
+    //     var dics_num = $('#total_disc').val();
+    //     var duration = $('#duration').val();
+    //     var disc = $('#round-table tr').length;  // number of rounds = rows - header row
 
-        if(duration === '' || duration < 0){
-            $duration_error.show();
-            return;
-        }
-
-
-        /* rasor 2016-03-04
-         * Let's just send the number of rounds and duration to the back end
-         * here before any of the js mangles it.  We'll remove the js code used
-         * to fill out the table and eventually hook the table completely to
-         * the controller... sometime later...
-         */
-        var url = '/test-rounds'
-        /* TODO: Figure out how the start time is going to be determined.
-         * As it currently stands, there is nowhere to enter a "start-time"
-         * or "end-time" for the rounds.
-         */
-        /* For now, I'll just use moment.js to fill an array of times starting
-         * with {duration} from NOW.
-         */
-        var start_times = [];
-        for(var i = 0; i < dics_num; i++) {
-            start_times.push(moment().add(duration * i, 'hours').format("YYYY-MM-DD[T]HH:MM"))
-        }
-        /* And stupidly I don't know how to pass an array if not in JSON,
-         * which is how they did it originally
-         */
-        start_times = JSON.stringify(start_times);
-        /* Do the post and get the callback */
-        $.post(url, {
-            dics_num: dics_num, duration: duration, action: 'add',
-            round: "{{nextRound}}", times: start_times,
-            course: "{{selectedCourse}}", section: "{{selectedSection}}"
-        }, function (data) {
-            bootbox.alert(data.substring(1));
-        });
+    //     if(duration === '' || duration < 0){
+    //         $duration_error.show();
+    //         return;
+    //     }
 
 
-        while(dics_num > disc){
-            disc++;
-            var _row = $('<tr></tr>');
+    //     /* rasor 2016-03-04
+    //      * Let's just send the number of rounds and duration to the back end
+    //      * here before any of the js mangles it.  We'll remove the js code used
+    //      * to fill out the table and eventually hook the table completely to
+    //      * the controller... sometime later...
+    //      */
+    //     var url = '/test-rounds'
+    //     /* TODO: Figure out how the start time is going to be determined.
+    //      * As it currently stands, there is nowhere to enter a "start-time"
+    //      * or "end-time" for the rounds.
+    //      */
+    //     /* For now, I'll just use moment.js to fill an array of times starting
+    //      * with {duration} from NOW.
+    //      */
+    //     var start_times = [];
+    //     for(var i = 0; i < dics_num; i++) {
+    //         start_times.push(moment().add(duration * i, 'hours').format("YYYY-MM-DD[T]HH:MM"))
+    //     }
+    //     /* And stupidly I don't know how to pass an array if not in JSON,
+    //      * which is how they did it originally
+    //      */
+    //     start_times = JSON.stringify(start_times);
+    //     /* Do the post and get the callback */
+    //     $.post(url, {
+    //         dics_num: dics_num, duration: duration, action: 'add',
+    //         round: "{{nextRound}}", times: start_times,
+    //         course: "{{selectedCourse}}", section: "{{selectedSection}}"
+    //     }, function (data) {
+    //         bootbox.alert(data.substring(1));
+    //     });
 
-            //add remove icon
-            _button = $('<button class="btn btn-default remove-round" aria-label="Edit Discussion"></button>');
-            _button.click(function(e){
-                var duration = $('#duration').val();
-                var $parent = $(this).closest('tr');
-                $parent.remove();
-                $('#total_disc').val($('#total_disc').val()-1);
-                num_rounds -= 1;
-                updateRoundNums(2);
-                updateRoundTimes(duration);
-            });
-            _button.append($('<span class="glyphicon glyphicon-remove"></span>'));
-            _row.append($('<td></td>').append(_button));
 
-            /**
-             * Dev Note: Andrew Clinton
-             * Date: 2/24/16
-             * 
-             * Need to make sure the name attribs match what the backend API is expecting
-             */
+    //     while(dics_num > disc){
+    //         disc++;
+    //         var _row = $('<tr></tr>');
 
-            //add round number
-            _row.append($('<td></td>').text(disc).append($('<input type="hidden" name="round_num[]">')));
+    //         //add remove icon
+    //         _button = $('<button class="btn btn-default remove-round" aria-label="Edit Discussion"></button>');
+    //         _button.click(function(e){
+    //             var duration = $('#duration').val();
+    //             var $parent = $(this).closest('tr');
+    //             $parent.remove();
+    //             $('#total_disc').val($('#total_disc').val()-1);
+    //             num_rounds -= 1;
+    //             updateRoundNums(2);
+    //             updateRoundTimes(duration);
+    //         });
+    //         _button.append($('<span class="glyphicon glyphicon-remove"></span>'));
+    //         _row.append($('<td></td>').append(_button));
 
-            //add start time
-            _row.append($('<td></td>').append($('<input type="hidden" name="startime[]">')));
+    //         /**
+    //          * Dev Note: Andrew Clinton
+    //          * Date: 2/24/16
+    //          * 
+    //          * Need to make sure the name attribs match what the backend API is expecting
+    //          */
 
-            //add deadline
-            _row.append($('<td></td>').append($('<input type="hidden" name="deadline[]">')));
+    //         //add round number
+    //         _row.append($('<td></td>').text(disc).append($('<input type="hidden" name="round_num[]">')));
 
-            //add description
-            _row.append($('<td></td>').append($('<input type="hidden" name="description[]">')));
+    //         //add start time
+    //         _row.append($('<td></td>').append($('<input type="hidden" name="startime[]">')));
 
-            //add the edit pencil
-            _button = $('<button class="btn btn-default" aria-label="Edit Discussion"></button>');
-            _button.append($('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
-            _row.append($('<td></td>').append(_button));
+    //         //add deadline
+    //         _row.append($('<td></td>').append($('<input type="hidden" name="deadline[]">')));
 
-            //add the row to the last spot in the table
-            $('#round-table tbody').append(_row);
+    //         //add description
+    //         _row.append($('<td></td>').append($('<input type="hidden" name="description[]">')));
 
-            //update the times
-            updateRoundTimes(duration);
-        }
-    });
+    //         //add the edit pencil
+    //         _button = $('<button class="btn btn-default" aria-label="Edit Discussion"></button>');
+    //         _button.append($('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
+    //         _row.append($('<td></td>').append(_button));
+
+    //         //add the row to the last spot in the table
+    //         $('#round-table tbody').append(_row);
+
+    //         //update the times
+    //         updateRoundTimes(duration);
+    //     }
+    // });
 
     function updateRoundNums(start_val){
         var val = start_val;
@@ -798,6 +850,10 @@ $(document).ready(function () {
 
     function submitDiscussion() {
         $("#discussionForm").find('[type="submit"]').trigger('click');
+    }
+
+    function submitEditDiscussion() {
+        $("#editDiscussionForm").find('[type="submit"]').trigger('click');
     }
 
     $("#discussionForm").submit(function (event) {

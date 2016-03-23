@@ -217,7 +217,7 @@ class RoundsTest(webapp2.RequestHandler):
             section.rounds = new_rounds[-1].number
             section.put()
         #end
-        utils.log('Success, {0} rounds added.'.format(num_of_rounds), type='S', handler=self)
+        utils.log('Success, {0} rounds added.'.format(num_of_rounds), type='S')
         # Now grab all of the rounds again
         rounds = models.Round.query(ancestor=section.key).fetch()
         # And now send all the rounds back to the view
