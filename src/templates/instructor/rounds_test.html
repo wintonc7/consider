@@ -438,7 +438,7 @@ $(document).ready(function () {
         modal.find('#discussionStartTime').val(moment(start).format("YYYY-MM-DD[T]HH:MM"));
         modal.find('#discussionEndTime').val(moment(deadline).format("YYYY-MM-DD[T]HH:MM"));
         modal.find('#inputEditDiscussionDescription').val(description);
-        modal.find('#roundId').val(id);
+        modal.find('#round_id').val(id);
 
         //show modal
         modal.modal('show');
@@ -482,7 +482,7 @@ $(document).ready(function () {
         url = $form.attr("action")
         start_time = $form.find('#discussionStartTime').val(),
         deadline = $form.find('#discussionEndTime').val(),
-        round = $form.find('#roundId').val();
+        round = $form.find('#round_id').val();
 
         // do the POST and get the callback
         $.post(url, {
