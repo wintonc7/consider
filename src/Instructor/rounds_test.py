@@ -94,17 +94,20 @@ class RoundsTest(webapp2.RequestHandler):
             return self.redirect('/')
         #end
 
-        # Now, let's grab the number of rounds and duration from the page
-        num_of_rounds = int(self.request.get('total_discussions'))
+        # Now let's grab the action from the page
         action = self.request.get('action')
-
+        # And check that it was actually passed
         if not action:
             # Error if not
             utils.error('Invalid arguments: action is null', handler=self)
         else:
             # Now switch on the action
-            if action == 'add_disc':
-                # Grab the duration
+            if action == 'add':
+                # Only the lead-in or summary are listed as an 'add' action
+                self.add_leadin_summary(instructor)
+            elif action == 'add_disc':
+                # Now, let's grab the number of rounds and duration from the
+                num_of_rounds = int(self.request.get('total_discussions'))
                 duration_of_round = int(self.request.get('duration'))
                 # Send the number and duration to the add rounds function
                 self.add_rounds(num_of_rounds, duration_of_round, instructor)
@@ -120,6 +123,55 @@ class RoundsTest(webapp2.RequestHandler):
             #end
         #end
     #end post
+
+    def add_leadin_summary(self, instructor):
+        # So first we need to get at the course and section
+        course, section = utils.get_course_and_section_objs(self.request, instructor)
+
+        # Now grab the values from the post request
+        round_num = int(self.request.get('round'))
+        end_time = self.request.get('time')
+        # Now create our new round object
+        round_obj = models.Round(parent=section.key, id=round_num)
+        round_obj.deadline = end_time
+        round_obj.number = round_num
+        # Set the object to be a quiz type
+        round_obj.is_quiz = True
+        # Now grab all the quiz attributes from the page
+        question = self.request.get('question')
+        num_options = int(self.request.get('number'))
+        options = json.loads(self.request.get('options'))
+        # And set the object
+        round_obj.quiz = models.Question(options_total=num_options,
+                                         question=question, options=options)
+
+        # Now grab the round type (lead-in or summary)
+        round_type = self.request.get('roundType')
+        # And switch on the type to create our start time
+        if round_type == 'leadin':
+            # We'll simply use unix epoch as the start time for leadin questions
+            epoch = datetime.datetime(1970,1,1)
+            round_obj.starttime = epoch.isoformat()[:-3]
+        else:
+            # If not a lead-in question, we know it's a summary
+            # So, we need to find the end time of the last discussion round
+            rounds = models.Round.query(ancestor=section.key).fetch()
+            # And check that we're not trying to add a summary as the first
+            if not rounds:
+                # Send an error if so
+                utils.error('Summary question cannot be first round added.', handler=self)
+            #end
+            last_time = rounds[-1].deadline
+            round_obj.starttime = last_time
+        #end
+        # And update the section rounds attribute if necessary
+        if round_obj.number > section.rounds:
+            section.rounds = round_obj.number
+            section.put()
+        #end
+        round_obj.put()
+        utils.log('Success, round added.', type='S', handler=self)
+    #end add_leadin_summary
 
     def add_rounds(self, num_of_rounds, duration, instructor):
         # So first we need to get at the course and section
@@ -140,8 +192,9 @@ class RoundsTest(webapp2.RequestHandler):
         # We need the end time of the last round currently in this section
         last_time = rounds[-1].deadline
         # Now we need to compute new start and end times for the new rounds
-        end_times = self.get_end_times(last_time, num_of_rounds, duration, 0)
-
+        start_times, end_times = self.get_end_times(last_time, num_of_rounds, duration, 0)
+        # And lastly, create a list to hold the newly created rounds
+        new_rounds = list()
         # Now let's just loop over the number of rounds
         for i in range(num_of_rounds):
             # TODO: Description and anonymity will only be set during an edit
@@ -150,28 +203,46 @@ class RoundsTest(webapp2.RequestHandler):
             current_last_round += 1
             # Create a new rounds object
             new_round = models.Round(parent=section.key, id=current_last_round)
-            # Set the deadline
+            # Set the starttime and deadline
+            new_round.starttime = start_times[i]
             new_round.deadline = end_times[i]
             # And the round number
             new_round.number = current_last_round
             # And save our object
             new_round.put()
+            new_rounds.append(new_round)
+        #end
+        # Now update the number of rounds attribute of the section
+        if new_rounds[-1].number > section.rounds:
+            section.rounds = new_rounds[-1].number
+            section.put()
         #end
         utils.log('Success, {0} rounds added.'.format(num_of_rounds), type='S', handler=self)
+        # Now grab all of the rounds again
+        rounds = models.Round.query(ancestor=section.key).fetch()
+        # And now send all the rounds back to the view
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(json.dumps(rounds, cls=utils.RoundEncoder))
     #end add_rounds
 
     def get_end_times(self, start, num, duration, delay):
         # First, we need to get the start time into something we can work with
         start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M")
 
-        # Ok, now we need to create our new end times list
+        # Ok, now we need to create our new start and end times list
+        start_times = list()
         end_times = list()
         # And loop the correct number of times
-        for i in range(1,num+1):
-            end_time = start + datetime.timedelta(hours = i * duration + delay)
+        for i in range(num):
+            # Create start and end times with the given duration and delay
+            start_time = start + datetime.timedelta(hours = i * duration + i * delay)
+            end_time = start + datetime.timedelta(hours = (i+1) * duration + (i+1) * delay)
+            # And add to our arrays
+            # Use string indexing to remove the seconds from the isoformat
+            start_times.append(start_time.isoformat()[:-3])
             end_times.append(end_time.isoformat()[:-3])
         #end
-        return end_times
+        return start_times, end_times
     #end
 
 #end class RoundsTest

@@ -109,7 +109,7 @@
 <div class="row">
 	<div class="col-xs-6 col-sm-2">
 		<label for="total_disc">Total Discussions</label>
-        <input class="form-control" id="total_disc" value="{{(discussionRounds|length)}}" name="total_discussions" type="tel">
+        <input class="form-control" id="total_discussions" value="{{(discussionRounds|length)}}" name="total_discussions" type="tel">
         <div id="total_dis_error" class="alert alert-danger" role="alert">
             <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <strong>Invalid Duration!</strong>
@@ -234,7 +234,7 @@
             </div>
             <div class="modal-body">
                 <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;"
-                      action="/rounds">
+                      action="/test-rounds">
                     <div class="form-group">
                         <label for="endTime" class="col-sm-2 control-label">End time</label>
                         <div class="col-sm-10">
@@ -296,7 +296,7 @@
             </div>
             <div class="modal-body">
                 <form class="form-horizontal" id="discussionForm" method="post" style="text-align: center;"
-                      action="/rounds">
+                      action="/test-rounds">
                     <div class="form-group">
                         <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
                         <div class="col-sm-10">
@@ -345,7 +345,7 @@
             </div>
             <div class="modal-body">
                 <form class="form-horizontal" id="discussionForm" method="post" style="text-align: center;"
-                      action="/rounds">
+                      action="/test-rounds">
                     <input type="hidden" name="action" value="edit_round" />
                     <div class="form-group">
                         <label for="discussionEndTime" class="col-sm-2 control-label">Start time</label>
@@ -392,11 +392,13 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var action = "add_disc";
+        console.log(total_discussions);
 
         $.ajax({
             url: '/test-rounds',
             method: 'POST',
             data: {
+                total_discussions: total_discussions,
                 duration: duration,
                 course: course,
                 section: section,

@@ -16,6 +16,7 @@ from google.appengine.api import users
 
 import models
 
+from json import JSONEncoder
 
 def jinja_env():
     """
@@ -275,3 +276,18 @@ def is_valid_response(response):
     #     if response[i] not in ['support', 'neutral', 'disagree']:
     #         return True
     # return False
+
+
+# Simple class to serialize Round objects
+class RoundEncoder(JSONEncoder):
+    def default(self, obj):
+        json_round = dict()
+        json_round['deadline'] = obj.deadline
+        json_round['number'] = obj.number
+        json_round['description'] = obj.description
+        json_round['is_anonymous'] = obj.is_anonymous
+        json_round['is_quiz'] = obj.is_quiz
+        json_round['starttime'] = obj.starttime
+        return json_round
+    #end
+#end
