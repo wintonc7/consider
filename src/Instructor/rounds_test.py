@@ -147,6 +147,8 @@ class RoundsTest(webapp2.RequestHandler):
 
         # Now grab the round type (lead-in or summary)
         round_type = self.request.get('roundType')
+        # And set the description
+        round_obj.description = round_type
         # And switch on the type to create our start time
         if round_type == 'leadin':
             # We'll simply use unix epoch as the start time for leadin questions
@@ -165,19 +167,24 @@ class RoundsTest(webapp2.RequestHandler):
             round_obj.starttime = last_time
         #end
         # And update the section rounds attribute if necessary
-        if round_obj.number > section.rounds:
-            section.rounds = round_obj.number
-            section.put()
-        #end
+        self.update_section_rounds(round_obj.number, section)
         round_obj.put()
         utils.log('Success, round added.', type='S', handler=self)
     #end add_leadin_summary
+
+    def update_section_rounds(self, num, section):
+        # Update the section rounds attribute if necessary
+        if num > section.rounds:
+            section.rounds = num
+            section.put()
+        #end
+    #end update_section_rounds
 
     def add_rounds(self, num_of_rounds, duration, instructor):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
 
-        # First, grab all the rounds for this current section
+        # Now, grab all the rounds for this current section
         rounds = models.Round.query(ancestor=section.key).fetch()
         # The view requires at least a lead-in question to add rounds, but check
         if not rounds:
@@ -187,18 +194,61 @@ class RoundsTest(webapp2.RequestHandler):
             return self.redirect('/')
         #end
 
-        # Now grab the current last round
+        # Copy the summary round if it exists
+        summary = self.copy_summary(section, rounds, num_of_rounds)
+        # If it exists, pop it off the list
+        if summary:
+            rounds.pop()
+        #end
+
+        # Now create all the new rounds
+        new_rounds = self.create_new_rounds(section, rounds, num_of_rounds, duration)
+
+        # And update the summary round
+        self.update_summary(summary, new_rounds)
+        # Now update the number of rounds attribute of the section
+        self.update_section_rounds(new_rounds[-1].number, section)
+
+        # Now grab all of the rounds again
+        rounds = models.Round.query(ancestor=section.key).fetch()
+        # And now send all the rounds back to the view
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(json.dumps(rounds, cls=utils.RoundEncoder))
+    #end add_rounds
+
+    def copy_summary(self, section, rounds, num_of_rounds):
+        summary = None
+        # First, check if there's even a summary round to copy
+        if rounds[-1].description == 'summary':
+            # If so, create a new summary round with those properties
+            # But change it to be the last round after adding num_of_rounds
+            summary_round_num = rounds[-1].number + num_of_rounds
+            summary = models.Round(parent=section.key, id=summary_round_num)
+            # Now copy over all the pertinent summary information
+            summary.starttime = rounds[-1].starttime
+            summary.deadline = rounds[-1].deadline
+            summary.number = summary_round_num
+            summary.is_quiz = True
+            summary.quiz = rounds[-1].quiz
+            summary.description = rounds[-1].description
+            summary.is_anonymous = rounds[-1].is_anonymous
+            # Now remove the summary from the current rounds
+            rounds[-1].put().delete()
+        #end
+        return summary
+    #end copy_summary
+
+    def create_new_rounds(self, section, rounds, num_of_rounds, duration):
+        # Now grab the current last round number
         current_last_round = rounds[-1].number
         # We need the end time of the last round currently in this section
         last_time = rounds[-1].deadline
         # Now we need to compute new start and end times for the new rounds
-        start_times, end_times = self.get_end_times(last_time, num_of_rounds, duration, 0)
-        # And lastly, create a list to hold the newly created rounds
+        start_times, end_times = self.get_new_times(last_time, num_of_rounds, duration, 0)
+        # Let's keep a list of the newly added rounds
         new_rounds = list()
         # Now let's just loop over the number of rounds
         for i in range(num_of_rounds):
-            # TODO: Description and anonymity will only be set during an edit
-
             # And increment the current round for this iteration
             current_last_round += 1
             # Create a new rounds object
@@ -210,22 +260,31 @@ class RoundsTest(webapp2.RequestHandler):
             new_round.number = current_last_round
             # And save our object
             new_round.put()
+            # And add it to our list
             new_rounds.append(new_round)
         #end
-        # Now update the number of rounds attribute of the section
-        if new_rounds[-1].number > section.rounds:
-            section.rounds = new_rounds[-1].number
-            section.put()
-        #end
-        utils.log('Success, {0} rounds added.'.format(num_of_rounds), type='S')
-        # Now grab all of the rounds again
-        rounds = models.Round.query(ancestor=section.key).fetch()
-        # And now send all the rounds back to the view
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(json.dumps(rounds, cls=utils.RoundEncoder))
-    #end add_rounds
+        return new_rounds
+    #end create_new_rounds
 
-    def get_end_times(self, start, num, duration, delay):
+    def update_summary(self, summary, new_rounds):
+        # And check if a summary round was saved
+        if summary:
+            # We need to calculate the old duration of the summary round
+            old_end = datetime.datetime.strptime(summary.deadline, "%Y-%m-%dT%H:%M")
+            old_start = datetime.datetime.strptime(summary.starttime, "%Y-%m-%dT%H:%M")
+            duration = old_end - old_start
+            # Now grab the new start time from the last round's deadline
+            new_start = datetime.datetime.strptime(new_rounds[-1].deadline, "%Y-%m-%dT%H:%M")
+            # Set the summary start time to be the end of the last new round
+            summary.starttime = new_start.isoformat()[:-3]
+            summary.deadline = (new_start + duration).isoformat()[:-3]
+            # And save it to the database and add to our list
+            summary.put()
+            new_rounds.append(summary)
+        #end
+    #end update_summary
+
+    def get_new_times(self, start, num, duration, delay):
         # First, we need to get the start time into something we can work with
         start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M")
 
@@ -243,6 +302,6 @@ class RoundsTest(webapp2.RequestHandler):
             end_times.append(end_time.isoformat()[:-3])
         #end
         return start_times, end_times
-    #end
+    #end get_new_times
 
 #end class RoundsTest
