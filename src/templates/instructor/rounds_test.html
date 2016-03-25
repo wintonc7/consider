@@ -164,7 +164,7 @@
 	            <td class="round_deadline">{{obj.deadline}} <input type="hidden" value="{{obj.deadline}}" /></td>
 	            <td class="round_description">{{obj.description}} <input type="hidden" value="{{obj.description}}" /></td>
 	            <td>
-	                <button class="btn btn-default edit-round" aria-label="Edit Discussion">
+	                <button data-round-key="{{obj.number}}" class="btn btn-default edit-round" aria-label="Edit Discussion">
                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                     </button>
 	            </td>
@@ -438,7 +438,7 @@ $(document).ready(function () {
         modal.find('#discussionStartTime').val(moment(start).format("YYYY-MM-DD[T]HH:MM"));
         modal.find('#discussionEndTime').val(moment(deadline).format("YYYY-MM-DD[T]HH:MM"));
         modal.find('#inputEditDiscussionDescription').val(description);
-        modal.find('#round_id').val(id);
+        modal.find('[name="round_id"]').val(id);
 
         //show modal
         modal.modal('show');
@@ -476,24 +476,23 @@ $(document).ready(function () {
 
         //collect form elements
         var $form = $(this),
-        time_val = moment($("#discussionEndTime").val()).format("YYYY-MM-DD[T]HH:MM"),
         description = $form.find("textarea").val(),
         url = $form.attr("action")
-        start_time = $form.find('#discussionStartTime').val(),
-        deadline = $form.find('#discussionEndTime').val(),
-        round = $form.find('#round_id').val();
+        start_time = moment($form.find('#discussionStartTime').val()).format("YYYY-MM-DD[T]HH:MM"),
+        deadline = moment($form.find('#discussionEndTime').val()).format("YYYY-MM-DD[T]HH:MM"),
+        round = $form.find('[name="round_id"]').val();
+        console.log("trying to edit round: " + round);
 
         // do the POST and get the callback
         $.post(url, {
-            time: time_val, 
-            round: round, 
+            round_id: round,
             description: description, 
             course: "{{selectedCourse}}",
-            section: "{{selectedSection}}", 
-            roundType: 'discussion', 
-            action: 'change', 
-            deadline: deadline, 
-            start_time, start_time
+            section: "{{selectedSection}}",
+            roundType: 'discussion',
+            action: 'change',
+            deadline: deadline,
+            start_time: start_time
         }, function (data) {
             if (data.charAt(0) == 'E') {
                 bootbox.alert(data.substring(1));
@@ -785,7 +784,7 @@ $(document).ready(function () {
         });
     }
 
-    $(".dateTimePicker").on('mouseenter', function() {
+    $(".dateTimePicker").on('mousedown', function() {
         $(this).datetimepicker();
     });
 
@@ -842,7 +841,6 @@ $(document).ready(function () {
         }
     });
 
-    {% if not summaryQuestion %}
     function addDiscussion() {
         $("#discussionModal").modal('show');
     }
@@ -881,7 +879,6 @@ $(document).ready(function () {
             }
         });
     });
-    {% endif %}
 
     $("#inputOptions").change(function () {
         var select = parseInt($('#inputOptions').val(), 10);
