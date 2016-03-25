@@ -155,7 +155,7 @@
 	        {% for obj in discussionRounds %}
 	        <tr id="round_{{obj.number}}">
                 <td>
-                    <button data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Edit Discussion">
+                    <button data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Remove Discussion">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </td>
@@ -456,13 +456,12 @@ $(document).ready(function () {
             data: {
                 course: "{{selectedCourse}}",
                 section: "{{selectedSection}}",
-                round: round_key,
+                round_id: round_key,
                 action: 'delete'
             },
             success: function (res){
                 console.log(res);
-                //$('#round-table tbody').find('#round_' + round_key).remove();
-                //TODO: need to update the round numbers of the proceeding rounds
+                location.reload();
             },
             error: function (xhr, status, error){
                 console.log(error);
