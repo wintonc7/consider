@@ -17,6 +17,7 @@ from google.appengine.api import users
 import models
 
 from json import JSONEncoder
+import datetime
 
 def jinja_env():
     """
@@ -276,6 +277,35 @@ def is_valid_response(response):
     #     if response[i] not in ['support', 'neutral', 'disagree']:
     #         return True
     # return False
+
+
+def convert_time(old_time):
+    """
+    Provides a method to switch between isoformat date-time string (used in
+    the database and for deadline checking in the views) and python datetime
+    objects used to manipulate and compare times.
+
+    Args:
+        old_time (object):
+            Either an isoformat string or a python datetime object.
+
+    Returns:
+        isoformat string or python datetime object (opposite of input)
+    """
+    new_time = None
+
+    # Check if the input time is a datetime object or string
+    if type(old_time) is datetime.datetime:
+        # If so, convert it to iso format the strip the last three characters
+        # since we're not storing seconds in the database
+        new_time = old_time.isoformat()[:-3]
+    else:
+        # Ohterwise, we were given a iso string from the database
+        # So, use datetime to convert it to an object
+        new_time = datetime.datetime.strptime(old_time, "%Y-%m-%dT%H:%M")
+    #end
+    return new_time
+#end
 
 
 # Simple class to serialize Round objects
