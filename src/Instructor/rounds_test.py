@@ -119,6 +119,9 @@ class RoundsTest(webapp2.RequestHandler):
                 # Send the id of the round to be edited
                 round_id = int(self.request.get('round_id'))
                 self.edit_round(instructor, round_id)
+            elif action == 'start':
+                # Simply kick off the first round
+                self.start_rounds(instructor)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)
@@ -470,6 +473,28 @@ class RoundsTest(webapp2.RequestHandler):
         #end
     #end
 
+
+
+def start_rounds(self, instructor):
+    # So first we need to get at the course and section
+    course, section = utils.get_course_and_section_objs(self.request, instructor)
+    # And grab all of the rounds for this section
+    rounds = models.Round.query(ancestor=section.key).fetch()
+    # The view requires at least a lead-in question to add rounds, but check
+    if not rounds:
+        # Send an error if no rounds exist for this section
+        utils.error('No lead-in question exists; cannot start yet.', handler=self)
+        # And redirect
+        return self.redirect('/')
+    #end
+
+    # Now simply turn on the first round
+    section.is_active = True
+    section.current_round = 1
+
+    # And send a success message
+    utils.log('Successfully started the first round.', type='S', handler=self)
+#end
 
 
     def copy_summary(self, section, rounds, num_of_rounds):
