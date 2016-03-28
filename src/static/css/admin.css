@@ -104,6 +104,10 @@ body {
   border-radius: 50%;
 }
 
+.alert {
+  margin-top:10px;
+}
+
 .tooltip {
     z-index: 1 !important;
 }

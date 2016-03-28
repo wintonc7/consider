@@ -1,0 +1,893 @@
+{% extends "layouts/instructor_base.html" %}
+{% block title %} | Rounds{% endblock %}
+
+{% block content %}
+<h1 class="page-header">Rounds</h1>
+<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h4>Course</h4>
+        {% if courses %}
+        <select id="courseSelector" class="form-control">
+            {% for course in courses %}
+            <option {% if selectedCourse== course.name %}selected="selected" {% endif %}>{{course.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        Please add a course to add Students
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h4>Section</h4>
+        {% if sections %}
+        <select id="sectionSelector" class="form-control">
+            {% for section in sections %}
+            <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        {% if courses %}
+        There are no sections in this Course
+        {% else %}
+        Please select a course to see sections
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- WE ARE REMOVING THIS SEGMENT -->
+<!--
+<h4 class="sub-header">Current round</h4>
+{% if rounds %}
+<h5 class="well well-sm">{% if not activeRound %}No round {% else %} Round {{activeRound}} is {% endif %}in
+    progress</h5>
+<div class="row">
+    <div class="col-md-2">
+        <select id="roundSelector" class="form-control">
+            {% for round in rounds %}
+            <option {% if activeRound== round.number %}selected="selected" {% endif %}>{{round.number}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="button" class="btn btn-default" onclick="makeActive()"
+                aria-label="Activate Round">
+            <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> Make Active
+        </button>
+    </div>
+</div>
+{% endif %}
+-->
+<!-- END REMOVE SEGMENT -->
+<br>
+<h4 class="sub-header">Lead-in Question:</h4>
+{% if selectedSection %}
+{% if leadInQuestion %}
+<button type="button" class="btn btn-default" onclick="addQuestion()"  aria-label="Edit Question">
+    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> 
+    Edit Question
+</button>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Round</th>
+            <th>Deadline (GMT)</th>
+            <th>Question</th>
+            <th>Options</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+
+            <td>{{leadInQuestion.number}}</td>
+            <td>{{leadInQuestion.deadline}}</td>
+            <td>{{leadInQuestion.quiz.question}}</td>
+            <td>
+                <ul class="list-group">
+                    {% for option in leadInQuestion.quiz.options %}
+                    <li class="list-group-item">{{option}}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% else %}
+<button type="button" class="btn btn-default" onclick="addQuestion()" style=""
+        aria-label="Add Question">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
+</button>
+{% endif %}
+{% else %}
+<p>Select a section to continue.</p>
+{% endif %}
+
+<!-- THIS IS THE START OF THE DISCUSSIONS BLOCK -->
+<h4 class="sub-header">Discussions:</h4>
+<div class="row">
+	<div class="col-xs-6 col-sm-2">
+		<label for="total_disc">Discussions</label>
+        <input class="form-control" id="total_discussions" value="" name="total_discussions" type="tel">
+        <div id="total_dis_error" class="alert alert-danger" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Invalid Duration!</strong>
+        </div>
+	</div>
+	<div class="col-xs-6 col-sm-2">
+		<label for="durration">Duration (hours)</label>
+        <input class="form-control" id="duration" name="duration" type="tel" value="24">
+        <div id="duration_error" class="alert alert-danger" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Invalid Duration!</strong>
+        </div>
+	</div>
+</div>
+<div class="row">
+    <div class="col-xs-12 col-sm-12">
+        <!--<button type="button" class="btn btn-default" onclick="addDiscussion()"
+                aria-label="Add Discussion">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
+        </button>-->
+        <button style="margin-top: 5px" id="add-rounds" class="btn btn-default"
+                aria-label="Add Discussion">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussions
+        </button>
+    </div>
+</div>
+
+<br>
+<div class="table-responsive">
+    <table class="table table-striped" id="round-table">
+        <thead>
+        <tr>
+            <th>Remove</th>
+            <th>Round</th>
+            <th>Start Time (GMT)</th>
+            <th>Deadline (GMT)</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if discussionRounds %}
+	        {% for obj in discussionRounds %}
+	        <tr id="round_{{obj.number}}">
+                <td>
+                    <button data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Remove Discussion">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+	            <td>{{obj.number}}</td>
+                <td class="round_starttime">{{obj.starttime|default('n/a')}} <input type="hidden" value="{{obj.starttime|default('n/a')}}" /></td>
+	            <td class="round_deadline">{{obj.deadline}} <input type="hidden" value="{{obj.deadline}}" /></td>
+	            <td class="round_description">{{obj.description}} <input type="hidden" value="{{obj.description}}" /></td>
+	            <td>
+	                <button data-round-key="{{obj.number}}" class="btn btn-default edit-round" aria-label="Edit Discussion">
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    </button>
+	            </td>
+	        </tr>
+	        {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+<!-- END OF THE DISCUSSION BLOCK -->
+
+<h4 class="sub-header">Summary Question:</h4>
+
+
+<button type="button" class="btn btn-default" onclick="addLastQuestion()"
+        aria-label="Edit Question">
+    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit Question
+</button>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Round</th>
+            <th>Deadline (GMT)</th>
+            <th>Question</th>
+            <th>Options</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            {% if summaryQuestion %}
+                <td>{{summaryQuestion.number}}</td>
+                <td>{{summaryQuestion.deadline}}</td>
+                <td>{{summaryQuestion.quiz.question}}</td>
+                <td>
+                    <ul class="list-group">
+                        {% for option in summaryQuestion.quiz.options %}
+                        <li class="list-group-item">{{option}}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            {% endif %}
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<button type="button" class="btn btn-default" onclick="addLastQuestion()" style=""
+        aria-label="Add Question">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
+</button>
+
+<div class="row">
+    <div class="col-sm-12">
+        <h2>Round Activation Control</h2>
+        <hr>
+        <button type="button" class="btn btn-warning btn-lg" onclick="">
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            Start Rounds
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Please add the question</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;"
+                      action="/test-rounds">
+                    <div class="form-group">
+                        <label for="endTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="endTime" class="form-control dateTimePicker" name="endTime" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputQuestion" class="col-sm-2 control-label">Question</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputQuestion" name="question"
+                                      placeholder="Please enter the question..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputOptions" class="col-sm-2 control-label">Number of options</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="inputOptions" name="options">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4" selected="selected">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputOptions1" class="col-sm-2 control-label">Options: </label>
+                        <div class="col-sm-10" id="optionsContainer">
+                            <input type="text" class="form-control" id="inputOptions1" name="Options1"
+                                   style="margin-bottom: 10px" required="true">
+                            <input type="text" class="form-control" id="inputOptions2" name="Options2"
+                                   style="margin-bottom: 10px" required="true">
+                            <input type="text" class="form-control" id="inputOptions3" name="Options3"
+                                   style="margin-bottom: 10px" required="true">
+                            <input type="text" class="form-control" id="inputOptions4" name="Options4"
+                                   style="margin-bottom: 10px" required="true">
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitQuestion()">Submit Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="discussionModal" tabindex="-1" role="dialog" aria-labelledby="discussionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="discussionModalLabel">Please add a description</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="discussionForm" method="post" style="text-align: center;"
+                      action="/test-rounds">
+                    <div class="form-group">
+                        <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionEndTime" class="form-control dateTimePicker" name="discussionEndTime" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Anonymous discussion</label>
+                        <div class="col-sm-8 text-left">
+                            <label class="radio-inline">
+                                <input type="radio" name="anonymousDiscussion" id="anonymousYes" value="yes" checked> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="anonymousDiscussion" id="anonymousNo" value="no"> No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputDiscussionQuestion" class="col-sm-2 control-label">Description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputDiscussionQuestion"
+                                      name="discussionQuestion" placeholder="Please enter a description..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitDiscussion()">Submit Round</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT ROUND MODAL -->
+<div class="modal fade" id="editDiscussionModal" tabindex="-1" role="dialog" aria-labelledby="editDiscussionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="discussionModalLabel">Please add a description</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="editDiscussionForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <input type="hidden" name="action" value="edit_round" />
+                    <input type="hidden" name="round_id" value="" />
+                    <div class="form-group">
+                        <label for="discussionStartTime" class="col-sm-2 control-label">Start time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionStartTime" class="form-control dateTimePicker" name="discussionStartTime" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionEndTime" class="form-control dateTimePicker" name="discussionEndTime" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEditDiscussionDescription" class="col-sm-2 control-label">Description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputEditDiscussionDescription"
+                                      name="discussionQuestion" placeholder="Please enter a description..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditDiscussion()">Update Round</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="/js/moment.js"></script>
+<script src="/js/bootstrap-datetimepicker.js"></script>
+<link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<!-- NEW LOGICS -->
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#add-rounds').click(function () {
+        var total_discussions = $('#total_discussions').val();
+        var duration = $('#duration').val();
+        var course = "{{selectedCourse}}";
+        var section = "{{selectedSection}}";
+        var num = $('#total_discussions').val();
+        var action = "add_disc";
+        console.log(total_discussions);
+
+        //Add new rounds on the server side
+        $.ajax({
+            url: '/test-rounds',
+            method: 'POST',
+            data: {
+                total_discussions: total_discussions,
+                duration: duration,
+                course: course,
+                section: section,
+                action: action,
+                total_discussions: num
+            },
+            success: function (res){
+                //do stuff with res
+                console.log(res);
+                //addRoundRows(res);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.log(status);
+            }
+        });
+    });
+
+    $('.edit-round').click(function () {
+        var modal = $('#editDiscussionModal');
+        var self = $(this);
+
+        //get values
+        var description = self.closest('td').siblings('.round_description').find('input').val();
+        var deadline = self.closest('td').siblings('.round_deadline').find('input').val();
+        var start = self.closest('td').siblings('.round_starttime').find('input').val();
+        var id = self.closest('tr').attr('id').split('_')[1];
+
+        //populate fields with this rounds data
+        modal.find('#discussionStartTime').val(moment(start).format("YYYY-MM-DD[T]HH:MM"));
+        modal.find('#discussionEndTime').val(moment(deadline).format("YYYY-MM-DD[T]HH:MM"));
+        modal.find('#inputEditDiscussionDescription').val(description);
+        modal.find('[name="round_id"]').val(id);
+
+        //show modal
+        modal.modal('show');
+    });
+
+    $('.remove-round').click(function(e){
+        var round_key = $(this).data('round-key');
+
+        console.log('Trying to remove round: ' + round_key);
+
+        //Remove the round on the server side
+        $.ajax({
+            url: '/test-rounds',
+            method: 'POST',
+            data: {
+                course: "{{selectedCourse}}",
+                section: "{{selectedSection}}",
+                round_id: round_key,
+                action: 'delete'
+            },
+            success: function (res){
+                console.log(res);
+                location.reload();
+            },
+            error: function (xhr, status, error){
+                console.log(error);
+            }
+        });
+    });
+
+    //Submit discussion edit to server
+    $("#editDiscussionForm").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+
+        //collect form elements
+        var $form = $(this),
+        description = $form.find("textarea").val(),
+        url = $form.attr("action")
+        start_time = moment($form.find('#discussionStartTime').val()).format("YYYY-MM-DD[T]HH:MM"),
+        deadline = moment($form.find('#discussionEndTime').val()).format("YYYY-MM-DD[T]HH:MM"),
+        round = $form.find('[name="round_id"]').val();
+        console.log("trying to edit round: " + round);
+
+        // do the POST and get the callback
+        $.post(url, {
+            round_id: round,
+            description: description, 
+            course: "{{selectedCourse}}",
+            section: "{{selectedSection}}",
+            roundType: 'discussion',
+            action: 'change',
+            deadline: deadline,
+            start_time: start_time
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
+            }
+        });
+    });
+
+    function addRoundRows(data){
+        var table_body = $('#round-table tbody');
+        var current_num_rounds = table_body.find("tr").length;
+
+        //for each returned round add it to the rounds table
+        for(var i = 0, len = data.length; i < len; i++){
+            var round = data[i];
+            var _row = $('<tr></tr>').attr('id', 'round_' + data.number);
+            var _remove_button = null;
+            var _edit_button = null;
+
+            //add remove icon
+            _remove_button = $('<button class="btn btn-default remove-round" aria-label="Edit Discussion"></button>');
+            //pass the round id to the button so we can grab it below
+            _remove_button.data('round_key', data.number);
+            _remove_button.click(function(e){
+                var round_key = $(this).data('round_key');
+
+                //Remove the round on the server side
+                $.ajax({
+                    url: '/test-rounds',
+                    method: 'DELETE',
+                    data: {
+                        course: "{{selectedCourse}}",
+                        section: "{{selectedSection}}",
+                        round: round_key
+                    },
+                    success: function (res){
+                        console.log(res);
+                        $('#round-table tbody').find('#round_' + round_key).remove();
+                        //TODO: need to update the round numbers of the proceeding rounds
+                    },
+                    error: function (xhr, status, error){
+                        console.log(error);
+                    }
+                })
+            });
+            _remove_button.append($('<span class="glyphicon glyphicon-remove"></span>'));
+            _row.append($('<td></td>').append(_remove_button));
+
+            /**
+             * Dev Note: Andrew Clinton
+             * Date: 2/24/16
+             * 
+             * Need to make sure the name attribs match what the backend API is expecting
+             */
+
+            //add round number
+            _row.append($('<td class="round_num"></td>').text(current_num_rounds+i+1).attr('round_num', current_num_rounds+i+1));
+
+            //add start time
+            _row.append($('<td class="round_start_time"></td>').test(round.starttime).append($('<input type="hidden" name="startime">')));
+
+            //add deadline
+            _row.append($('<td class="round_deadline"></td>').text(round.deadline).append($('<input type="hidden" name="deadline">')));
+
+            //add description
+            _row.append($('<td class="round_description"></td>').text(round.description).append($('<input type="hidden" name="description">')));
+
+            //add the edit pencil
+            _edit_button = $('<button class="btn btn-default" aria-label="Edit Discussion"></button>');
+            _edit_button.click(function () {
+                var modal = $('#editDiscussionModal');
+
+                //get values
+                var description = $(this).closest('.round_description').val();
+                var deadline = $(this).closest('.round_deadline').val();
+                var start = $(this).closest('.round_start_time').val();
+                var id = $(this).closest('tr').attr('id').split('_')[1];
+
+                //populate fields with this rounds data
+                modal.find('#discussionStartTime').val(start);
+                modal.find('#discussionEndTime').val(deadline);
+                modal.find('#inputDiscussionQuestion').val(description);
+                modal.find('#roundId').val(id);
+
+                //show modal
+                modal.modal('show');
+            });
+            _edit_button.append($('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
+            _row.append($('<td></td>').append(_edit_button));
+
+            //add the row to the last spot in the table
+            table_body.append(_row);
+        }
+    }
+});
+</script>
+<script type="text/javascript">
+    var num_rounds = {{discussionRounds|length}};
+    var lead_in_deadline = moment();
+
+    {% if leadInQuestion %}
+        lead_in_deadline = "{{leadInQuestion.deadline}}";
+    {% endif %}
+
+    $('.alert').hide();
+    $('.alert .close').click(function () {
+        $(this).closest('.alert').hide();
+    });
+
+    //Logic to add new discussion round to UI
+    var $duration_error = $('#duration_error');
+
+    // $('.remove-round').click(function () {
+    //     var $parent = $(this).closest('tr');
+    //     var duration = $('#duration').val();
+    //     $parent.remove();
+    //     $('#total_disc').val($('#total_disc').val()-1);
+    //     num_rounds -= 1;
+    //     updateRoundNums(2);
+    //     updateRoundTimes(duration);
+    // });
+
+    $('#total_disc').change(function (e){
+        var val = $(this).val();
+        if(val < num_rounds){
+            $(this).val(num_rounds);
+        } else {
+            num_rounds = val;
+        }
+    });
+
+    // $("#add_disc").click(function(){
+    //     var dics_num = $('#total_disc').val();
+    //     var duration = $('#duration').val();
+    //     var disc = $('#round-table tr').length;  // number of rounds = rows - header row
+
+    //     if(duration === '' || duration < 0){
+    //         $duration_error.show();
+    //         return;
+    //     }
+
+
+    //     /* rasor 2016-03-04
+    //      * Let's just send the number of rounds and duration to the back end
+    //      * here before any of the js mangles it.  We'll remove the js code used
+    //      * to fill out the table and eventually hook the table completely to
+    //      * the controller... sometime later...
+    //      */
+    //     var url = '/test-rounds'
+    //     /* TODO: Figure out how the start time is going to be determined.
+    //      * As it currently stands, there is nowhere to enter a "start-time"
+    //      * or "end-time" for the rounds.
+    //      */
+    //     /* For now, I'll just use moment.js to fill an array of times starting
+    //      * with {duration} from NOW.
+    //      */
+    //     var start_times = [];
+    //     for(var i = 0; i < dics_num; i++) {
+    //         start_times.push(moment().add(duration * i, 'hours').format("YYYY-MM-DD[T]HH:MM"))
+    //     }
+    //     /* And stupidly I don't know how to pass an array if not in JSON,
+    //      * which is how they did it originally
+    //      */
+    //     start_times = JSON.stringify(start_times);
+    //     /* Do the post and get the callback */
+    //     $.post(url, {
+    //         dics_num: dics_num, duration: duration, action: 'add',
+    //         round: "{{nextRound}}", times: start_times,
+    //         course: "{{selectedCourse}}", section: "{{selectedSection}}"
+    //     }, function (data) {
+    //         bootbox.alert(data.substring(1));
+    //     });
+
+
+    //     while(dics_num > disc){
+    //         disc++;
+    //         var _row = $('<tr></tr>');
+
+    //         //add remove icon
+    //         _button = $('<button class="btn btn-default remove-round" aria-label="Edit Discussion"></button>');
+    //         _button.click(function(e){
+    //             var duration = $('#duration').val();
+    //             var $parent = $(this).closest('tr');
+    //             $parent.remove();
+    //             $('#total_disc').val($('#total_disc').val()-1);
+    //             num_rounds -= 1;
+    //             updateRoundNums(2);
+    //             updateRoundTimes(duration);
+    //         });
+    //         _button.append($('<span class="glyphicon glyphicon-remove"></span>'));
+    //         _row.append($('<td></td>').append(_button));
+
+    //         /**
+    //          * Dev Note: Andrew Clinton
+    //          * Date: 2/24/16
+    //          * 
+    //          * Need to make sure the name attribs match what the backend API is expecting
+    //          */
+
+    //         //add round number
+    //         _row.append($('<td></td>').text(disc).append($('<input type="hidden" name="round_num[]">')));
+
+    //         //add start time
+    //         _row.append($('<td></td>').append($('<input type="hidden" name="startime[]">')));
+
+    //         //add deadline
+    //         _row.append($('<td></td>').append($('<input type="hidden" name="deadline[]">')));
+
+    //         //add description
+    //         _row.append($('<td></td>').append($('<input type="hidden" name="description[]">')));
+
+    //         //add the edit pencil
+    //         _button = $('<button class="btn btn-default" aria-label="Edit Discussion"></button>');
+    //         _button.append($('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
+    //         _row.append($('<td></td>').append(_button));
+
+    //         //add the row to the last spot in the table
+    //         $('#round-table tbody').append(_row);
+
+    //         //update the times
+    //         updateRoundTimes(duration);
+    //     }
+    // });
+
+    function updateRoundNums(start_val){
+        var val = start_val;
+        $('#round-table').find('> tbody tr').each(function (index, el){
+            $(el).find('td:nth-child(2)').text(val);
+            val++;
+        });
+    }
+
+    function updateRoundTimes(duration){
+        var previous = moment(lead_in_deadline);
+
+        $('#round-table').find('> tbody tr').each(function (index, el){
+            //1 hour padding for now
+            var _start = previous.add(1, 'hour');
+            var _end = moment(_start).add(duration, 'hour');
+            previous = moment(_end);
+
+            $(el).find('td:nth-child(3)').text(_start.format('YYYY-MM-DDTHH:mm'));
+            $(el).find('td:nth-child(4)').text(_end.format('YYYY-MM-DDTHH:mm'));
+        });
+    }
+
+    $('#courseSelector').on('change', function () {
+        location.href = "/rounds?course=" + this.value;
+    });
+
+    $('#sectionSelector').on('change', function () {
+        location.href = "/rounds?course={{selectedCourse}}&section=" + this.value;
+    });
+
+    var lastQuestion = false;
+
+    function addQuestion() {
+        lastQuestion = false;
+        $("#myModal").modal('show');
+    }
+
+    function addLastQuestion() {
+        lastQuestion = true;
+        $("#myModal").modal('show');
+    }
+
+    function submitQuestion() {
+        $("#modalForm").find('[type="submit"]').trigger('click');
+    }
+
+    function makeActive() {
+        r = $("#roundSelector").val();
+
+        $.post("/rounds", {
+            course: "{{selectedCourse}}", section: "{{selectedSection}}", round: r, action: 'activate'
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
+            }
+        });
+    }
+
+    $(".dateTimePicker").on('mousedown', function() {
+        $(this).datetimepicker();
+    });
+
+    $("#modalForm").submit(function (event) {
+        event.preventDefault();
+        // First we need to check that a date has been selected
+        var $form = $(this),
+                question = $form.find("textarea").val(),
+                options = $form.find("select").val(),
+                url = $form.attr("action");
+
+        var optionVals = [];
+        for (var i = 1; i <= options; i++) {
+            var val = $("#inputOptions" + i).val();
+            optionVals.push(val);
+        }
+        optionVals = JSON.stringify(optionVals);
+
+        var time_val = moment($("#endTime").val()).format("YYYY-MM-DD[T]HH:MM");
+
+        console.log(question + options + time_val + optionVals);
+
+        if (!lastQuestion) {
+            // do the POST and get the callback
+            $.post(url, {
+                time: time_val, question: question, number: options, options: optionVals, course: "{{selectedCourse}}",
+                section: "{{selectedSection}}", round: 1, roundType: 'leadin', action: 'add'
+            }, function (data) {
+                if (data.charAt(0) == 'E') {
+                    bootbox.alert(data.substring(1));
+                }
+                else {
+                    bootbox.alert(data.substring(1), function () {
+                        location.reload();
+                    });
+                }
+            });
+        }
+        else {
+            // do the POST and get the callback
+            $.post(url, {
+                time: time_val, question: question, number: options, options: optionVals, course: "{{selectedCourse}}",
+                section: "{{selectedSection}}", round: '{{nextRound}}', roundType: 'summary', action: 'add'
+            }, function (data) {
+                if (data.charAt(0) == 'E') {
+                    bootbox.alert(data.substring(1));
+                }
+                else {
+                    bootbox.alert(data.substring(1), function () {
+                        location.reload();
+                    });
+                }
+            });
+        }
+    });
+
+    function addDiscussion() {
+        $("#discussionModal").modal('show');
+    }
+
+    function submitDiscussion() {
+        $("#discussionForm").find('[type="submit"]').trigger('click');
+    }
+
+    function submitEditDiscussion() {
+        $("#editDiscussionForm").find('[type="submit"]').trigger('click');
+    }
+
+    $("#discussionForm").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+
+        //collect form elements
+        var $form = $(this),
+        time_val = moment($("#discussionEndTime").val()).format("YYYY-MM-DD[T]HH:MM"),
+                description = $form.find("textarea").val(),
+                anonymity = $('input[name="anonymousDiscussion"]:checked').val();
+                url = $form.attr("action");
+
+        // do the POST and get the callback
+        $.post(url, {
+            time: time_val, round: "{{nextRound}}", description: description, course: "{{selectedCourse}}",
+            section: "{{selectedSection}}", roundType: 'discussion', anonymity:anonymity, action: 'add'
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
+            }
+        });
+    });
+
+    $("#inputOptions").change(function () {
+        var select = parseInt($('#inputOptions').val(), 10);
+        var html = '';
+        for (var i = 1; i <= select; i++) {
+            html += '<input type="text" class="form-control" id="inputOptions' + i + '" name="Options' + i + '" placeholder="Option ' + i + '" style="margin-bottom: 10px" required="true">';
+        }
+        $('#optionsContainer').empty().html(html);
+    }).change();
+
+</script>
+{% endblock %}

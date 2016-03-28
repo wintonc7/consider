@@ -14,7 +14,6 @@ All the entities derive from ``ndb`` class of Google App Engine.
 """
 from google.appengine.ext import ndb
 
-
 class Course(ndb.Model):
     """
     .. _Course:
@@ -142,6 +141,10 @@ class Round(ndb.Model):
     """ Boolean. If ``True``, this is a quiz round (e.g., lead-in question); if ``False``, a discussion round."""
     quiz = ndb.StructuredProperty(Question, indexed=False)
     """ A `Question`_ property. Contains the question if this is a quiz round."""
+
+    #NEW ATTRIBUTES FOR DYNAMIC ROUNDS: PART 1
+    starttime = ndb.StringProperty(required=True, indexed=False)
+    """ String. Represents the start of the round in the format %Y-%m-%dT%H:%M """
 
 
 class Response(ndb.Model):

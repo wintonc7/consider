@@ -1,8 +1,8 @@
-{% extends "instructor_base.html" %}
+{% extends "layouts/instructor_base.html" %}
 {% block title %} | Responses {% endblock %}
 
 {% block content %}
-<h1 class="page-header">Responses</h1>
+<h1 class="page-header">Groups Responses</h1>
 <h4 class="form-signin-heading">Please select a Course and Section below:</h4>
 <div class="row">
     <div class="col-md-6">
@@ -34,28 +34,37 @@
         {% endif %}
     </div>
 </div>
-{% if round %}
-<h4 class="sub-header">Responses from {{selectedSection}}</h4>
+{% if round and groups %}
+<h4 class="sub-header">Group Responses from {{selectedSection}}</h4>
 <div role="tabpanel">
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-        {% for r in range(round) %}
-        <li role="presentation" {% if loop.first -%}class="active" {%- endif -%}><a href="#round_{{loop.index}}"
-                                                                                    aria-controls="round_{{loop.index}}"
-                                                                                    role="tab" data-toggle="tab">Round-{{loop.index}}</a>
+        {% for g in range(1,groups+1) %}
+        <li role="presentation" class="dropdown {% if loop.first -%}active{%- endif -%}">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Group
+                {{g}}<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+                {% for r in range(1,round+1) %}
+                <li><a href="#group_{{g}}_{{r}}" aria-controls="group_{{g}}_{{r}}" role="tab" data-toggle="tab">Round
+                    {{r}}</a></li>
+                {% endfor %}
+            </ul>
         </li>
         {% endfor %}
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
+        {% for g in range(1, groups+1) %}
+        {% set outloop = loop %}
         {% for r in range(1, round+1) %}
-        <div role="tabpanel" class="tab-pane fade {% if loop.first -%}in active{%- endif -%}" id="round_{{loop.index}}">
+        <div role="tabpanel" class="tab-pane fade {% if outloop.first and loop.first -%}in active{%- endif -%}"
+             id="group_{{g}}_{{r}}">
             <table class="table table-striped" id="table_{{loop.index}}">
-                {% if responses[r|string] %}
+                {% if responses['group_'+g|string+'_'+r|string] %}
                 <thead>
                 <tr>
-                    <th>#</th>
+                    <th>Alias</th>
                     <th>Student</th>
                     <th>Option</th>
                     <th>Comment</th>
@@ -64,15 +73,15 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for response in responses[r|string] %}
+                {% for response in responses['group_'+g|string+'_'+r|string] %}
                 <tr>
-                    <td>{{loop.index}}</td>
+                    <td>{{response.alias}}</td>
                     <td>{{response.student}}</td>
                     <td>{{response.option}}</td>
                     <td>{{response.comment}}</td>
                     <td>
                         {%- for resp in response.response -%}
-                            S{{loop.index}}: {{resp}}
+                        S{{loop.index}}: {{resp}}
                         {% else -%}
                         NA
                         {%- endfor -%}
@@ -89,21 +98,21 @@
             </table>
         </div>
         {% endfor %}
+        {% endfor %}
     </div>
 </div>
 {% else %}
-<h5 class="sub-header" style="margin-top: 20px;">No rounds exists for this section.</h5>
+<h5 class="sub-header" style="margin-top: 20px;">No groups exists for this section.</h5>
 {% endif %}
 {% endblock %}
 
 {% block script %}
 <script>
     $('#courseSelector').on('change', function () {
-        location.href = "/responses?course=" + this.value;
+        location.href = "/group_responses?course=" + this.value;
     });
-
     $('#sectionSelector').on('change', function () {
-        location.href = "/responses?course={{selectedCourse}}&section=" + this.value;
+        location.href = "/group_responses?course={{selectedCourse}}&section=" + this.value;
     });
 </script>
 {% endblock %}

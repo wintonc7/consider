@@ -6,17 +6,21 @@ consider.py
 
 --------------------
 
-Main module of the app. Implements the ``application`` object; handlers for error, home and root pages; and redirects URL to appropriate handler classes.
+Main module of the app. Implements the ``application`` object; handlers for error, home and root pages;
+and redirects URL to appropriate handler classes.
 """
 
 import webapp2
 from google.appengine.api import users
 
 import admin
-import instructor
 import student
 import utils
 from models import Role
+
+# Import all of the instructor controller modules
+# Modify __init__.py in the Instructor directory to add or remove modules
+import Instructor
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -101,13 +105,14 @@ application = webapp2.WSGIApplication([
     ('/home', MainPage),
     ('/error', ErrorPage),
     ('/admin', admin.AdminPage),
-    ('/courses', instructor.Courses),
-    ('/sections', instructor.Section),
-    ('/students', instructor.Students),
-    ('/rounds', instructor.Rounds),
-    ('/responses', instructor.Responses),
-    ('/group_responses', instructor.GroupResponses),
-    ('/groups', instructor.Groups),
+    ('/courses', Instructor.courses.Courses),
+    ('/sections', Instructor.sections.Sections),
+    ('/students', Instructor.students.Students),
+    ('/rounds', Instructor.rounds_test.RoundsTest),
+    ('/test-rounds', Instructor.rounds_test.RoundsTest),
+    ('/responses', Instructor.responses.Responses),
+    ('/group_responses', Instructor.group_responses.GroupResponses),
+    ('/groups', Instructor.groups.Groups),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
 ], debug=True)
