@@ -12,7 +12,7 @@
 {{ super() }}
     <div class="container">
         <div class="jumbotron">
-            <p> {{question}} </p>
+            <p class="md"> {{question}} </p>
         </div>
         <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
             <div class="list-group">
@@ -23,9 +23,17 @@
                 </label>
                 {% endfor %}
             </div>
-            <textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required {% if expired -%} disabled="true" {%- endif -%}>
+            <textarea class="form-control" rows="3" style="max-width: 100%;" id="comment" placeholder="Enter your answer here..." required {% if expired -%} disabled="true" {%- endif -%} onkeyup="showPreview()">
             {%- if comment -%}{{comment}}{%- endif -%}
             </textarea>
+            <div>
+                <p style="text-align: left; padding-top: 10px;">
+                    <a href="http://showdownjs.github.io/demo/">Markdown</a> supported preview:
+                </p>
+                <hr/>
+                <div class="md" id="previewPlaceholder" style="text-align: left; color: black"></div>
+                <hr/>
+            </div>
             <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}>
                 <span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
             </button>
@@ -52,6 +60,7 @@
             </form>
           </div>
           <div class="modal-footer">
+              <p style="text-align: left"><a href="#" target="_blank">Review old rounds in new tab</a></p>
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" onclick="submitSummary()">Submit</button>
           </div>
@@ -112,14 +121,13 @@
 	        	comment = $form.find("textarea").val();
 	        	var url = $form.attr("action");
                 console.log("option = " + radio + ", comment = " + comment + ", url = " + url);
-                {% if last_round %}
-                    $('#myModal').modal('show');
-                {% else %} //last_round
 	        	$.post(url,{option:radio, comm:comment, section:'{{sectionKey}}'},function (data) {
 		        	bootbox.alert(data,function(){
                         ocomment = comment;
                     });
 		        });
+                {% if last_round %}
+                    $('#myModal').modal('show');
                 {% endif %} // last_round
 	        }
 	    });
@@ -127,10 +135,34 @@
         var ocomment = $("#comment").val();
 
         $(window).bind('beforeunload', function() {
-            if ($('#comment').val() !== ocomment) {
+            if ($('#comment').val() !== ocomment || $('#inputSummary').val() !== summary) {
                 return "It looks like you have input you haven't submitted.";
             }
         });
 	   {%- endif -%} // not expired
+</script>
+<script src="/js/showdown.min.js"></script> 
+<script>
+    function mdToHtml(text) {
+        var converter = new showdown.Converter();
+        return converter.makeHtml(text);
+    }
+    function showPreview() {
+        var text = $('#comment').val();
+        console.log('text = ' + text);
+        preview = mdToHtml(text);
+        console.log('preview = '+preview);
+        $('#previewPlaceholder').html(preview);
+    }
+
+    (function () {
+        mds = document.getElementsByClassName('md');
+        console.log('mds = '+mds.length);
+        for (var i = 0; i < mds.length; i++) {
+            text = mds[i].innerHTML;
+            mds[i].innerHTML = mdToHtml(text);
+        }
+        showPreview();
+    })();
 </script>
 {% endblock script %}}

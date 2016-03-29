@@ -11,12 +11,15 @@ Implements the APIs for Instructor control of rounds within the app.
 
 """
 import json
+import time
+from datetime import datetime
 
 import webapp2
 from google.appengine.api import users
 
 from src import models
 from src import utils
+
 
 class Rounds(webapp2.RequestHandler):
     """
@@ -35,7 +38,7 @@ class Rounds(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Now create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -43,7 +46,8 @@ class Rounds(webapp2.RequestHandler):
         course_name = self.request.get('course')
         selected_section_name = self.request.get('section')
         # And get all the courses and sections for this instructor
-        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
+        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(),
+                                                                      selected_section_name.upper())
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -71,11 +75,11 @@ class Rounds(webapp2.RequestHandler):
                     else:
                         # Otherwise, it's just a discussion round
                         discussion_rounds.append(r)
-                    #end
-                #end
+                        # end
+                # end
                 # Set the discussion round template values
                 template_values['discussionRounds'] = discussion_rounds
-            #end
+            # end
             # Check to see if the summary round was set in the template
             if 'summaryQuestion' in template_values:
                 # If so, set the next round to the total number of rounds
@@ -84,21 +88,22 @@ class Rounds(webapp2.RequestHandler):
                 # Otherwise, it must be set to the number of rounds plus
                 # one (to account for the eventual summary round)
                 template_values['nextRound'] = current_section.rounds + 1
-            #end
-        #end
+                # end
+        # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/rounds.html')
         self.response.write(template.render(template_values))
-    #end get
+
+    # end get
 
     def add_round(self, section):
         # Grab the current round and time from the webpage
         curr_round = int(self.request.get('round'))
-        time = self.request.get('time')
-        #Create a new round object with those parameters
+        dealine_time = self.request.get('time')
+        # Create a new round object with those parameters
         round_obj = models.Round(parent=section.key, id=curr_round)
-        round_obj.deadline = time
+        round_obj.deadline = dealine_time
         round_obj.number = curr_round
         # Grab the type of round from the webpage
         round_type = self.request.get('roundType')
@@ -123,11 +128,18 @@ class Rounds(webapp2.RequestHandler):
             round_obj.description = description
             if anonymity != "yes":
                 round_obj.is_anonymous = False
-            #end
+                # end
         else:
             # And send an error if any other round type is sent
             utils.error('Unknown round_type passed.', handler=self)
-        #end
+        # end
+
+        # SJ: add `now` as starttime to maintain consistency with the updated model
+        t = datetime.fromtimestamp(time.time())
+        round_obj.starttime = t.strftime('%Y-%m-%d') + 'T' + t.strftime('%H:%M')
+        utils.log('starttime = ' + round_obj.starttime)
+        # Temporary
+
         # And save the round object into the database
         round_obj.put()
         # Only update the value of total rounds if a new round is created,
@@ -135,9 +147,10 @@ class Rounds(webapp2.RequestHandler):
         if curr_round > section.rounds:
             section.rounds = curr_round
             section.put()
-        #end
+        # end
         utils.log('Success, round added.', type='S', handler=self)
-    #end add_round
+
+    # end add_round
 
     def activate_round(self, section):
         # Grab the number for the next round from the page
@@ -147,8 +160,9 @@ class Rounds(webapp2.RequestHandler):
             section.current_round = next_round
             section.put()
             utils.log('Success, round active.', type='S', handler=self)
-        #end
-    #end activate_round
+            # end
+
+    # end activate_round
 
     def post(self):
         """
@@ -163,7 +177,7 @@ class Rounds(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -184,8 +198,8 @@ class Rounds(webapp2.RequestHandler):
             else:
                 # And error if any other action is provided
                 utils.error('Unexpected action: ' + action, handler=self)
-            #end
-        #end
-    #end post
+                # end
+                # end
+                # end post
 
-#end class Rounds
+# end class Rounds
