@@ -135,6 +135,37 @@ def check_privilege(expected_role):
     return user
 #end
 
+def get_current_round(section):
+    """
+    Fetches and returns the current round
+    """
+    if section.is_active:
+        rounds = models.Round.query(ancestor=section.key).fetch()
+        if rounds:
+            for i in range(len(rounds)):
+                #get start time and end time of the round
+                start_time = rounds[i].starttime
+                end_time = rounds[i].deadline
+
+                #change time into a workable format
+                start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
+                end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
+
+                #if the current time is inbetween the start and end time
+                #return that round
+                current_time = datetime.datetime.now()
+                if current_time > start_time and current_time < end_time:
+                    if section.current_round != rounds[i].number:
+                        section.current_round = rounds[i].number
+                        section.put()
+                    return rounds[i].number
+                #end if
+            #end for
+    else:
+        return 0
+    #end if
+#end get_current_round
+
 
 def get_template_all_courses_and_sections(instructor, course_name, selected_section):
     """
