@@ -225,13 +225,13 @@
         <h2>Round Activation Control</h2>
         <hr>
         <form action="/test-rounds" method="post">
-            <button type="submit" class="btn btn-warning btn-lg">
-                <input type="hidden" name="action" value="start" />
-                <input type="hidden" name="course" value="{{selectedCourse}}" />
-                <input type="hidden" name="section" value="{{selectedSection}}" />
-                <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            <button type="button" id="start-rounds" class="btn btn-warning btn-lg">
                 Start Rounds
+                <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
             </button>
+            <input type="hidden" name="action" value="start" />
+            <input type="hidden" name="course" value="{{selectedCourse}}" />
+            <input type="hidden" name="section" value="{{selectedSection}}" />
         </form>
     </div>
 </div>
@@ -436,6 +436,23 @@ $(document).ready(function () {
             },
             error: function (xhr, status, error) {
                 console.log(status);
+            }
+        });
+    });
+
+    $('#start-rounds').click(function (){
+        $.post('/test-rounds', {
+            course: "{{selectedCourse}}",
+            section: "{{selectedSection}}", 
+            action: 'start'
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                bootbox.alert(data.substring(1), function () {
+                    location.reload();
+                });
             }
         });
     });
