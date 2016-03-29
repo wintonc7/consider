@@ -112,7 +112,8 @@ class Rounds(webapp2.RequestHandler):
 
     def render_template(self, student, section):
         # First, get the round number from the page
-        current_round = self.request.get('round')
+        # current_round = self.request.get('round')
+        current_round = utils.get_current_round(section)
         # Now check that the round number passed in actually exists, and set
         # the requested round number appropriately if not
         if current_round:
