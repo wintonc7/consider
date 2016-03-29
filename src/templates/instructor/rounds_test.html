@@ -227,6 +227,8 @@
         <form action="/test-rounds" method="post">
             <button type="submit" class="btn btn-warning btn-lg">
                 <input type="hidden" name="action" value="start" />
+                <input type="hidden" name="course" value="{{selectedCourse}}" />
+                <input type="hidden" name="section" value="{{selectedSection}}" />
                 <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
                 Start Rounds
             </button>
