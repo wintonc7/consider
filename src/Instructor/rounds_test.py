@@ -44,6 +44,7 @@ class RoundsTest(webapp2.RequestHandler):
             # If so, grab that section from the template values
             current_section = template_values['selectedSectionObject']
             # Set the current active round
+            # template_values['activeRound'] = utils.get_current_round(current_section)
             template_values['activeRound'] = current_section.current_round
             # And grab all the rounds for this section
             rounds = models.Round.query(ancestor=current_section.key).fetch()
