@@ -47,7 +47,7 @@ class RoundsTest(webapp2.RequestHandler):
             # template_values['activeRound'] = utils.get_current_round(current_section)
             template_values['activeRound'] = current_section.current_round
             # Send the current time stamp back to the view to do comparisons with
-            template_values['now'] = datetime.datetime.utcnow()
+            template_values['now'] = datetime.datetime.now()
             # And grab all the rounds for this section
             rounds = models.Round.query(ancestor=current_section.key).fetch()
             # Double check that there are actually rounds already created
