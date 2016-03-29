@@ -99,6 +99,13 @@ class MainPage(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
 
+def format_datetime(value, format='%Y-%m-%d %H:%M:%S.%f'):
+    return datettime.datetime.strptime(value, format)
+
+
+myConfig = {}
+myConfig['webapp2_extras.jinja2'] = {'filters': {'date_format': format_datetime}}
+
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -115,4 +122,4 @@ application = webapp2.WSGIApplication([
     ('/groups', Instructor.groups.Groups),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
-], debug=True)
+], debug=True, config=myConfig)
