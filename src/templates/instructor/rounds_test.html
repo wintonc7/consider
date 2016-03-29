@@ -275,6 +275,12 @@
                     <div class="form-group">
                         <label for="inputOptions1" class="col-sm-2 control-label">Options: </label>
                         <div class="col-sm-10" id="optionsContainer">
+                        {% if leadInQuestion %}
+                            {% for option in leadInQuestion.quiz.options %}
+                                <input type="text" class="form-control" id="inputOptions{{loop.index}}" name="Options{{loop.index}}"
+                                   style="margin-bottom: 10px" required="true" value="{{option}}">
+                            {% endfor %}
+                        {% else %}
                             <input type="text" class="form-control" id="inputOptions1" name="Options1"
                                    style="margin-bottom: 10px" required="true">
                             <input type="text" class="form-control" id="inputOptions2" name="Options2"
@@ -283,6 +289,7 @@
                                    style="margin-bottom: 10px" required="true">
                             <input type="text" class="form-control" id="inputOptions4" name="Options4"
                                    style="margin-bottom: 10px" required="true">
+                        {% endif %}
                         </div>
                     </div>
                     <button type="submit" class="hide"></button>
@@ -460,18 +467,6 @@ $(document).ready(function () {
         var question = table.find('.question').text();
         var options_ul = table.find('.options ul');
 
-        //Clear options
-        var optionsContainer = modal.find('#optionsContainer');
-        optionsContainer.empty();
-
-        options_ul.find('li').each(function (i, el){
-            var input = $('<input type="text" class="form-control" id="inputOptions1" style="margin-bottom: 10px" required="true">');
-            input.attr('name', "Options" + (i+1));
-            input.attr('id', "Options" + (i+1));
-            input.val($(el).text());
-            optionsContainer.append(input);
-        });
-
         //
         var inputOptions = modal.find('#inputOptions');
         inputOptions.val(options_ul.find('li').length);
@@ -519,7 +514,7 @@ $(document).ready(function () {
         start_time = moment($form.find('#discussionStartTime').val()).format("YYYY-MM-DD[T]HH:MM"),
         deadline = moment($form.find('#discussionEndTime').val()).format("YYYY-MM-DD[T]HH:MM"),
         round = $form.find('[name="round_id"]').val();
-        console.log("trying to edit round: " + round);
+        console.log("trying to edit round: " + deadline);
 
         // do the POST and get the callback
         $.post(url, {
@@ -930,11 +925,24 @@ $(document).ready(function () {
 
     $("#inputOptions").change(function () {
         var select = parseInt($('#inputOptions').val(), 10);
-        var html = '';
-        for (var i = 1; i <= select; i++) {
-            html += '<input type="text" class="form-control" id="inputOptions' + i + '" name="Options' + i + '" placeholder="Option ' + i + '" style="margin-bottom: 10px" required="true">';
+        var current_num = $('#optionsContainer').find('input').length;
+        var $container = $('#optionsContainer');
+
+        //Add to end
+        if(current_num < select){
+            for (var i = current_num; i < select; i++) {
+                var input = $('<input type="text" class="form-control" id="inputOptions' + (i+1) + '" name="Options' + (i+1) + '" placeholder="Option ' + (i+1) + '" style="margin-bottom: 10px" required="true">');
+                $container.append(input).find('input:last-child').hide().fadeIn('slow');
+            }
         }
-        $('#optionsContainer').empty().html(html);
+
+        //Remove from end
+        if(current_num > select){
+            while(current_num > select){
+                $container.find('input:last-child').remove();
+                current_num--;
+            }
+        }
     }).change();
 
 </script>
