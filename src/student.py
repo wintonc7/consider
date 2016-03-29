@@ -111,9 +111,10 @@ class Rounds(webapp2.RequestHandler):
     #end post
 
     def render_template(self, student, section):
-        # First, get the round number from the page
-        # current_round = self.request.get('round')
-        current_round = utils.get_current_round(section)
+        # update the database to the current round based on time
+        database_round = utils.get_current_round(section)
+        # Get the requested round number from the page
+        current_round = self.request.get('round')
         # Now check that the round number passed in actually exists, and set
         # the requested round number appropriately if not
         if current_round:
@@ -206,7 +207,7 @@ class Rounds(webapp2.RequestHandler):
             group = models.Group.get_by_id(group, parent=section.key)
             # Double check that it was found
             if group:
-                # Depending on round number, we have to grab from 
+                # Depending on round number, we have to grab from
                 if round_number == 1:
                     previous_round = models.Round.get_by_id(1, parent=section.key)
                 else:

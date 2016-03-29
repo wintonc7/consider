@@ -494,7 +494,7 @@ class RoundsTest(webapp2.RequestHandler):
         # Now simply turn on the first round
         section.is_active = True
         section.current_round = 1
-
+        section.put()
         # And send a success message
         utils.log('Successfully started the first round.', type='S', handler=self)
     #end
