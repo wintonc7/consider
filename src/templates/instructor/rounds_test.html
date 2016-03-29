@@ -156,7 +156,7 @@
 	        {% for obj in discussionRounds %}
 	        <tr id="round_{{obj.number}}">
                 <td>
-                    {% if obj.starttime < now %}
+                    {% if obj.starttime > now %}
                         <button data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Remove Discussion">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
@@ -167,7 +167,7 @@
 	            <td class="round_deadline">{{obj.deadline}} <input type="hidden" value="{{obj.deadline}}" /></td>
 	            <td class="round_description">{{obj.description}} <input type="hidden" value="{{obj.description}}" /></td>
 	            <td>
-                    {% if obj.starttime < now %}
+                    {% if obj.starttime > now %}
     	                <button data-round-key="{{obj.number}}" class="btn btn-default edit-round" aria-label="Edit Discussion">
                             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                         </button>
