@@ -475,26 +475,26 @@ class RoundsTest(webapp2.RequestHandler):
 
 
 
-def start_rounds(self, instructor):
-    # So first we need to get at the course and section
-    course, section = utils.get_course_and_section_objs(self.request, instructor)
-    # And grab all of the rounds for this section
-    rounds = models.Round.query(ancestor=section.key).fetch()
-    # The view requires at least a lead-in question to add rounds, but check
-    if not rounds:
-        # Send an error if no rounds exist for this section
-        utils.error('No lead-in question exists; cannot start yet.', handler=self)
-        # And redirect
-        return self.redirect('/')
+    def start_rounds(self, instructor):
+        # So first we need to get at the course and section
+        course, section = utils.get_course_and_section_objs(self.request, instructor)
+        # And grab all of the rounds for this section
+        rounds = models.Round.query(ancestor=section.key).fetch()
+        # The view requires at least a lead-in question to add rounds, but check
+        if not rounds:
+            # Send an error if no rounds exist for this section
+            utils.error('No lead-in question exists; cannot start yet.', handler=self)
+            # And redirect
+            return self.redirect('/')
+        #end
+
+        # Now simply turn on the first round
+        section.is_active = True
+        section.current_round = 1
+
+        # And send a success message
+        utils.log('Successfully started the first round.', type='S', handler=self)
     #end
-
-    # Now simply turn on the first round
-    section.is_active = True
-    section.current_round = 1
-
-    # And send a success message
-    utils.log('Successfully started the first round.', type='S', handler=self)
-#end
 
 
     def copy_summary(self, section, rounds, num_of_rounds):
