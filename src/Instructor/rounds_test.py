@@ -12,12 +12,26 @@ Implements the APIs for Instructor control of adding discussion rounds.
 """
 import json
 import datetime
+import jinja2
 
 import webapp2
 from google.appengine.api import users
 
 from src import models
 from src import utils
+
+
+def str_to_date(date_string, format="%Y-%m-%dT%H:%M"):
+    return datetime.datetime.strptime(date_string, format)
+
+
+def since_epoch(date):
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    return (date - epoch).total_seconds() * 100.0
+
+
+jinja2.filters.FILTERS['str_to_date'] = str_to_date
+jinja2.filters.FILTERS['since_epoch'] = since_epoch
 
 class RoundsTest(webapp2.RequestHandler):
     def get(self):
@@ -131,7 +145,6 @@ class RoundsTest(webapp2.RequestHandler):
             #end
         #end
     #end post
-
 
 
     def add_leadin_summary(self, instructor):
