@@ -126,8 +126,9 @@ class RoundsTest(webapp2.RequestHandler):
                 # Now, let's grab the number of rounds and duration from the
                 num_of_rounds = int(self.request.get('total_discussions'))
                 duration_of_round = int(self.request.get('duration'))
+                rounds_delay = int(self.request.get('buffer'))
                 # Send the number and duration to the add rounds function
-                self.add_rounds(num_of_rounds, duration_of_round, instructor)
+                self.add_rounds(num_of_rounds, duration_of_round, rounds_delay, instructor)
             elif action == 'delete':
                 # Send the id of the round to be deleted
                 round_id = int(self.request.get('round_id'))
@@ -259,7 +260,7 @@ class RoundsTest(webapp2.RequestHandler):
         #end
     #end add_lead_in
 
-    def add_rounds(self, num_of_rounds, duration, instructor):
+    def add_rounds(self, num_of_rounds, duration, rounds_delay, instructor):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
@@ -272,6 +273,13 @@ class RoundsTest(webapp2.RequestHandler):
             return self.redirect('/')
         #end
 
+        if rounds_delay < 0:
+            # Make sure the buffer value is positive
+            utils.error('Buffer value must be greater than 0.', handler=self)
+            # And redirect
+            return self.redirect('/')
+        #end
+
         # Copy the summary round if it exists
         summary = self.copy_summary(section, rounds, num_of_rounds)
         # If it exists, pop it off the list
@@ -280,7 +288,7 @@ class RoundsTest(webapp2.RequestHandler):
         #end
 
         # Now create all the new rounds
-        new_rounds = self.create_new_rounds(section, rounds, num_of_rounds, duration)
+        new_rounds = self.create_new_rounds(section, rounds, num_of_rounds, rounds_delay, duration)
 
         # And update the summary round
         self.update_summary(summary, new_rounds)
@@ -293,13 +301,13 @@ class RoundsTest(webapp2.RequestHandler):
         utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='S', handler=self)
     #end add_rounds
 
-    def create_new_rounds(self, section, rounds, num_of_rounds, duration):
+    def create_new_rounds(self, section, rounds, num_of_rounds, rounds_delay, duration):
         # Now grab the current last round number
         current_last_round = rounds[-1].number
         # We need the end time of the last round currently in this section
         last_time = rounds[-1].deadline
         # Now we need to compute new start and end times for the new rounds
-        start_times, end_times = self.get_new_times(last_time, num_of_rounds, duration, 0)
+        start_times, end_times = self.get_new_times(last_time, num_of_rounds, duration, rounds_delay)
         # Let's keep a list of the newly added rounds
         new_rounds = list()
         # Now let's just loop over the number of rounds
@@ -327,7 +335,7 @@ class RoundsTest(webapp2.RequestHandler):
         # TODO: For now, let's just add 24 hours to the start time of the
         # discussion rounds so that there's time for instructors to create
         # groups.  Later, we will need to somehow offer a UI element to set this
-        start += datetime.timedelta(hours = 24)
+        start += datetime.timedelta(hours = delay)
 
         # Ok, now we need to create our new start and end times list
         start_times = list()

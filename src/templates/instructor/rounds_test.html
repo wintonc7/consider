@@ -431,6 +431,7 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var num = $('#total_discussions').val();
+        var buffer = $('#buffer').val();
         var action = "add_disc";
         console.log(total_discussions);
 
@@ -442,6 +443,7 @@ $(document).ready(function () {
                 total_discussions: total_discussions,
                 duration: duration,
                 course: course,
+                buffer: buffer,
                 section: section,
                 action: action,
                 total_discussions: num
