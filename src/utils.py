@@ -149,8 +149,8 @@ def get_current_round(section):
                 end_time = rounds[i].deadline
 
                 #change time into a workable format
-                start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
-                end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
+                start_time = convert_time(start_time)
+                end_time = convert_time(end_time)
 
                 #if the current time is inbetween the start and end time
                 #return that round

@@ -276,6 +276,12 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="startBuffer" class="col-sm-2 control-label">Buffer</label>
+                        <div class="col-sm-10">
+                            <input id="startBuffer" type="tel" class="form-control" name="startBuffer" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="inputQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
                         <div class="col-sm-10">
                             <textarea class="form-control" rows="3" id="inputQuestion" name="question"
@@ -491,7 +497,7 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var num = $('#total_discussions').val();
-        //var buffer = $('#buffer').val();
+        var startBuffer = $('#startBuffer').val();
         var action = "add_disc";
         console.log(total_discussions);
 
@@ -503,7 +509,7 @@ $(document).ready(function () {
                 total_discussions: total_discussions,
                 duration: duration,
                 course: course,
-                //buffer: buffer,
+                startBuffer: startBuffer,
                 section: section,
                 action: action,
                 total_discussions: num
@@ -531,8 +537,8 @@ $(document).ready(function () {
         var id = self.closest('tr').attr('id').split('_')[1];
 
         //populate fields with this rounds data
-        modal.find('#discussionStartTime').val(moment(start).format("MM/DD/YYYY HH:mm"));
-        modal.find('#discussionEndTime').val(moment(deadline).format("MM/DD/YYYY HH:mm"));
+        modal.find('#discussionStartTime').val(moment(start).format("MM/DD/YYYY hh:mm A"));
+        modal.find('#discussionEndTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
 
         modal.find('#inputEditDiscussionDescription').val(description);
         modal.find('[name="round_id"]').val(id);
@@ -556,7 +562,7 @@ $(document).ready(function () {
         var inputOptions = modal.find('#inputOptions');
         inputOptions.val(options_ul.find('li').length);
 
-        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY HH:mm"));
+        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
         modal.find('#inputQuestion').val(question);
 
         //hide the summary and show the lead in
@@ -582,7 +588,7 @@ $(document).ready(function () {
         var inputOptions = modal.find('#inputOptions');
         inputOptions.val(options_ul.find('li').length);
 
-        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY HH:mm"));
+        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
         modal.find('#inputQuestion').val(question);
 
         //hide the summary and show the lead in
