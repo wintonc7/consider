@@ -36,7 +36,7 @@ class AdminPage(webapp2.RequestHandler):
             instructor = models.Instructor(id=email)
             instructor.email = email
             instructor.put()
-            utils.log(email + ' has been added as an Instructor', type='S', handler=self)
+            utils.log(email + ' has been added as an Instructor', type='Success!', handler=self)
         else:
             utils.error('Invalid arguments: email')
 

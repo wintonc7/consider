@@ -46,7 +46,7 @@ class Sections(webapp2.RequestHandler):
             section = models.Section(parent=course.key, id=section_name)
             section.name = section_name
             section.put()
-            utils.log(section_name + ' added', type='S')
+            utils.log(section_name + ' added', type='Success!')
         #end
     #end add_section
 
@@ -68,7 +68,7 @@ class Sections(webapp2.RequestHandler):
             # Toggle the section to active, save it to the database, and log it
             section.is_active = not section.is_active
             section.put()
-            utils.log('Status changed for ' + section_name, type='S')
+            utils.log('Status changed for ' + section_name, type='Success!')
         else:
             # Send an error if the section passed in doesn't exist
             utils.error('Section ' + section_name + ' not found', handler=self)

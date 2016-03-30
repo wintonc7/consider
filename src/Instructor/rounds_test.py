@@ -181,7 +181,7 @@ class RoundsTest(webapp2.RequestHandler):
         # And update the section rounds attribute if necessary
         self.update_section_rounds(rounds[-1].number, section)
         # And send our success message
-        utils.log('Success, round added.', type='S', handler=self)
+        utils.log('Round added.', type='Success!', handler=self)
     #end add_leadin_summary
 
     def build_round_obj(self, section):
@@ -271,7 +271,7 @@ class RoundsTest(webapp2.RequestHandler):
         # Now grab all of the rounds again
         rounds = models.Round.query(ancestor=section.key).fetch()
         # And send a success message
-        utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='S', handler=self)
+        utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='Success!', handler=self)
     #end add_rounds
 
     def create_new_rounds(self, section, rounds, num_of_rounds, duration):
@@ -363,7 +363,7 @@ class RoundsTest(webapp2.RequestHandler):
         # And update the section
         self.update_section_rounds(rounds[-1].number, section)
         # And send a success message
-        utils.log('Successfully deleted round {0}'.format(round_id), type='S', handler=self)
+        utils.log('Successfully deleted round {0}'.format(round_id), type='Success!', handler=self)
     #end delete_rounds
 
     def shift_rounds(self, rounds, round_id):
@@ -464,7 +464,7 @@ class RoundsTest(webapp2.RequestHandler):
                 # And commit the changes to the database
                 rounds[i].put()
                 # Since we've done our updating, break the loop
-                utils.log('Successfully updated round {0}.'.format(round_id), type='S', handler=self)
+                utils.log('Successfully updated round {0}.'.format(round_id), type='Success!', handler=self)
                 break
             #end
         #end

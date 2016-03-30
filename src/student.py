@@ -222,6 +222,8 @@ class Rounds(webapp2.RequestHandler):
                 template_values['comments'] = comments
                 # Grab the requested round
                 requested_round = models.Round.get_by_id(round_number, parent=section.key)
+                # Grab the discussion description
+                template_values['description'] = requested_round.description
                 # And grab the logged in student's response
                 stu_response = models.Response.get_by_id(student.email, parent=requested_round.key)
                 # Check that they actually answered
@@ -321,8 +323,8 @@ class Rounds(webapp2.RequestHandler):
             response.student = student.email
             response.put()
             utils.log(
-                'Your response have been saved. You can edit it any time before the deadline.',
-                type='S', handler=self)
+                'Your response has been saved. You can edit it any time before the deadline.',
+                type='Success!', handler=self)
         else:
             # Otherwise alert them that time has passed to submit for this round
             utils.error(

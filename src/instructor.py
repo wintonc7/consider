@@ -46,9 +46,10 @@ class Courses(webapp2.RequestHandler):
             course = models.Course(parent=instructor.key, id=course_name)
             course.name = course_name
             course.put()
-            utils.log(course_name + ' added', type='S',handler=self)
-        #end
-    #end add_course
+            utils.log(course_name + ' added', type='Success!', handler=self)
+            # end
+
+    # end add_course
 
     def toggle_course(self, instructor, course_name):
         """
@@ -66,11 +67,12 @@ class Courses(webapp2.RequestHandler):
         if course:
             course.is_active = not course.is_active
             course.put()
-            utils.log('Status changed for ' + course_name, type='S',handler=self)
+            utils.log('Status changed for ' + course_name, type='Success!', handler=self)
         else:
             utils.error('Course ' + course_name + ' not found', handler=self)
-        #end
-    #end toggle_course
+            # end
+
+    # end toggle_course
 
     def post(self):
         """
@@ -81,7 +83,7 @@ class Courses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, get the course name and action from the webpage
         course_name = self.request.get('name')
@@ -100,10 +102,11 @@ class Courses(webapp2.RequestHandler):
                 self.toggle_course(instructor, course_name.upper())
             else:
                 # If any other action, log it as an error
-                utils.error('Unexpected action: ' + action,handler=self)
-            #end
-        #end
-    #end post
+                utils.error('Unexpected action: ' + action, handler=self)
+                # end
+                # end
+
+    # end post
 
     def get(self):
         """
@@ -114,7 +117,7 @@ class Courses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, generate a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -130,16 +133,17 @@ class Courses(webapp2.RequestHandler):
             for course in courses:
                 # And grab all the sections attributed to that course
                 course.sections = models.Section.query(ancestor=course.key).fetch()
-            #end
+            # end
             # Add all the instructor's courses to the template values
             template_values['courses'] = courses
-        #end
+        # end
         # And set the template and render the page
         template = utils.jinja_env().get_template('instructor/courses.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class Courses
+
+# end class Courses
 
 
 class Section(webapp2.RequestHandler):
@@ -169,9 +173,10 @@ class Section(webapp2.RequestHandler):
             section = models.Section(parent=course.key, id=section_name)
             section.name = section_name
             section.put()
-            utils.log(section_name + ' added', type='S')
-        #end
-    #end add_section
+            utils.log(section_name + ' added', type='Success!')
+            # end
+
+    # end add_section
 
     def toggle_section(self, course, section_name):
         """
@@ -191,12 +196,13 @@ class Section(webapp2.RequestHandler):
             # Toggle the section to active, save it to the database, and log it
             section.is_active = not section.is_active
             section.put()
-            utils.log('Status changed for ' + section_name, type='S')
+            utils.log('Status changed for ' + section_name, type='Success!')
         else:
             # Send an error if the section passed in doesn't exist
             utils.error('Section ' + section_name + ' not found', handler=self)
-        #end
-    #end toggle_section
+            # end
+
+    # end toggle_section
 
     def post(self):
         """
@@ -207,7 +213,7 @@ class Section(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, grab the course, section, and action from the webpage
         course_name = self.request.get('course')
@@ -235,16 +241,18 @@ class Section(webapp2.RequestHandler):
                 else:
                     # Error if the action is neither toggle or add
                     utils.error('Unexpected action:' + action, handler=self)
-                #end
-            #end
-        #end
-    #end post
+                    # end
+                    # end
+                    # end
+
+    # end post
 
     def get(self):
         self.redirect('/courses')
-    #end get
+        # end get
 
-#end class Section
+
+# end class Section
 
 
 class Students(webapp2.RequestHandler):
@@ -275,7 +283,7 @@ class Students(webapp2.RequestHandler):
                 info = models.StudentInfo()
                 info.email = email
                 section.students.append(info)
-            #end
+            # end
             # Now grab the student from the database
             student = models.Student.get_by_id(email)
             # And if they don't already have a db entry
@@ -283,19 +291,20 @@ class Students(webapp2.RequestHandler):
                 # Create a new student and assign the email address
                 student = models.Student(id=email)
                 student.email = email
-            #end
+            # end
             # Now check if the current student is subscribed to this section
             if section.key not in student.sections:
                 # And add them if they weren't already
                 student.sections.append(section.key)
-            #end
+            # end
             # Save the student data back to the database
             student.put()
-        #end
+        # end
         # Now save all the section data back to the database and log it
         section.put()
-        utils.log('Students added to Section ' + str(section), type='S')
-    #end add_students
+        utils.log('Students added to Section ' + str(section), type='Success!')
+
+    # end add_students
 
     def remove_student(self, section, email):
         """
@@ -321,15 +330,16 @@ class Students(webapp2.RequestHandler):
             if section.key in student.sections:
                 # And remove them if so
                 student.sections.remove(section.key)
-            #end
+            # end
             # And save both the student and section back to the db and log it
             student.put()
             section.put()
             utils.log(
-                    'Student {0} has been removed from Section {1}'.format(str(student),
-                    str(section)), handler=self, type='S')
-        #end
-    #end remove_student
+                'Student {0} has been removed from Section {1}'.format(str(student),
+                                                                       str(section)), handler=self, type='Success!')
+            # end
+
+    # end remove_student
 
     def post(self):
         """
@@ -340,7 +350,7 @@ class Students(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -365,9 +375,10 @@ class Students(webapp2.RequestHandler):
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)
-            #end
-        #end
-    #end post
+                # end
+                # end
+
+    # end post
 
     def get(self):
         """
@@ -378,7 +389,7 @@ class Students(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -386,14 +397,16 @@ class Students(webapp2.RequestHandler):
         course_name = self.request.get('course')
         selected_section_name = self.request.get('section')
         # And start building the template values
-        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
+        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(),
+                                                                      selected_section_name.upper())
         template_values['logouturl'] = logout_url
         # Set the template and render the page
         template = utils.jinja_env().get_template('instructor/list_students.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class Students
+
+# end class Students
 
 class RoundsTest(webapp2.RequestHandler):
     def get(self):
@@ -405,7 +418,7 @@ class RoundsTest(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Now create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -413,7 +426,8 @@ class RoundsTest(webapp2.RequestHandler):
         course_name = self.request.get('course')
         selected_section_name = self.request.get('section')
         # And get all the courses and sections for this instructor
-        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
+        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(),
+                                                                      selected_section_name.upper())
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -441,11 +455,11 @@ class RoundsTest(webapp2.RequestHandler):
                     else:
                         # Otherwise, it's just a discussion round
                         discussion_rounds.append(r)
-                    #end
-                #end
+                        # end
+                # end
                 # Set the discussion round template values
                 template_values['discussionRounds'] = discussion_rounds
-            #end
+            # end
             # Check to see if the summary round was set in the template
             if 'summaryQuestion' in template_values:
                 # If so, set the next round to the total number of rounds
@@ -454,13 +468,14 @@ class RoundsTest(webapp2.RequestHandler):
                 # Otherwise, it must be set to the number of rounds plus
                 # one (to account for the eventual summary round)
                 template_values['nextRound'] = current_section.rounds + 1
-            #end
-        #end
+                # end
+        # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/rounds_test.html')
         self.response.write(template.render(template_values))
-    #end get
+
+    # end get
 
     def post(self):
         # First, check that the logged in user is an instructor
@@ -468,7 +483,7 @@ class RoundsTest(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Now, let's grab the number of rounds and duration from the page
         num_of_rounds = int(self.request.get('dics_num'))
@@ -484,18 +499,19 @@ class RoundsTest(webapp2.RequestHandler):
                 duration_of_round = int(self.request.get('duration'))
                 # Send the number and duration to the add rounds function
                 self.add_rounds(num_of_rounds, duration_of_round, instructor)
-            #elif action == 'delete':
+                # elif action == 'delete':
                 # Send the id of the round to be deleted
-            #    self.delete_round(round_id)
-            #elif action == 'change':
+                #    self.delete_round(round_id)
+                # elif action == 'change':
                 # Send the new number of rounds requested
             #    self.change_num_of_rounds(num_of_rounds)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)
-            #end
-        #end
-    #end post
+                # end
+                # end
+
+    # end post
 
     def add_rounds(self, num_of_rounds, duration, instructor):
         # So first we need to get at the course and section
@@ -509,6 +525,7 @@ class RoundsTest(webapp2.RequestHandler):
         # This needs fixed in the view.
         start_times = json.loads(self.request.get('times'))
 
+
         # Now let's just loop over the number of rounds
         for i in range(num_of_rounds - 1):
             # Start by creating a new round object with the correct parameters
@@ -520,11 +537,12 @@ class RoundsTest(webapp2.RequestHandler):
             new_round.put()
             # And increment the current round for next iteration
             current_round += 1
-        #end
-        utils.log('Success, {0} rounds added.'.format(num_of_rounds - 1), type='S', handler=self)
-    #end add_rounds
+        # end
+        utils.log('{0} rounds added.'.format(num_of_rounds - 1), type='Success!', handler=self)
+        # end add_rounds
 
-#end class RoundsTest
+
+# end class RoundsTest
 
 class Rounds(webapp2.RequestHandler):
     """
@@ -543,7 +561,7 @@ class Rounds(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Now create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -551,7 +569,8 @@ class Rounds(webapp2.RequestHandler):
         course_name = self.request.get('course')
         selected_section_name = self.request.get('section')
         # And get all the courses and sections for this instructor
-        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(), selected_section_name.upper())
+        template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(),
+                                                                      selected_section_name.upper())
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -579,11 +598,11 @@ class Rounds(webapp2.RequestHandler):
                     else:
                         # Otherwise, it's just a discussion round
                         discussion_rounds.append(r)
-                    #end
-                #end
+                        # end
+                # end
                 # Set the discussion round template values
                 template_values['discussionRounds'] = discussion_rounds
-            #end
+            # end
             # Check to see if the summary round was set in the template
             if 'summaryQuestion' in template_values:
                 # If so, set the next round to the total number of rounds
@@ -592,19 +611,20 @@ class Rounds(webapp2.RequestHandler):
                 # Otherwise, it must be set to the number of rounds plus
                 # one (to account for the eventual summary round)
                 template_values['nextRound'] = current_section.rounds + 1
-            #end
-        #end
+                # end
+        # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/rounds.html')
         self.response.write(template.render(template_values))
-    #end get
+
+    # end get
 
     def add_round(self, section):
         # Grab the current round and time from the webpage
         curr_round = int(self.request.get('round'))
         time = self.request.get('time')
-        #Create a new round object with those parameters
+        # Create a new round object with those parameters
         round_obj = models.Round(parent=section.key, id=curr_round)
         round_obj.deadline = time
         round_obj.number = curr_round
@@ -631,11 +651,11 @@ class Rounds(webapp2.RequestHandler):
             round_obj.description = description
             if anonymity != "yes":
                 round_obj.is_anonymous = False
-            #end
+                # end
         else:
             # And send an error if any other round type is sent
             utils.error('Unknown round_type passed.', handler=self)
-        #end
+        # end
         # And save the round object into the database
         round_obj.put()
         # Only update the value of total rounds if a new round is created,
@@ -643,9 +663,10 @@ class Rounds(webapp2.RequestHandler):
         if curr_round > section.rounds:
             section.rounds = curr_round
             section.put()
-        #end
-        utils.log('Success, round added.', type='S', handler=self)
-    #end add_round
+        # end
+        utils.log('Round added.', type='Success!', handler=self)
+
+    # end add_round
 
     def activate_round(self, section):
         # Grab the number for the next round from the page
@@ -654,9 +675,10 @@ class Rounds(webapp2.RequestHandler):
             # If the selected round is not currently active make it active
             section.current_round = next_round
             section.put()
-            utils.log('Success, round active.', type='S', handler=self)
-        #end
-    #end activate_round
+            utils.log('Round {0} active.'.format(next_round), type='S', handler=self)
+            # end
+
+    # end activate_round
 
     def post(self):
         """
@@ -671,7 +693,7 @@ class Rounds(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -692,11 +714,12 @@ class Rounds(webapp2.RequestHandler):
             else:
                 # And error if any other action is provided
                 utils.error('Unexpected action: ' + action, handler=self)
-            #end
-        #end
-    #end post
+                # end
+                # end
+                # end post
 
-#end class Rounds
+
+# end class Rounds
 
 
 class Groups(webapp2.RequestHandler):
@@ -725,10 +748,11 @@ class Groups(webapp2.RequestHandler):
                 # If the total number of groups are not as requested change them
                 section.groups = group_count
                 section.put()
-            #end
-            utils.log('Groups modified.', type='S', handler=self)
-        #end
-    #end modify_group_count
+            # end
+            utils.log('Groups modified.', type='Success!', handler=self)
+            # end
+
+    # end modify_group_count
 
     def update_groups(self, section, groups):
         """
@@ -760,7 +784,7 @@ class Groups(webapp2.RequestHandler):
                         # And create it if not, giving it the proper number
                         group = models.Group(parent=section.key, id=student.group)
                         group.number = student.group
-                    #end
+                    # end
                     # Now check if the student is listed in the correct group
                     if student.email not in group.members:
                         # If not, add that student in to the group
@@ -771,14 +795,15 @@ class Groups(webapp2.RequestHandler):
                         student.alias = 'S' + str(group.size)
                         # And commit the changes to the group
                         group.put()
-                    #end
-                #end
-            #end
+                        # end
+                        # end
+            # end
             # Commit the changes to the section and log it
             section.put()
             utils.log('Groups updated.', handler=self)
-        #end
-    #end update_groups
+            # end
+
+    # end update_groups
 
     def get(self):
         """
@@ -790,7 +815,7 @@ class Groups(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -799,7 +824,8 @@ class Groups(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # Grab all the courses and sections for the logged in instructor
         template_values = utils.get_template_all_courses_and_sections(instructor,
-                            course_name.upper(), selected_section_name.upper())
+                                                                      course_name.upper(),
+                                                                      selected_section_name.upper())
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -809,7 +835,7 @@ class Groups(webapp2.RequestHandler):
             if current_section.rounds > 0:
                 # Grab the responses from the lead-in question
                 response = models.Response.query(
-                        ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                    ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
                 # Loop over the responses
                 for res in response:
                     # And loop over the students in this section
@@ -819,19 +845,20 @@ class Groups(webapp2.RequestHandler):
                             # And set the group of the response to the
                             # group of the student who made that response
                             res.group = stu.group
-                        #end
-                    #end
-                #end
+                            # end
+                            # end
+                # end
                 # Add the responses and current group to the template values
                 template_values['responses'] = response
                 template_values['group'] = current_section.groups
-            #end
-        #end
+                # end
+        # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/groups.html')
         self.response.write(template.render(template_values))
-    #end get
+
+    # end get
 
     def post(self):
         """
@@ -842,7 +869,7 @@ class Groups(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -868,11 +895,12 @@ class Groups(webapp2.RequestHandler):
             else:
                 # Send an error if a different action is supplied
                 utils.error('Unknown action' + action if action else 'None', handler=self)
-            #end
-        #end
-    #end post
+                # end
+                # end
+                # end post
 
-#end class Groups
+
+# end class Groups
 
 
 class Responses(webapp2.RequestHandler):
@@ -889,7 +917,7 @@ class Responses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Create logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -898,7 +926,7 @@ class Responses(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # And grab all the other courses and sections for this instructor
         template_values = utils.get_template_all_courses_and_sections(
-                            instructor, course_name, selected_section_name)
+            instructor, course_name, selected_section_name)
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -911,22 +939,23 @@ class Responses(webapp2.RequestHandler):
             # And loop over the number of rounds (indexed at 1 for lead-in)
             for i in range(1, current_section.rounds + 1):
                 response = models.Response.query(
-                        ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
+                    ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
                 # response is a list of all the responses for the round i
                 if response:
                     resp[str(i)] = response
-                #end
-            #end
+                    # end
+            # end
             # Add the responses to the template values
             template_values['responses'] = resp
-        #end
+        # end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/responses.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class Responses
+
+# end class Responses
 
 
 class GroupResponses(webapp2.RequestHandler):
@@ -943,7 +972,7 @@ class GroupResponses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -952,7 +981,7 @@ class GroupResponses(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # And grab the other courses and sections from this instructor
         template_values = utils.get_template_all_courses_and_sections(
-                            instructor, course_name, selected_section_name)
+            instructor, course_name, selected_section_name)
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -971,13 +1000,13 @@ class GroupResponses(webapp2.RequestHandler):
                     for r in range(1, current_section.rounds + 1):
                         # Now set an empty list for each group and round
                         resp['group_' + str(g) + '_' + str(r)] = []
-                    #end
-                #end
+                        # end
+                # end
                 # Loop over the number of rounds (indexed by 1)
                 for r in range(1, current_section.rounds + 1):
                     # Grab the responses for that round from the db
                     responses = models.Response.query(
-                            ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
+                        ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
                     # Double check that the responses actually exist
                     if responses:
                         # And loop over the responses
@@ -994,20 +1023,19 @@ class GroupResponses(webapp2.RequestHandler):
                                     # group and round
                                     resp['group_' + str(s.group) + '_' + str(r)].append(res)
                                     break
-                                #end
-                            #end
-                        #end
-                    #end
-                #end
+                                    # end
+                                    # end
+                                    # end
+                                    # end
+                # end
                 # And set the template values for all the responses
                 template_values['responses'] = resp
-            #end
-        #end
+                # end
+        # end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/groups_responses.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class GroupResponses
-
+# end class GroupResponses

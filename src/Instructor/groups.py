@@ -46,7 +46,7 @@ class Groups(webapp2.RequestHandler):
                 section.groups = group_count
                 section.put()
             #end
-            utils.log('Groups modified.', type='S', handler=self)
+            utils.log('Groups modified.', type='Success!', handler=self)
         #end
     #end modify_group_count
 

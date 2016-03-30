@@ -76,7 +76,7 @@ def error(message, handler=None):
           Handler to post the same message back to user.
 
     """
-    log(message, type='E', handler=handler)
+    log(message, type='Error!', handler=handler)
 
 
 def get_role_user():

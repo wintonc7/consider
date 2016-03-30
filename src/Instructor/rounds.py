@@ -148,7 +148,7 @@ class Rounds(webapp2.RequestHandler):
             section.rounds = curr_round
             section.put()
         # end
-        utils.log('Success, round added.', type='S', handler=self)
+        utils.log('Round added.', type='S', handler=self)
 
     # end add_round
 
@@ -159,7 +159,7 @@ class Rounds(webapp2.RequestHandler):
             # If the selected round is not currently active make it active
             section.current_round = next_round
             section.put()
-            utils.log('Success, round active.', type='S', handler=self)
+            utils.log('Round {0} active.'.format(next_round), type='S', handler=self)
             # end
 
     # end activate_round

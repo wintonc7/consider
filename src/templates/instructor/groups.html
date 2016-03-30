@@ -69,8 +69,8 @@
           <tr>
             <td>{{loop.index}}</td>
             <td>{{response.student}}</td>
-            <td>{{response.option}}</td>
-            <td>{{response.comment}}</td>
+            <td class="md">{{response.option}}</td>
+            <td class="md">{{response.comment}}</td>
             <td>{%- if response.group|int != 0 -%} {{response.group}} {%- else -%} NA {%- endif -%}</td>
             <td>{%- if group -%} <select class="form-control" name="select_{{loop.index}}" id="select_{{loop.index}}">
                                   {% for i in range(0, group) %}
@@ -144,4 +144,6 @@
         });
       });
 </script>
+<script src="/js/showdown.min.js"></script> 
+<script src="/js/md-html.js"></script>
 {% endblock %}
