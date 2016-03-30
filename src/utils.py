@@ -139,7 +139,8 @@ def get_current_round(section):
     """
     Fetches and returns the current round
     """
-    if section.is_active:
+    # Check that the rounds for this section have actually started
+    if section.current_round != 0:
         rounds = models.Round.query(ancestor=section.key).fetch()
         if rounds:
             for i in range(len(rounds)):
