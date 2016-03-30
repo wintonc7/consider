@@ -179,21 +179,25 @@ class RoundsTest(webapp2.RequestHandler):
                 utils.error('Summary question cannot be first round added.', handler=self)
                 return
             #end
-            # Let's check that the deadline doesn't conflict with the last round
+
             # First check if we're editing the summary
             if rounds[-1].description == 'summary':
                 # And if so, grab the deadline of the round before the summary
                 last_time = rounds[-2].deadline
+                # And remove the old summary from the database
+                rounds[-1].put().delete()
             else:
                 # Otherwise, grab the deadline of the previous round
                 last_time = rounds[-1].deadline
             #end
-            if utils.convert_time(round_obj.deadline) < utils.convert_time(last_time):
+
+            # Let's check that the deadline doesn't conflict with the last round
+            if utils.convert_time(round_obj.deadline) <= utils.convert_time(last_time):
                 # Send an error if so and return
                 utils.error('Cannot set end time of summary before end of last discussion.', handler=self)
                 return
             #end
-            # Otherwise set the start time of summary as deadline of last round
+            # Set start time of summary as the deadline of the last round
             round_obj.starttime = last_time
         #end
 
