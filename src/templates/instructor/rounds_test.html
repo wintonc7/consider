@@ -124,6 +124,7 @@
             <strong>Invalid Duration!</strong>
         </div>
 	</div>
+    <!-- this is for dynamic rounds
     <div class="col-xs-6 col-sm-2">
         <label for="buffer">Buffer (hours)</label>
         <input class="form-control" id="buffer" name="buffer" type="tel" value="4">
@@ -132,6 +133,7 @@
             <strong>Invalid Duration!</strong>
         </div>
     </div>
+    -->
 </div>
 <div class="row">
     <div class="col-xs-12 col-sm-12">
@@ -431,7 +433,7 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var num = $('#total_discussions').val();
-        var buffer = $('#buffer').val();
+        //var buffer = $('#buffer').val();
         var action = "add_disc";
         console.log(total_discussions);
 
@@ -443,7 +445,7 @@ $(document).ready(function () {
                 total_discussions: total_discussions,
                 duration: duration,
                 course: course,
-                buffer: buffer,
+                //buffer: buffer,
                 section: section,
                 action: action,
                 total_discussions: num
