@@ -36,7 +36,7 @@ class Rounds(webapp2.RequestHandler):
         if not student:
             # Redirect home if not a student
             return self.redirect('/home')
-        #end
+        # end
 
         # Otherwise, log which student made the get
         utils.log('Student logged in: ' + str(student))
@@ -62,10 +62,11 @@ class Rounds(webapp2.RequestHandler):
                 else:
                     # Otherwise, we need to set our template values
                     self.render_template(student, section)
-                #end
-            #end
-        #end
-    #end get
+                    # end
+                    # end
+                    # end
+
+    # end get
 
     def post(self):
         """
@@ -76,7 +77,7 @@ class Rounds(webapp2.RequestHandler):
         if not student:
             # Redirect home if not a student
             return self.redirect('/home')
-        #end
+        # end
 
         # First, grab the section key from the page
         section_key = self.request.get('section')
@@ -101,14 +102,16 @@ class Rounds(webapp2.RequestHandler):
                         utils.error('Sorry! The round is not visible, please try again later.', handler=self)
                     else:
                         self.save_submission(student, current_round)
-                    #end
-                #end
+                        # end
+                        # end
             except:
-                utils.error('Sorry! There was some error submitting your response please try again later.', handler=self)
-                #end
-            #end
-        #end
-    #end post
+                utils.error('Sorry! There was some error submitting your response please try again later.',
+                            handler=self)
+                # end
+                # end
+                # end
+
+    # end post
 
     def render_template(self, student, section):
         # First, get the round number from the page
@@ -119,7 +122,7 @@ class Rounds(webapp2.RequestHandler):
             requested_round_number = int(current_round)
         else:
             requested_round_number = section.current_round
-        #end
+        # end
 
         # Grab the requested round
         requested_round = models.Round.get_by_id(requested_round_number, parent=section.key)
@@ -138,11 +141,11 @@ class Rounds(webapp2.RequestHandler):
             if deadline < current_time or requested_round_number < section.current_round:
                 # Set the template value if so
                 template_values['expired'] = True
-            #end
+            # end
             # Check if we're on the last round
             if requested_round.is_quiz and requested_round_number > 1:
                 template_values['last_round'] = True
-            #end
+            # end
             # Now, just grab all the other generic values we need directly
             template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
@@ -163,11 +166,12 @@ class Rounds(webapp2.RequestHandler):
                 self.discussion_view_template(student, section, requested_round_number, template_values)
                 # And set the right template
                 template = utils.jinja_env().get_template('students/discussion.html')
-            #end
+            # end
             # Now, render it.
             self.response.write(template.render(template_values))
-        #end
-    #end render_templates
+            # end
+
+    # end render_templates
 
     def quiz_view_template(self, student, rround, template_values):
         # Grab the response for this round by this student
@@ -178,12 +182,13 @@ class Rounds(webapp2.RequestHandler):
             template_values['option'] = response.option
             template_values['comment'] = response.comment
             template_values['summary'] = response.summary
-        #end
+        # end
         # Now set the remaining template values directly
         template_values['question'] = rround.quiz.question
         template_values['options'] = rround.quiz.options
         template_values['number'] = rround.quiz.options_total
-    #end quiz_view_template
+
+    # end quiz_view_template
 
     def discussion_view_template(self, student, section, round_number, template_values):
         # Init group and alias to "null" values
@@ -197,8 +202,8 @@ class Rounds(webapp2.RequestHandler):
                 group = _student.group
                 template_values['alias'] = _student.alias
                 break
-            #end
-        #end
+                # end
+        # end
         # Double check that the student was found in this section
         if group > 0 and template_values['alias']:
             # Now grab the actual group from the db
@@ -210,7 +215,7 @@ class Rounds(webapp2.RequestHandler):
                     previous_round = models.Round.get_by_id(1, parent=section.key)
                 else:
                     previous_round = models.Round.get_by_id(round_number - 1, parent=section.key)
-                #end
+                # end
                 # Now grab all the group comments for the previous round
                 comments = self.group_comments(group, section, previous_round)
                 # Set the template value for all the group comments
@@ -225,10 +230,11 @@ class Rounds(webapp2.RequestHandler):
                     template_values['comment'] = stu_response.comment
                     utils.log("{0}".format(str(stu_response.comment)))
                     template_values['response'] = ','.join(str(item) for item in stu_response.response)
-                #end
-            #end
-        #end
-    #end discussion_view_template
+                    # end
+                    # end
+                    # end
+
+    # end discussion_view_template
 
     def group_comments(self, group, section, previous_round):
         # Init an empty list for holding the comments
@@ -250,20 +256,23 @@ class Rounds(webapp2.RequestHandler):
                                    'opinion': response.response
                                    }
                         # If the response has an associated option
-                        if response.option != 'NA':
+                        if not response.option:
+                            comment['option'] = ''
+                        elif response.option != 'NA':
                             # Grab the option
                             opt = int(response.option[-1]) - 1
                             comment['option'] = previous_round.quiz.options[opt]
-                        #end
+                        # end
                         # And finally add the comment to the list
                         comments.append(comment)
                         break
-                    #end
-                #end
-            #end
-        #end
+                        # end
+                        # end
+                        # end
+        # end
         return comments
-    #end group_comments
+
+    # end group_comments
 
     def save_submission(self, student, current_round):
         # Create a new response object
@@ -276,11 +285,11 @@ class Rounds(webapp2.RequestHandler):
         # Now check whether we're on a lead-in or summary or discussion round
         if current_round.is_quiz:
             # If it is, double check that they selected an answer and commented
-            if not (option and comment):
+            if current_round.quiz.options_total > 0 and not (option and comment):
                 # Error if not
                 utils.error('Invalid Parameters: option or comment is null', handler=self)
                 return
-            #end
+            # end
             # if current_round.number != 1 and not summary:
             #     utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
             #     return
@@ -295,13 +304,13 @@ class Rounds(webapp2.RequestHandler):
                 # Error if not
                 utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
                 return
-            #end
+            # end
             # Now loop over the agree, etc. responses
             for i in range(1, len(res)):
                 # And save them in our response object for the db
                 response.response.append(res[i])
-            #end
-        #end
+                # end
+        # end
         # Grab the deadline and the current time
         deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
         current_time = datetime.datetime.now()
@@ -320,10 +329,11 @@ class Rounds(webapp2.RequestHandler):
                 'Sorry, the time for submission for this round has expired \
                    and your response was not saved, please wait for the next round.',
                 handler=self)
-        #end
-    #end save_submission
+            # end
+            # end save_submission
 
-#end class Rounds
+
+# end class Rounds
 
 
 class HomePage(webapp2.RequestHandler):
@@ -336,7 +346,7 @@ class HomePage(webapp2.RequestHandler):
         if not student:
             # Redirect home if not a student
             return self.redirect('/')
-        #end
+        # end
 
         # Create a url for the user to logout
         logout_url = users.create_logout_url(self.request.uri)
@@ -358,21 +368,21 @@ class HomePage(webapp2.RequestHandler):
                 if section_obj and course_obj:
                     # Grab the section key, section name, and course name
                     sec = {
-                            'key': section.urlsafe(),
-                            'name': section_obj.name,
-                            'course': course_obj.name
-                        }
+                        'key': section.urlsafe(),
+                        'name': section_obj.name,
+                        'course': course_obj.name
+                    }
                     # And throw it in the list
                     section_list.append(sec)
-                #end
-            #end
-        #end
+                    # end
+                    # end
+        # end
         # Add the list of sections the student is in to our template
         template_values['sections'] = section_list
         # Set the template html page
         template = utils.jinja_env().get_template('students/home.html')
         # And render it
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class HomePage
+# end class HomePage
