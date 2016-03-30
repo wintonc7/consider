@@ -113,7 +113,7 @@
         <input class="form-control" id="total_discussions" value="" name="total_discussions" type="tel">
         <div id="total_dis_error" class="alert alert-danger" role="alert">
             <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Invalid Duration!</strong>
+            <strong></strong>
         </div>
 	</div>
 	<div class="col-xs-6 col-sm-2">
@@ -121,7 +121,7 @@
         <input class="form-control" id="duration" name="duration" type="tel" value="24">
         <div id="duration_error" class="alert alert-danger" role="alert">
             <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Invalid Duration!</strong>
+            <strong></strong>
         </div>
 	</div>
     <!-- this is for dynamic rounds
@@ -485,6 +485,15 @@
 <!-- NEW LOGICS -->
 <script type="text/javascript">
 $(document).ready(function () {
+    $('.alert').hide();
+    $('.alert .close').click(function () {
+        $(this).closest('.alert').hide();
+    });
+
+    function validateNumberInput(val){
+        return parseInt(val);
+    }
+
     $('#add-rounds').click(function () {
         var total_discussions = $('#total_discussions').val();
         var duration = $('#duration').val();
@@ -493,7 +502,49 @@ $(document).ready(function () {
         var num = $('#total_discussions').val();
         //var buffer = $('#buffer').val();
         var action = "add_disc";
-        console.log(total_discussions);
+
+        //Logic to add new discussion round to UI
+        var $duration_error = $('#duration_error');
+        var $total_discussions_error = $('#total_dis_error');
+
+        var errors = {'duration': [], 'total_discussions': []};
+
+        //Validate number
+        if(!validateNumberInput(total_discussions)){
+            errors.total_discussions.push('Total Discussions must be a valid number');
+        }
+
+        //Populate validation errors
+        if(errors.total_discussions.length > 0){
+            var _error_text = "";
+            for(var i = 0; i < errors.total_discussions.length; i++){
+                _error_text += errors.total_discussions[i];
+                if(i-1 != errors.total_discussions.length)
+                    _error_text += '<br><br>';
+            }
+            $total_discussions_error.find('strong').html(_error_text);
+            $total_discussions_error.show();
+        }
+
+        //Validate number
+        if(!validateNumberInput(duration)){
+            errors.duration.push('Duration must be a valid number');
+        }
+
+        if(errors.duration.length > 0){
+            var _error_text = "";
+            for(var i = 0; i < errors.duration.length; i++){
+                _error_text += errors.duration[i];
+                if(i-1 != errors.duration.length)
+                    _error_text += '<br><br>';
+            }
+            $duration_error.find('strong').html(_error_text);
+            $duration_error.show();
+        }
+
+        if(errors.duration.length + errors.total_discussions.length > 0)
+            return false;
+
 
         //Add new rounds on the server side
         $.ajax({
@@ -765,14 +816,6 @@ $(document).ready(function () {
     {% if leadInQuestion %}
         lead_in_deadline = "{{leadInQuestion.deadline}}";
     {% endif %}
-
-    $('.alert').hide();
-    $('.alert .close').click(function () {
-        $(this).closest('.alert').hide();
-    });
-
-    //Logic to add new discussion round to UI
-    var $duration_error = $('#duration_error');
 
     // $('.remove-round').click(function () {
     //     var $parent = $(this).closest('tr');
