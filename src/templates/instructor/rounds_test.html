@@ -497,7 +497,6 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var num = $('#total_discussions').val();
-        var startBuffer = $('#startBuffer').val();
         var action = "add_disc";
         console.log(total_discussions);
 
@@ -509,7 +508,6 @@ $(document).ready(function () {
                 total_discussions: total_discussions,
                 duration: duration,
                 course: course,
-                startBuffer: startBuffer,
                 section: section,
                 action: action,
                 total_discussions: num
@@ -932,7 +930,7 @@ $(document).ready(function () {
     }
 
     function addLastQuestion() {
-        
+
         lastQuestion = true;
         $("#myModal").modal('show');
     }
@@ -966,9 +964,10 @@ $(document).ready(function () {
         event.preventDefault();
         // First we need to check that a date has been selected
         var $form = $(this),
-                question = $form.find("textarea").val(),
-                options = $form.find("select").val(),
-                url = $form.attr("action");
+            startBuffer = $form.find('#startBuffer').val();
+            question = $form.find("textarea").val(),
+            options = $form.find("select").val(),
+            url = $form.attr("action");
 
         console.log($form.find('#inputOptions1').html());
 
@@ -995,7 +994,8 @@ $(document).ready(function () {
                 section: "{{selectedSection}}", 
                 round: 1, 
                 roundType: 'leadin', 
-                action: 'add'
+                action: 'add',
+                startBuffer: startBuffer
             }, function (data) {
                 if (data.charAt(0) == 'E') {
                     bootbox.alert(data.substring(1));
