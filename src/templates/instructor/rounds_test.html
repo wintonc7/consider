@@ -232,29 +232,31 @@
 </button>
 {% endif %}
 
-{% if leadInQuestion.is_active %}
-<div class="row">
-    <div class="col-sm-12">
-        <h2>Round Activation Control</h2>
-        <hr>
-        <form action="/test-rounds" method="post">
-            <button type="button" id="start-rounds" class="btn btn-warning btn-lg">
-                <input type="hidden" name="action" value="start" />
-                <input type="hidden" name="course" value="{{selectedCourse}}" />    
-                <input type="hidden" name="section" value="{{selectedSection}}" />
-                <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-                Start Rounds
-            </button>
-        </form>
-    </div>
-</div>
-{% else %}
-    <div class="row">
-        <div class="col-sm-6 col-sm-offset-3">
-            <h1>This section has begun.</h1>
+{% if leadInQuestion %}
+    {% if not selectedSection.is_active %}
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>Round Activation Control</h2>
+                <hr>
+                <form action="/test-rounds" method="post">
+                    <button type="button" id="start-rounds" class="btn btn-warning btn-lg">
+                        <input type="hidden" name="action" value="start" />
+                        <input type="hidden" name="course" value="{{selectedCourse}}" />    
+                        <input type="hidden" name="section" value="{{selectedSection}}" />
+                        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                        Start Rounds
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
-{% endif%}
+    {% else %}
+        <div class="row">
+            <div class="col-sm-6 col-sm-offset-3">
+                <h1>This section has begun.</h1>
+            </div>
+        </div>
+    {% endif%}
+{% endif %}
 
 <!-- MODALS -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
