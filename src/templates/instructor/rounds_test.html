@@ -300,23 +300,22 @@
                         <label for="inputOptions1" class="col-sm-2 control-label">Options: </label>
                         <div class="col-sm-10">
                             <div class="theOptions">
-                                {% if leadInQuestion %}
-                                    <div class="lead-in-options">
+                                <div class="lead-in-options">
+                                    {% if leadInQuestion %}
                                         {% for option in leadInQuestion.quiz.options %}
                                             <input type="text" class="form-control" id="inputOptions{{loop.index}}" name="Options{{loop.index}}"
                                                    style="margin-bottom: 10px" value="{{option}}" required="true" onkeyup="showPreview()">
                                         {% endfor %}
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
+                                </div>
 
-                                {% if summaryQuestion %}
-                                    <div class="summary-options">
-                                    {% for option in summaryQuestion.quiz.options %}
-                                        <input type="text" class="form-control" id="inputOptions{{loop.index}}" name="Options{{loop.index}}"
-                                           style="margin-bottom: 10px" required="true" value="{{option}}" onkeyup="showPreview()">
-                                    {% endfor %}
-                                    </div>
-                                {% endif %}
+                                <div class="summary-options">
+                                    {% if summaryQuestion %}
+                                        {% for option in summaryQuestion.quiz.options %}
+                                            <input type="text" class="form-control" id="inputOptions{{loop.index}}" name="Options{{loop.index}}" style="margin-bottom: 10px" required="true" value="{{option}}" onkeyup="showPreview()">
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
                             </div>
 
                         <!--
