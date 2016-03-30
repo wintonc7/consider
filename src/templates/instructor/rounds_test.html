@@ -222,6 +222,7 @@
 </button>
 {% endif %}
 
+{% if leadInQuestion.is_active %}
 <div class="row">
     <div class="col-sm-12">
         <h2>Round Activation Control</h2>
@@ -237,6 +238,13 @@
         </form>
     </div>
 </div>
+{% else %}
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <h1>This section has begun.</h1>
+        </div>
+    </div>
+{% endif%}
 
 <!-- MODALS -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
