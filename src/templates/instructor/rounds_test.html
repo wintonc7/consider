@@ -644,10 +644,9 @@ $(document).ready(function () {
         var $form = $(this),
         description = $form.find("textarea").val(),
         url = $form.attr("action")
-        start_time = moment($form.find('#discussionStartTime').val()).format("YYYY-MM-DD[T]HH:MM"),
-        deadline = moment($form.find('#discussionEndTime').val()).format("YYYY-MM-DD[T]HH:MM"),
+        start_time = moment($form.find('#discussionStartTime').val()).format("YYYY-MM-DD[T]HH:mm"),
+        deadline = moment($form.find('#discussionEndTime').val()).format("YYYY-MM-DD[T]HH:mm"),
         round = $form.find('[name="round_id"]').val();
-        console.log("trying to edit round: " + deadline);
 
         // do the POST and get the callback
         $.post(url, {
@@ -821,7 +820,7 @@ $(document).ready(function () {
     //      */
     //     var start_times = [];
     //     for(var i = 0; i < dics_num; i++) {
-    //         start_times.push(moment().add(duration * i, 'hours').format("YYYY-MM-DD[T]HH:MM"))
+    //         start_times.push(moment().add(duration * i, 'hours').format("YYYY-MM-DD[T]HH:mm"))
     //     }
     //     /* And stupidly I don't know how to pass an array if not in JSON,
     //      * which is how they did it originally
@@ -970,7 +969,7 @@ $(document).ready(function () {
         }
         optionVals = JSON.stringify(optionVals);
 
-        var time_val = moment($("#endTime").val()).format("YYYY-MM-DD[T]HH:MM");
+        var time_val = moment($("#endTime").val()).format("YYYY-MM-DD[T]HH:mm");
 
         console.log(question + ' ' + options + ' ' + time_val + ' ' + optionVals);
 
@@ -1033,7 +1032,7 @@ $(document).ready(function () {
 
         //collect form elements
         var $form = $(this),
-        time_val = moment($("#discussionEndTime").val()).format("YYYY-MM-DD[T]HH:MM"),
+        time_val = moment($("#discussionEndTime").val()).format("YYYY-MM-DD[T]HH:mm"),
                 description = $form.find("textarea").val(),
                 anonymity = $('input[name="anonymousDiscussion"]:checked').val();
                 url = $form.attr("action");
