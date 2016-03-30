@@ -511,8 +511,8 @@ $(document).ready(function () {
         var id = self.closest('tr').attr('id').split('_')[1];
 
         //populate fields with this rounds data
-        modal.find('#discussionStartTime').val(moment(start).format("MM/DD/YYYY HH:MM A"));
-        modal.find('#discussionEndTime').val(moment(deadline).format("MM/DD/YYYY HH:MM A"));
+        modal.find('#discussionStartTime').val(moment(start).format("MM/DD/YYYY HH:MM"));
+        modal.find('#discussionEndTime').val(moment(deadline).format("MM/DD/YYYY HH:MM"));
         modal.find('#inputEditDiscussionDescription').val(description);
         modal.find('[name="round_id"]').val(id);
 
@@ -533,7 +533,7 @@ $(document).ready(function () {
         var inputOptions = modal.find('#inputOptions');
         inputOptions.val(options_ul.find('li').length);
 
-        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY HH:MM A"));
+        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY HH:MM"));
         modal.find('#inputQuestion').val(question);
 
         modal.modal('show');
