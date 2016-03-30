@@ -145,7 +145,8 @@ class Round(ndb.Model):
     #NEW ATTRIBUTES FOR DYNAMIC ROUNDS: PART 1
     starttime = ndb.StringProperty(required=True, indexed=False)
     """ String. Represents the start of the round in the format %Y-%m-%dT%H:%M """
-
+    buffer_time = ndb.IntegerProperty(default=0, indexed=False)
+    """ Integer. Represents the buffer time between rounds."""
 
 class Response(ndb.Model):
     """

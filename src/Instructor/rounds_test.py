@@ -123,15 +123,13 @@ class RoundsTest(webapp2.RequestHandler):
                 # Only the lead-in or summary are listed as an 'add' action
                 self.add_leadin_summary(instructor)
             elif action == 'add_disc':
-                # Now, let's grab the number of rounds and duration from the
+                # Now, let's grab the number of rounds and duration from page
                 num_of_rounds = int(self.request.get('total_discussions'))
                 duration_of_round = int(self.request.get('duration'))
-
-                # We'll use this when we start implementing the buffer logics
-                rounds_buffer = 0 #int(self.request.get('buffer'))
-                
+                # And grab the buffer time between rounds
+                buffer_bw_rounds = 0 #int(self.request.get('buffer_time'))
                 # Send the number and duration to the add rounds function
-                self.add_rounds(num_of_rounds, duration_of_round, rounds_buffer, instructor)
+                self.add_rounds(num_of_rounds, duration_of_round, instructor, buffer_bw_rounds)
             elif action == 'delete':
                 # Send the id of the round to be deleted
                 round_id = int(self.request.get('round_id'))
@@ -221,6 +219,14 @@ class RoundsTest(webapp2.RequestHandler):
         round_obj.deadline = end_time
         round_obj.number = round_num
         round_obj.is_quiz = True
+        # Try and grab the buffer time from the page
+        start_buffer = self.request.get('startBuffer')
+        print("\n\n\n\n" + str(start_buffer) + "\n\n\n\n")
+        # Check if it exists (i.e. only on the lead-in round)
+        if start_buffer:
+            # And set the property on the object if so
+            round_obj.buffer_time = int(start_buffer)
+        #end
 
         # Now grab all the quiz attributes from the page
         question = self.request.get('question')
@@ -267,7 +273,7 @@ class RoundsTest(webapp2.RequestHandler):
         #end
     #end add_lead_in
 
-    def add_rounds(self, num_of_rounds, rounds_buffer, duration, instructor):
+    def add_rounds(self, num_of_rounds, duration, instructor, buffer_bw_rounds):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
@@ -296,7 +302,7 @@ class RoundsTest(webapp2.RequestHandler):
         #end
 
         # Now create all the new rounds
-        new_rounds = self.create_new_rounds(section, rounds, num_of_rounds, rounds_buffer, duration)
+        new_rounds = self.create_new_rounds(section, rounds, num_of_rounds, duration, buffer_bw_rounds)
 
         # And update the summary round
         self.update_summary(summary, new_rounds)
@@ -309,13 +315,15 @@ class RoundsTest(webapp2.RequestHandler):
         utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='S', handler=self)
     #end add_rounds
 
-    def create_new_rounds(self, section, rounds, num_of_rounds, duration, rounds_buffer):
+    def create_new_rounds(self, section, rounds, num_of_rounds, duration, buffer_bw_rounds):
         # Now grab the current last round number
         current_last_round = rounds[-1].number
         # We need the end time of the last round currently in this section
         last_time = rounds[-1].deadline
+        # And grab the start buffer from the previous round
+        start_buffer = rounds[-1].buffer_time
         # Now we need to compute new start and end times for the new rounds
-        start_times, end_times = self.get_new_times(last_time, num_of_rounds, duration, 0)
+        start_times, end_times = self.get_new_times(last_time, num_of_rounds, duration, buffer_bw_rounds, start_buffer)
         # Let's keep a list of the newly added rounds
         new_rounds = list()
         # Now let's just loop over the number of rounds
@@ -337,13 +345,11 @@ class RoundsTest(webapp2.RequestHandler):
         return new_rounds
     #end create_new_rounds
 
-    def get_new_times(self, start, num, duration, delay):
+    def get_new_times(self, start, num, duration, delay, start_buffer):
         # First, we need to get the start time into something we can work with
         start = utils.convert_time(start)
-        # TODO: For now, let's just add 24 hours to the start time of the
-        # discussion rounds so that there's time for instructors to create
-        # groups.  Later, we will need to somehow offer a UI element to set this
-        start += datetime.timedelta(hours = 24)
+        # Grab the 
+        start += datetime.timedelta(hours = start_buffer)
 
         # Ok, now we need to create our new start and end times list
         start_times = list()

@@ -961,6 +961,7 @@ $(document).ready(function () {
         event.preventDefault();
         // First we need to check that a date has been selected
         var $form = $(this),
+                startBuffer = $form.find('#startBuffer').val(),
                 question = $form.find("textarea").val(),
                 options = $form.find("select").val(),
                 url = $form.attr("action");
@@ -990,7 +991,8 @@ $(document).ready(function () {
                 section: "{{selectedSection}}", 
                 round: 1, 
                 roundType: 'leadin', 
-                action: 'add'
+                action: 'add',
+                startBuffer: startBuffer
             }, function (data) {
                 if (data.charAt(0) == 'E') {
                     bootbox.alert(data.substring(1));
