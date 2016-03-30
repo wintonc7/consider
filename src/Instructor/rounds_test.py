@@ -169,7 +169,7 @@ class RoundsTest(webapp2.RequestHandler):
         # Now grab all of the rounds
         rounds = models.Round.query(ancestor=section.key).fetch()
         # And switch on the type to create our start time
-        if len(rounds) > 1 and round_obj.description == 'leadin':
+        if round_obj.description == 'leadin':
             self.add_lead_in(round_obj, rounds)
         else:
             # If not a lead-in question, we know it's a summary
@@ -239,7 +239,7 @@ class RoundsTest(webapp2.RequestHandler):
         epoch = datetime.datetime(1970,1,1)
         round_obj.starttime = utils.convert_time(epoch)
         # Now we need to check if there are more rounds
-        if rounds:
+        if rounds and len(rounds) > 1:
             # Discussion directly after the lead-in will always be index 1
             # If new lead-in deadline conflicts, shift rounds
             if utils.convert_time(round_obj.deadline) >= utils.convert_time(rounds[1].starttime):
