@@ -22,7 +22,7 @@ from src import utils
 
 
 def str_to_date(date_string, format="%Y-%m-%dT%H:%M"):
-    return datetime.datetime.strptime(date_string, format)
+    return utils.convert_time(date_string)
 
 
 def since_epoch(date):
