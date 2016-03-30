@@ -276,9 +276,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="startTime" class="col-sm-2 control-label">Buffer</label>
+                        <label for="startBuffer" class="col-sm-2 control-label">Buffer</label>
                         <div class="col-sm-10">
-                            <input id="startTime" type="tel" class="form-control" name="startTime" required="true" />
+                            <input id="startBuffer" type="tel" class="form-control" name="startBuffer" required="true" />
                         </div>
                     </div>
                     <div class="form-group">
@@ -497,7 +497,7 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var num = $('#total_discussions').val();
-        var buffer = $('#buffer').val();
+        var startBuffer = $('#startBuffer').val();
         var action = "add_disc";
         console.log(total_discussions);
 
@@ -509,7 +509,7 @@ $(document).ready(function () {
                 total_discussions: total_discussions,
                 duration: duration,
                 course: course,
-                buffer: buffer,
+                startBuffer: startBuffer,
                 section: section,
                 action: action,
                 total_discussions: num
