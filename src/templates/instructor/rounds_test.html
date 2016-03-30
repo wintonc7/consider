@@ -531,8 +531,8 @@ $(document).ready(function () {
         var id = self.closest('tr').attr('id').split('_')[1];
 
         //populate fields with this rounds data
-        modal.find('#discussionStartTime').val(moment(start).format("MM/DD/YYYY HH:mm"));
-        modal.find('#discussionEndTime').val(moment(deadline).format("MM/DD/YYYY HH:mm"));
+        modal.find('#discussionStartTime').val(moment(start).format("MM/DD/YYYY hh:mm A"));
+        modal.find('#discussionEndTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
 
         modal.find('#inputEditDiscussionDescription').val(description);
         modal.find('[name="round_id"]').val(id);
@@ -556,7 +556,7 @@ $(document).ready(function () {
         var inputOptions = modal.find('#inputOptions');
         inputOptions.val(options_ul.find('li').length);
 
-        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY HH:mm"));
+        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
         modal.find('#inputQuestion').val(question);
 
         //hide the summary and show the lead in
@@ -582,7 +582,7 @@ $(document).ready(function () {
         var inputOptions = modal.find('#inputOptions');
         inputOptions.val(options_ul.find('li').length);
 
-        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY HH:mm"));
+        modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
         modal.find('#inputQuestion').val(question);
 
         //hide the summary and show the lead in
