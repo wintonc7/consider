@@ -169,7 +169,7 @@ class RoundsTest(webapp2.RequestHandler):
         # Now grab all of the rounds
         rounds = models.Round.query(ancestor=section.key).fetch()
         # And switch on the type to create our start time
-        if round_obj.description == 'leadin':
+        if len(rounds) > 1 and round_obj.description == 'leadin':
             self.add_lead_in(round_obj, rounds)
         else:
             # If not a lead-in question, we know it's a summary
