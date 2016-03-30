@@ -275,6 +275,12 @@
                             <input id="endTime" class="form-control dateTimePicker" name="endTime" required="true" />
                         </div>
                     </div>
+                    <div id="buffer_entry" class="form-group">
+                        <label for="startBuffer" class="col-sm-2 control-label">Buffer</label>
+                        <div class="col-sm-10">
+                            <input id="startBuffer" type="tel" class="form-control" name="startBuffer" required="true" />
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="inputQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
                         <div class="col-sm-10">
@@ -500,7 +506,6 @@ $(document).ready(function () {
         var course = "{{selectedCourse}}";
         var section = "{{selectedSection}}";
         var num = $('#total_discussions').val();
-        //var buffer = $('#buffer').val();
         var action = "add_disc";
 
         //Logic to add new discussion round to UI
@@ -554,7 +559,6 @@ $(document).ready(function () {
                 total_discussions: total_discussions,
                 duration: duration,
                 course: course,
-                //buffer: buffer,
                 section: section,
                 action: action,
                 total_discussions: num
@@ -593,11 +597,13 @@ $(document).ready(function () {
     });
 
     $('#edit-leadin').click(function () {
+        $("#buffer_entry").show();
         lastQuestion = false;
         var modal = $('#myModal');
         var table = $('#leadin-question-table');
         var tr = $(this).find('tbody > tr');
         var optionsContainer = modal.find('.theOptions');
+
 
         var deadline = table.find('td:nth-child(2)').data('deadline');
         var question = table.find('.question').text();
@@ -618,6 +624,7 @@ $(document).ready(function () {
     });
 
     $('#edit-summary').click(function () {
+        $("#buffer_entry").hide();
         lastQuestion = true;
         var modal = $('#myModal');
         var table = $('#summary-question-table');
@@ -960,11 +967,13 @@ $(document).ready(function () {
     });
 
     function addQuestion() {
+        $("#buffer_entry").show();
         lastQuestion = false;
         $("#myModal").modal('show');
     }
 
     function addLastQuestion() {
+
         lastQuestion = true;
         $("#myModal").modal('show');
     }
@@ -998,9 +1007,10 @@ $(document).ready(function () {
         event.preventDefault();
         // First we need to check that a date has been selected
         var $form = $(this),
-                question = $form.find("textarea").val(),
-                options = $form.find("select").val(),
-                url = $form.attr("action");
+            startBuffer = $form.find('#startBuffer').val(),
+            question = $form.find("textarea").val(),
+            options = $form.find("select").val(),
+            url = $form.attr("action");
 
         console.log($form.find('#inputOptions1').html());
 
@@ -1027,7 +1037,8 @@ $(document).ready(function () {
                 section: "{{selectedSection}}", 
                 round: 1, 
                 roundType: 'leadin', 
-                action: 'add'
+                action: 'add',
+                startBuffer: startBuffer
             }, function (data) {
                 if (data.charAt(0) == 'E') {
                     bootbox.alert(data.substring(1));
