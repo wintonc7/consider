@@ -305,7 +305,7 @@ class RoundsTest(webapp2.RequestHandler):
         utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='S', handler=self)
     #end add_rounds
 
-    def create_new_rounds(self, section, rounds, num_of_rounds, rounds_buffer, duration):
+    def create_new_rounds(self, section, rounds, num_of_rounds, duration, rounds_buffer):
         # Now grab the current last round number
         current_last_round = rounds[-1].number
         # We need the end time of the last round currently in this section
