@@ -3,7 +3,12 @@
 
 {% block content %}
 <h1 class="page-header">Rounds</h1>
-<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+
+<div class="card">
+<div class="card-title">
+    <h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+</div>
+<div class="card-body">
 <div class="row">
     <div class="col-md-6">
         <h4>Course</h4>
@@ -34,6 +39,7 @@
         {% endif %}
     </div>
 </div>
+
 <br>
 <h4 class="sub-header">Lead-in Question</h4>
 {% if selectedSection %}
@@ -76,11 +82,19 @@
         </button>
     {% endif %}
 {% else %}
+
 <p>Select a section to continue.</p>
 {% endif %}
+    </div>
+</div>
 
 <!-- THIS IS THE START OF THE DISCUSSIONS BLOCK -->
-<h4 class="sub-header">Discussions:</h4>
+<div class="card">
+
+<div class="card-title">
+    <h4>Discussions:</h4>
+</div>
+<div class="card-body">
 <div class="row">
 	<div class="col-xs-6 col-sm-2">
 		<label for="total_disc">Discussions</label>
@@ -159,8 +173,16 @@
     </table>
 </div>
 <!-- END OF THE DISCUSSION BLOCK -->
+</div>
+</div>
 
-<h4 class="sub-header">Summary Question:</h4>
+
+<!-- START OF SUMMARY QUESTION BLOCK-->
+<div class="card">
+<div class="card-title">
+    <h4>Summary Question:</h4>    
+</div>
+<div class="card-body">
 
 {% if summaryQuestion %}
 <button type="button" class="btn btn-default" id="edit-summary" aria-label="Edit Question">
@@ -204,8 +226,14 @@
 </button>
 {% endif %}
 
+</div>
+</div>
+
+
 {% if leadInQuestion %}
     {% if selectedSectionObject.current_round == 0 %}
+    <div class="card">
+    <div class="card-body">
         <div class="row">
             <div class="col-sm-12">
                 <h2>Round Activation Control</h2>
@@ -230,6 +258,9 @@
         </div>
     {% endif%}
 {% endif %}
+</div>
+</div>
+<!-- END OF SUMMARY BLOCK-->
 
 {# 
 # Modals 
