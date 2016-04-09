@@ -39,9 +39,15 @@
         {% endif %}
     </div>
 </div>
+</div>
+</div>
 
-<br>
-<h4 class="sub-header">Lead-in Question</h4>
+
+<div class="card">
+<div class="card-title">
+    <h4>Lead-in Question</h4>
+</div>
+<div class="card-body"> 
 {% if selectedSection %}
     {% if leadInQuestion %}
         {% if leadInQuestion.deadline|str_to_date|since_epoch > now|since_epoch %}
