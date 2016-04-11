@@ -67,7 +67,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr {% if selectedSectionObject.current_round == 1 %} class="row-highlight" {% endif %} >
                         <td>{{leadInQuestion.number}}</td>
                         <td data-deadline="{{leadInQuestion.deadline}}">{{leadInQuestion.deadline}}</td>
                         <td class="question md">{{leadInQuestion.quiz.question}}</td>
@@ -157,7 +157,7 @@
         <tbody>
         {% if discussionRounds %}
 	        {% for obj in discussionRounds %}
-	        <tr id="round_{{obj.number}}">
+	        <tr id="round_{{obj.number}}" {% if selectedSectionObject.current_round == obj.number %} class="row-highlight" {% endif %} >
                 <td>
                     <button data-section="{{selectedSection}}" data-course="{{selectedCourse}}" data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Remove Discussion" {% if obj.starttime|str_to_date|since_epoch < now|since_epoch %}disabled{% endif %}>
                         <span class="glyphicon glyphicon-remove"></span>

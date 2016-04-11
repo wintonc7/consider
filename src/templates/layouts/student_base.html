@@ -10,9 +10,9 @@
 {{ super() }}
 {% for i in range(0,rounds) %}
 {%- if curr_page == i+1 -%}
-<li class="active">
+<li class="nav-active">
 {%- else -%}
-<li>
+<li class="nav-hover">
 {%- endif -%}
     <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}">Round {{i+1}}</a>
 </li>

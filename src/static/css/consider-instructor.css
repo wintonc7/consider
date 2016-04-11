@@ -3,22 +3,18 @@ body {
 	font-family: 'Lato', sans-serif;
 }
 
-input {
+input, textarea, select {
 	border-radius: 0px !important;
 	background: rgba(200,200,255,0.5) !important;
 
-	background: rgba(255,255,255,1);
-	background: -moz-radial-gradient(center, ellipse cover, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%) !important;
-	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(246,246,246,1)), color-stop(100%, rgba(237,237,237,1))) !important;
-	background: -webkit-radial-gradient(center, ellipse cover, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%) !important;
-	background: -o-radial-gradient(center, ellipse cover, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%) !important;
-	background: -ms-radial-gradient(center, ellipse cover, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%) !important;
-	background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%) !important;
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed', GradientType=1 ) !important;
-}
-
-select {
-	border-radius: 0px !important;
+	background: rgba(255,255,255,1) !important;
+background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(255,255,255,1)), color-stop(100%, rgba(247,247,247,1))) !important;
+background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f7f7f7', GradientType=0 ) !important;
 }
 
 .sidebar {
@@ -42,7 +38,6 @@ select {
   border-radius: 0px !important;
 }
 
-
 .sidebar-link a{
 	color: gray !important;
 	font-weight: bold;
@@ -50,7 +45,7 @@ select {
 
 .sidebar-link a:hover {
 	color: gray !important;
-	background-color: rgba(50,34,213,0.2) !important;
+	background-color: rgba(251,0,13,0.25) !important;
 }
 
 .sidebar-link a:visited {
@@ -64,12 +59,6 @@ select {
 h1 {
 	color: #9E0008 !important;
 }
-
-p {
-	color: #803815;
-}
-
-
 
 .card {
 	-webkit-box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
@@ -128,4 +117,20 @@ a:hover {
 	-moz-box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
 	box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
 
+}
+
+.row-highlight {
+	background-color: rgba(167,240,44,0.15) !important;
+}
+
+.modal-content {
+	border-radius: 3px !important;
+}
+
+.nav-hover:hover {
+	background-color: black !important;
+}
+
+.nav-active {
+	background-color: rgba(251,0,13,0.6) !important;
 }
