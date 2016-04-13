@@ -75,8 +75,6 @@ h1 {
 	padding: 0px !important;
 	margin: 20px 0px !important;
 
-	overflow: auto;
-
 
 }
 
@@ -91,12 +89,14 @@ h1 {
 	padding: 10px 15px !important;
 }
 
+
 a:link, a:visited {
    color: #2A4D6E;
    
    text-decoration: none;
    target-new: none;
 }
+
 
 a:hover {
    color: #267257 !important;

@@ -7,9 +7,12 @@
 {% endblock head %}
 
 {% block content %}
-<div class="jumbotron">
+<div class="container">
+<div class="card">
+    <div class="card-title">
     <h2>Welcome {{nickname}}!</h2>
-
+    </div>
+    <div class="card-body">
     <h4 class="form-signin-heading">Select a section to continue</h4>
 
     {% if sections %}
@@ -23,6 +26,8 @@
     {% else %}
     <p class="well">Sorry! none of the sections in which you are enrolled are active right now.</p>
     {% endif %}
+    </div>
+</div>
 </div>
 {% endblock %}
 
