@@ -3,7 +3,7 @@ rounds_test.py
 ~~~~~~~~~~~~~~~~~
 Implements the APIs for Instructor control of adding discussion rounds.
 
-- Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
+- Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor, Dustin Stanley
 - Last Modified: March 07, 2016
 
 --------------------
@@ -16,6 +16,7 @@ import jinja2
 
 import webapp2
 from google.appengine.api import users
+from google.appengine.api import mail
 
 from src import models
 from src import utils
@@ -141,6 +142,13 @@ class RoundsTest(webapp2.RequestHandler):
             elif action == 'start':
                 # Simply kick off the first round
                 self.start_rounds(instructor)
+                # Send Mail to Students
+
+                mail.send_mail(sender=instructor.email,
+                    to="dstanley27@gmail.com",
+                    subject="Consider Assignment",
+                    body="The rounds have started")
+
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)
@@ -285,7 +293,7 @@ class RoundsTest(webapp2.RequestHandler):
             # And redirect
             return self.redirect('/')
         #end
-        
+
         # We'll need this later on when doing the buffer stuff
         # if rounds_buffer < 0
         #     # Make sure the buffer value is positive
@@ -348,7 +356,7 @@ class RoundsTest(webapp2.RequestHandler):
     def get_new_times(self, start, num, duration, delay, start_buffer):
         # First, we need to get the start time into something we can work with
         start = utils.convert_time(start)
-        # Grab the 
+        # Grab the current time
         start += datetime.timedelta(hours = start_buffer)
 
         # Ok, now we need to create our new start and end times list
