@@ -143,9 +143,8 @@ class RoundsTest(webapp2.RequestHandler):
                 # Simply kick off the first round
                 self.start_rounds(instructor)
                 # Send Mail to Students
-
                 mail.send_mail(sender=instructor.email,
-                    to="dstanley27@gmail.com",
+                    to="dev.dstanley@gmail.com",
                     subject="Consider Assignment",
                     body="The rounds have started")
 
