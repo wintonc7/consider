@@ -59,7 +59,6 @@ class RoundsTest(webapp2.RequestHandler):
             # If so, grab that section from the template values
             current_section = template_values['selectedSectionObject']
             # Set the current active round
-            # template_values['activeRound'] = utils.get_current_round(current_section)
             template_values['activeRound'] = current_section.current_round
             # Send the current time stamp back to the view to do comparisons with
             template_values['now'] = datetime.datetime.now()
@@ -142,12 +141,10 @@ class RoundsTest(webapp2.RequestHandler):
             elif action == 'start':
                 # Simply kick off the first round
                 self.start_rounds(instructor)
-                # Send Mail to Students
-                mail.send_mail(sender=instructor.email,
-                    to="dev.dstanley@gmail.com",
-                    subject="Consider Assignment",
-                    body="The rounds have started")
-
+                # Send mail to students
+                # Grab section object and instructor email to pass to email function
+                email_course, email_section = utils.get_course_and_section_objs(self.request, instructor)
+                utils.send_mail(instructor.email, email_section)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)

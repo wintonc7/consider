@@ -3,7 +3,7 @@ utils.py
 ~~~~~~~~~~~~~~~~~
 Defines the functions and constants which are accessed by different modules of this application.
 
-- Author(s): Rohit Kapoor, Swaroop Joshi
+- Author(s): Rohit Kapoor, Swaroop Joshi, Dustin Stanley
 - Last Modified: Jan. 13, 2016
 
 --------------------
@@ -13,6 +13,7 @@ Defines the functions and constants which are accessed by different modules of t
 import logging
 
 from google.appengine.api import users
+from google.appengine.api import mail
 
 import models
 
@@ -338,6 +339,27 @@ def convert_time(old_time):
     #end
     return new_time
 #end
+
+def send_mail(senders_email, section):
+    """
+    Given the senders email(instructor) and the section object,
+    send an email to all students in the section from the instructor.
+
+    Args:
+        senders_email:
+          The instructor currently logged in.
+        section (object):
+          The section to send the emails to.
+    """
+    message = "The rounds have started"
+
+    recipient_emails = [s.email for s in section.students]
+    for email in recipient_emails:
+        mail.send_mail(sender=senders_email,
+                        to=email,
+                        subject="Consider Assignment",
+                        body=message)
+#end 
 
 
 # Simple class to serialize Round objects
