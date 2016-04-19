@@ -351,13 +351,18 @@ def send_mail(senders_email, section):
         section (object):
           The section to send the emails to.
     """
-    message = "The rounds have started"
 
+    # Grab all the student emails from the section object
     recipient_emails = [s.email for s in section.students]
+    # Message to be sent to the students via email
+    message = "The rounds have started"
+    # Subject of the email
+    subject = "Consider Assignment"
+    # Send the email to all the students
     for email in recipient_emails:
         mail.send_mail(sender=senders_email,
                         to=email,
-                        subject="Consider Assignment",
+                        subject=subject,
                         body=message)
 #end 
 
