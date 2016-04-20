@@ -347,6 +347,8 @@ $(document).ready(function() {
         $.post('/rounds', {
             course: course,
             section: section,
+            message: message,
+            subject: subject,
             action: 'start'
         }, function(data) {
             if (data.charAt(0) == 'E') {
