@@ -338,7 +338,7 @@ $(document).ready(function() {
         });
     });
 
-    $('#startRoundsForm').submit(function(e) {
+    $('#editEmailForm').submit(function(e) {
         e.preventDefault();
 
         var course = $(this).find('[name="course"]').val(),
