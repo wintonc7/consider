@@ -244,16 +244,12 @@
             <div class="col-sm-12">
                 <h2>Round Activation Control</h2>
                 <hr>
-                <form action="/rounds" method="post" id="startRoundsForm">
-                    <input type="hidden" name="action" value="start" />
-                    <input type="hidden" name="course" value="{{selectedCourse}}" />    
-                    <input type="hidden" name="section" value="{{selectedSection}}" />
 
-                    <button type="submit" class="btn btn-warning btn-lg">
-                        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-                        Start Rounds
-                    </button>
-                </form>
+                <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#editEmailModal">
+                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                    Start Rounds
+                </button>
+
             </div>
         </div>
     {% else %}
@@ -458,6 +454,50 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="submitEditDiscussion">Update Round</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{# Edit Email Modal #}
+<div class="modal fade" id="editEmailModal" tabindex="-1" role="dialog" aria-labelledby="editEmailModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editEmailModalLabel">Notification Email Message</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="editEmailForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <input type="hidden" name="course" value="{{selectedCourse}}" />
+                    <input type="hidden" name="section" value="{{selectedSection}}" />
+                    <input type="hidden" name="action" value="start" />
+                    
+                    <div class="form-group">
+                        <label for="subject" class="col-sm-2 control-label">Subject</label>
+                        <div class="col-sm-10">
+                            <input id="subject" class="form-control" name="subject" required="true" value="CONSIDER rounds have begun" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message" class="col-sm-2 control-label">Message</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputEditEmailMessage"
+                                      name="message"
+                                      required>The lead-in round for CONSIDER has begun. Please visit the following link to submit your answer: http://go.osu.edu/consider</textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitEmail">Activate & Send</button>
             </div>
         </div>
     </div>

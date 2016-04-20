@@ -31,6 +31,10 @@ $(document).ready(function() {
         $("#editDiscussionForm").find('[type="submit"]').trigger('click');
     });
 
+    $('#submitEmail').click(function() {
+        $("#editEmailForm").find('[type="submit"]').trigger('click');
+    });
+
     $('.close').click(function() {
         $(this).parent().hide();
     });
