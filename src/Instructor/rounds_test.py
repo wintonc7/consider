@@ -144,7 +144,11 @@ class RoundsTest(webapp2.RequestHandler):
                 # Send mail to students
                 # Grab section object and instructor email to pass to email function
                 email_course, email_section = utils.get_course_and_section_objs(self.request, instructor)
-                utils.send_mail(instructor.email, email_section)
+                # Grab the message of the email
+                message = self.request.get('message')
+                # Grab the subject of the email
+                subject = self.request.get('subject')
+                utils.send_mail(instructor.email, email_section, subject, message)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)

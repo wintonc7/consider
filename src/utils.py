@@ -340,7 +340,7 @@ def convert_time(old_time):
     return new_time
 #end
 
-def send_mail(senders_email, section):
+def send_mail(senders_email, section, subject, message):
     """
     Given the senders email(instructor) and the section object,
     send an email to all students in the section from the instructor.
@@ -352,18 +352,24 @@ def send_mail(senders_email, section):
           The section to send the emails to.
     """
 
+    # Default messages
+    email_subject = "Consider Assignment"
+    email_message = "The rounds have started"
+
     # Grab all the student emails from the section object
     recipient_emails = [s.email for s in section.students]
-    # Message to be sent to the students via email
-    message = "The rounds have started"
     # Subject of the email
-    subject = "Consider Assignment"
+    if subject:
+        email_subject = subject
+    # Message to be sent to the students via email
+    if message:
+        email_message = message
     # Send the email to all the students
     for email in recipient_emails:
         mail.send_mail(sender=senders_email,
                         to=email,
-                        subject=subject,
-                        body=message)
+                        subject=email_subject,
+                        body=email_message)
 #end 
 
 
