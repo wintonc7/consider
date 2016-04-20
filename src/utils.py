@@ -347,9 +347,13 @@ def send_mail(senders_email, section, subject, message):
 
     Args:
         senders_email:
-          The instructor currently logged in.
+            The instructor currently logged in.
         section (object):
-          The section to send the emails to.
+            The section to send the emails to.
+        subject (string):
+            The subject line of the email.
+        message (string):
+            The body of the email.
     """
 
     # Default messages
@@ -364,7 +368,7 @@ def send_mail(senders_email, section, subject, message):
     # Message to be sent to the students via email
     if message:
         email_message = message
-    # Send the email to all the students
+    # Send the email to the list of email addresses
     for email in recipient_emails:
         mail.send_mail(sender=senders_email,
                         to=email,
