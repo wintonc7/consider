@@ -342,7 +342,10 @@ $(document).ready(function() {
         e.preventDefault();
 
         var course = $(this).find('[name="course"]').val(),
-            section = $(this).find('[name="section"]').val();
+            section = $(this).find('[name="section"]').val(),
+            subject = $(this).find('[name="subject"]').val(),
+            message = $(this).find('[name="message"]').val();
+
 
         $.post('/rounds', {
             course: course,
