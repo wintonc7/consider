@@ -69,4 +69,6 @@ If you are pushing update for CONSIDER you may skip these steps.
 
 8. Visit `http://your-webapp-ID.appspot.com` to see if your code has updated
 
-**NOTE:** If the server does not seem to be running your code, make sure the server is running the correct version (this is defined in your **app.yaml** in the root directory).  You can visit `https://console.cloud.google.com/appengine/versions?project=`**`your-webapp-ID`**`, and verify the correct version is being served.
+**NOTE:** If the server does not seem to be running your code, make sure the server is running the correct version (this is defined in your **app.yaml** in the root directory).  You can visit the following URL to gverify the correct version is being served.
+
+`https://console.cloud.google.com/appengine/versions?project=`**`your-webapp-ID`**
