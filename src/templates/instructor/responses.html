@@ -81,8 +81,8 @@
                 <tr>
                     <td>{{loop.index}}</td>
                     <td>{{response.student}}</td>
-                    <td>{{response.option}}</td>
-                    <td>{{response.comment}}</td>
+                    <td class="md">{{response.option}}</td>
+                    <td class="md">{{response.comment}}</td>
                     <td>
                         {%- for resp in response.response -%}
                             S{{loop.index}}: {{resp}}
@@ -90,7 +90,7 @@
                         NA
                         {%- endfor -%}
                     </td>
-                    <td>{{response.summary}}</td>
+                    <td class="md">{{response.summary}}</td>
                 </tr>
                 {% else %}
                 No responses submitted yet.
@@ -121,4 +121,6 @@
         location.href = "/responses?course={{selectedCourse}}&section=" + this.value;
     });
 </script>
+<script src="/js/showdown.min.js"></script> 
+<script src="/js/md-html.js"></script>
 {% endblock %}
