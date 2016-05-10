@@ -3,32 +3,33 @@
 {% block head %}
 {{ super() }}
 <link href="/css/admin.css" rel="stylesheet">
+<link href="/css/overrides.css" rel="stylesheet">
 {% endblock head %}
 
 {% set show_sidenavbar = True %}
 
 {% block topnavbar %}
-<li><a href="/home">Courses</a></li>
-<li><a href="/students">Students</a></li>
-<li><a href="/rounds">Rounds</a></li>
-<li><a href="/groups">Groups</a></li>
-<li><a href="/responses">Responses</a></li>
-<li><a href="/group_responses">Group Responses</a></li>
+<li><a href="/home">COURSES</a></li>
+<li><a href="/students">STUDENTS</a></li>
+<li><a href="/rounds">ROUNDS</a></li>
+<li><a href="/groups">GROUPS</a></li>
+<li><a href="/responses">RESPONSES</a></li>
+<li><a href="/group_responses">GROUP RESPONSES</a></li>
 {% endblock topnavbar %}
 
 {#
 {% block sidenavbar %}
 <ul class="nav nav-sidebar">
-    <li><a href="/home">Courses</a></li>
-    <li><a href="/students">Students</a></li>
+    <li><a href="/home">COURSES</a></li>
+    <li><a href="/students">STUDENTS</a></li>
 </ul>
 <ul class="nav nav-sidebar">
-    <li><a href="/rounds">Rounds</a></li>
-    <li><a href="/groups">Groups</a></li>
+    <li><a href="/rounds">ROUNDS</a></li>
+    <li><a href="/groups">GROUPS</a></li>
 </ul>
 <ul class="nav nav-sidebar">
-    <li><a href="/responses">Responses</a></li>
-    <li><a href="/group_responses">Group Responses</a></li>
+    <li><a href="/responses">RESPONSES</a></li>
+    <li><a href="/group_responses">GROUP RESPONSES</a></li>
 </ul>
 {% endblock sidenavbar %}
 #}
@@ -36,13 +37,13 @@
 
 {% block sidenavbar %}
 <ul class="nav nav-sidebar">
-    <li><a href="/home">Courses</a></li>
-    <li><a href="/students">Students</a></li>
+    <li class="sidebar-link"><a href="/home">COURSES</a></li>
+    <li class="sidebar-link"><a href="/students">STUDENTS</a></li>
     <li role="separator" class="divider" style="height: 3px;"></li>
-    <li><a href="/rounds">Rounds</a></li>
-    <li><a href="/groups">Groups</a></li>
+    <li class="sidebar-link"><a href="/rounds">ROUNDS</a></li>
+    <li class="sidebar-link"><a href="/groups">GROUPS</a></li>
     <li role="separator" class="divider" style="height: 3px;"></li>
-    <li><a href="/responses">Responses</a></li>
-    <li><a href="/group_responses">Group Responses</a></li>
+    <li class="sidebar-link"><a href="/responses">RESPONSES</a></li>
+    <li class="sidebar-link"><a href="/group_responses">GROUP RESPONSES</a></li>
 </ul>
 {% endblock sidenavbar %}

@@ -32,10 +32,10 @@
                 aria-hidden="true"></span>
         </span>
         {% endfor %}
-        <div class="well well-sm"><p class="md">{{comment.response}}</p></div>
-             <!--style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">-->
-            <!--<p class="md" style="margin: -50px;">-->
-            <!--</p>-->
+        <div class="well"
+             style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">
+            {{comment.response}}
+        </div>
         <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if
                 expired -%} disabled="true" {%- endif -%}>
             <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support
@@ -63,22 +63,12 @@
     {% endif %}
     <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
         <textarea class="form-control" rows="5" id="comment"
-                  onkeyup="showPreview()"
-                  style="max-width: 100%;"
                   placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%}
                   disabled="true" {%- endif -%}>
         {%- if comment -%}
             {{comment}}
         {%- endif -%}
         </textarea>
-        <div>
-            <p style="text-align: left; padding-top: 10px;">
-                <a href="http://go.osu.edu/considertutorial#md">Markdown</a> supported preview:
-            </p>
-            <hr/>
-            <div class="md" id="previewPlaceholder" style="text-align: left; color: black"></div>
-            <hr/>
-        </div>
         <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
                 -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
         </button>
@@ -180,29 +170,5 @@
         }
     });
     {% endif %}
-</script>
-<script src="/js/showdown.min.js"></script> 
-<script>
-    function mdToHtml(text) {
-        var converter = new showdown.Converter();
-        return converter.makeHtml(text);
-    }
-    function showPreview() {
-        var text = $('#comment').val();
-        console.log('text = ' + text);
-        preview = mdToHtml(text);
-        console.log('preview = '+preview);
-        $('#previewPlaceholder').html(preview);
-    }
-
-    (function () {
-        mds = document.getElementsByClassName('md');
-        for (var i = 0; i < mds.length; i++) {
-            text = mds[i].innerHTML;
-            console.log(text);
-            mds[i].innerHTML = mdToHtml(text);
-        }
-        showPreview();
-    })();
 </script>
 {% endblock script %}
