@@ -1,9 +1,14 @@
-{% extends "instructor_base.html" %}
+{% extends "layouts/instructor_base.html" %}
 {% block title %} | Groups {% endblock %}
 
 {% block content %}
 <h1 class="page-header">Groups</h1>
+
+<div class="card">
+<div class="card-title">
 <h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+</div>
+<div class="card-body">
 <div class="row">
     <div class="col-md-6">
         <h4>Course</h4>
@@ -34,6 +39,9 @@
         {% endif %}
     </div>
 </div>
+</div>
+</div>
+
 <h4 class="sub-header">Total groups: {% if group -%} {{group}} {% else -%} 0{%- endif -%}</h4>
   <form class="form-horizontal" id="form" method="post" style="text-align: center;">
     <div class="form-group">
@@ -48,7 +56,12 @@
       </div>
     </div>
   </form>
-<h4 class="sub-header">Following are the responses from students of {{selectedSection}}:</h4>
+
+<div class="card">
+<div class="card-title">
+<h4>Following are the responses from students of {{selectedSection}}:</h4>
+</div>
+<div class="card-body">
 <div class="table-responsive">
   <form id="form_table" method="post" action="/groups">
     <table class="table table-striped" id="group_table">
@@ -92,6 +105,9 @@
   </form>
 </div>
 {% endblock %}
+</div>
+</div>
+
 
 {% block script %}
 <script>

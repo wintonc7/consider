@@ -1,9 +1,14 @@
-{% extends "instructor_base.html" %}
+{% extends "layouts/instructor_base.html" %}
 {% block title %} | Students{% endblock %}
 
 {% block content %}
 <h1 class="page-header">Students</h1>
-<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+
+<div class="card">
+<div class="card-title">
+<h4 class="form-signin-heading">Please select a Course and Section below</h4>
+</div>
+<div class="card-body">
 <div class="row">
     <div class="col-md-6">
         <h4>Course</h4>
@@ -34,15 +39,22 @@
         {% endif %}
     </div>
 </div>
+</div>
+</div>
 <button type="button" class="btn btn-default" onclick="addStudents()" style="margin-top: 20px; margin-bottom: 20px"
         aria-label="Add Students">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Students
 </button>
 {% if sections %}
 {% if students %}
-<h4 class="sub-header">Students already enrolled {% if selectedCourse and selectedSection -%} in Section
+
+<div class="card">
+<div class="card-title">
+<h4>Students already enrolled {% if selectedCourse and selectedSection -%} in Section
     {{selectedSection}} of Course {{selectedCourse}} {%- endif %} {% if students -%}
-    ({{students|length}}) {%- endif -%}:</h4>
+    ({{students|length}}) {%- endif -%}</h4>
+</div>
+<div class="card-body">
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -64,6 +76,8 @@
         {% endfor %}
         </tbody>
     </table>
+</div>
+</div>
 </div>
 {% endif %}
 {% endif %}

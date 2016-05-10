@@ -1,0 +1,145 @@
+body {
+	background-color: rgb(240,240,240);
+	font-family: 'Lato', sans-serif;
+}
+
+/* FORM INPUT STYLING */
+
+input, textarea, select {
+	border-radius: 0px !important;
+	background: rgba(255,255,255,1) !important;
+	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(255,255,255,1)), color-stop(100%, rgba(247,247,247,1))) !important;
+	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+	background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+	background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+	background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 47%, rgba(247,247,247,1) 100%) !important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f7f7f7', GradientType=0 ) !important;
+}
+
+/* BUTTON STYLING */
+
+.btn {
+  color: #ffffff !important;
+  font-size: 13px !important;
+  background: rgb(170,170,170); !important;
+  padding: 6px 10px 6px 10px !important;
+  text-decoration: none !important;
+  border: 1px solid black;
+  border-radius: 0px !important;
+}
+
+.btn:hover {
+  background: #59A766 !important;
+  text-decoration: none !important;
+  border-radius: 0px !important;
+}
+
+/* INTRUCTOR NAVIGATION SIDE BAR */
+
+.sidebar {
+	background-color: transparent !important;
+	border-width: 0px !important; 
+}
+
+.sidebar-link a{
+	color: gray !important;
+	font-weight: bold;
+}
+
+.sidebar-link a:hover {
+	color: gray !important;
+	background-color: rgba(251,0,13,0.25) !important;
+}
+
+.sidebar-link a:visited {
+	color: gray !important;
+}
+
+/* CUSTOM FONT STYLING */
+
+.page-header {
+	color: rgb(100,50,50);
+}
+
+h1 {
+	color: #9E0008 !important;
+}
+
+/* CARD STYLING */
+
+.card {
+	-webkit-box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+	-moz-box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+	box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+	border-radius: 3px !important;
+	-moz-border-radius: 0px 0px 0px 0px;
+	-webkit-border-radius: 0px 0px 0px 0px;
+	border: 0px solid #000000;
+	background-color: rgb(254,254,254);
+	padding: 0px !important;
+	margin: 20px 0px !important;
+}
+
+.card-title {
+	padding: 1px 15px !important;
+	background-color: #0B0B71;
+	color: white !important;
+	border-radius: 3px 3px 0px 0px;
+}
+
+
+.card-body {
+	padding: 10px 15px !important;
+}
+
+/* CUSTOM LINK STYLING */
+
+a:link, a:visited {
+   color: #2A4D6E;
+   
+   text-decoration: none;
+   target-new: none;
+}
+
+
+a:hover {
+   color: #267257 !important;
+   
+   target-new: none;
+}
+
+/* NAVBAR STYLING */
+
+.navbar a:link, a:visited{
+	color: white !important;
+}
+
+.navbar {
+	background-color: rgba(40,40,40,0.95);
+	-webkit-box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+	-moz-box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+	box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+
+}
+
+.nav-hover:hover {
+	background-color: black !important;
+}
+
+.nav-active {
+	background-color: rgba(251,0,13,0.6) !important;
+}
+
+/* CURRENT ROUND HIGLIGHTING */
+
+.row-highlight {
+	background-color: rgba(167,240,44,0.15) !important;
+}
+
+/* CUSTOM MODAL STYLE */
+
+.modal-content {
+	border-radius: 3px !important;
+}
+

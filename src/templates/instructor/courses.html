@@ -1,4 +1,4 @@
-{% extends "instructor_base.html" %}
+{% extends "layouts/instructor_base.html" %}
 {% block title %} | Courses {% endblock %}
 
 {% block content %}
@@ -7,9 +7,14 @@
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add a course
 </button>
 {% if courses %}
-<h4 class="sub-header">
-    Current courses {% if courses -%} ({{courses|length}}) {%- endif -%}:
+
+<div class="card">
+<div class="card-title">
+<h4>
+    Current courses {% if courses -%} ({{courses|length}}) {%- endif -%}
 </h4>
+</div>
+<div class="card-body">
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -109,7 +114,10 @@
         </tbody>
     </table>
 </div>
+</div>
+</div>
 {% endif %}
+
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
