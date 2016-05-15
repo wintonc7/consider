@@ -104,7 +104,8 @@
 	        //collect form elements
 	        var $form = $(this);
 
-	        if (document.getElementsByClassName('optionsRadios').length > 0 && $form.find("input:radio[name='optionsRadios']:checked").val() === undefined) {
+	        if (document.getElementsByClassName('optionsRadios').length > 0
+                    && $form.find("input:radio[name='optionsRadios']:checked").val() === undefined) {
 	        	bootbox.alert("Please select one of the options");
 	        } else {
 	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val();

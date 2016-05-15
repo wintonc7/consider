@@ -66,7 +66,7 @@ class Students(webapp2.RequestHandler):
         #end
         # Now save all the section data back to the database and log it
         section.put()
-        utils.log('Students added to Section ' + str(section), type='S')
+        utils.log('Students added to Section ' + str(section), type='Success!')
     #end add_students
 
     def remove_student(self, section, email):
@@ -99,7 +99,7 @@ class Students(webapp2.RequestHandler):
             section.put()
             utils.log(
                     'Student {0} has been removed from Section {1}'.format(str(student),
-                    str(section)), handler=self, type='S')
+                    str(section)), handler=self, type='Success!')
         #end
     #end remove_student
 

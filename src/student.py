@@ -219,6 +219,8 @@ class Rounds(webapp2.RequestHandler):
                 template_values['comments'] = comments
                 # Grab the requested round
                 requested_round = models.Round.get_by_id(round_number, parent=section.key)
+                # Grab the discussion description
+                template_values['description'] = requested_round.description
                 # And grab the logged in student's response
                 stu_response = models.Response.get_by_id(student.email, parent=requested_round.key)
                 # Check that they actually answered
@@ -252,7 +254,9 @@ class Rounds(webapp2.RequestHandler):
                                    'opinion': response.response
                                    }
                         # If the response has an associated option
-                        if response.option != 'NA':
+                        if not response.option:
+                            comment['option'] = '' # if there are no options for this question, default comment is ''
+                        elif response.option != 'NA':
                             # Grab the option
                             opt = int(response.option[-1]) - 1
                             comment['option'] = previous_round.quiz.options[opt]
@@ -278,7 +282,8 @@ class Rounds(webapp2.RequestHandler):
         # Now check whether we're on a lead-in or summary or discussion round
         if current_round.is_quiz:
             # If it is, double check that they selected an answer and commented
-            if not (option and comment):
+            if current_round.quiz.options_total > 0 and not (option and comment):
+                # if the question had 0 options, it's not an error
                 # Error if not
                 utils.error('Invalid Parameters: option or comment is null', handler=self)
                 return
@@ -314,8 +319,8 @@ class Rounds(webapp2.RequestHandler):
             response.student = student.email
             response.put()
             utils.log(
-                'Your response have been saved. You can edit it any time before the deadline.',
-                type='S', handler=self)
+                'Your response has been saved. You can edit it any time before the deadline.',
+                type='Success!', handler=self)
         else:
             # Otherwise alert them that time has passed to submit for this round
             utils.error(

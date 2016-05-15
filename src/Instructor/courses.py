@@ -46,7 +46,7 @@ class Courses(webapp2.RequestHandler):
             course = models.Course(parent=instructor.key, id=course_name)
             course.name = course_name
             course.put()
-            utils.log(course_name + ' added', type='S',handler=self)
+            utils.log(course_name + ' added', type='Success!',handler=self)
         #end
     #end add_course
 
@@ -66,7 +66,7 @@ class Courses(webapp2.RequestHandler):
         if course:
             course.is_active = not course.is_active
             course.put()
-            utils.log('Status changed for ' + course_name, type='S',handler=self)
+            utils.log('Status changed for ' + course_name, type='Success!',handler=self)
         else:
             utils.error('Course ' + course_name + ' not found', handler=self)
         #end

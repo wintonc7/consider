@@ -116,7 +116,7 @@ class Rounds(webapp2.RequestHandler):
         # And check that it was actually passed
         if not action:
             # Error if not
-            utils.error('Invalid arguments: action is null', handler=self)
+            utils.error('Error! Invalid arguments: action is null', handler=self)
         else:
             # Now switch on the action
             if action == 'add':
@@ -151,7 +151,7 @@ class Rounds(webapp2.RequestHandler):
                 utils.send_mail(instructor.email, email_section, subject, message)
             else:
                 # Send an error if any other action is supplied
-                utils.error('Unexpected action: ' + action, handler=self)
+                utils.error('Error! Unexpected action: ' + action, handler=self)
             #end
         #end
     #end post
@@ -165,7 +165,7 @@ class Rounds(webapp2.RequestHandler):
         end_time = self.request.get('time')
         if datetime.datetime.now() > utils.convert_time(end_time):
             # Send an error if so and exit
-            utils.error('Cannot create deadline in the past.', handler=self)
+            utils.error('Error! Cannot create deadline in the past.', handler=self)
             return
         #end
 
@@ -182,7 +182,7 @@ class Rounds(webapp2.RequestHandler):
             # And check that we're not trying to add a summary as the first
             if not rounds:
                 # Send an error if so and return
-                utils.error('Summary question cannot be first round added.', handler=self)
+                utils.error('Error! Summary question cannot be first round added.', handler=self)
                 return
             #end
 
@@ -200,7 +200,7 @@ class Rounds(webapp2.RequestHandler):
             # Let's check that the deadline doesn't conflict with the last round
             if utils.convert_time(round_obj.deadline) <= utils.convert_time(last_time):
                 # Send an error if so and return
-                utils.error('Cannot set end time of summary before end of last discussion.', handler=self)
+                utils.error('Error! Cannot set end time of summary before end of last discussion.', handler=self)
                 return
             #end
             # Set start time of summary as the deadline of the last round
@@ -214,7 +214,10 @@ class Rounds(webapp2.RequestHandler):
         # And update the section rounds attribute if necessary
         self.update_section_rounds(rounds[-1].number, section)
         # And send our success message
-        utils.log('Success, round added.', type='S', handler=self)
+        # utils.log('Success, round added.', type='Success!', handler=self)
+        utils.log(
+            'Success! Round added.',
+            type='S', handler=self)
     #end add_leadin_summary
 
     def build_round_obj(self, section):
@@ -289,7 +292,7 @@ class Rounds(webapp2.RequestHandler):
         # The view requires at least a lead-in question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('No lead-in question exists; cannot add new rounds yet.', handler=self)
+            utils.error('Error! No lead-in question exists; cannot add new rounds yet.', handler=self)
             # And redirect
             return self.redirect('/')
         #end
@@ -297,7 +300,7 @@ class Rounds(webapp2.RequestHandler):
         # We'll need this later on when doing the buffer stuff
         # if rounds_buffer < 0
         #     # Make sure the buffer value is positive
-        #     utils.error('Buffer value must be greater than 0.', handler=self)
+        #     utils.error('Error! Buffer value must be greater than 0.', handler=self)
         #     # And redirect
         #     return self.redirect('/')
         # #end
@@ -320,7 +323,7 @@ class Rounds(webapp2.RequestHandler):
         # Now grab all of the rounds again
         rounds = models.Round.query(ancestor=section.key).fetch()
         # And send a success message
-        utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='S', handler=self)
+        utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='Success!', handler=self)
     #end add_rounds
 
     def create_new_rounds(self, section, rounds, num_of_rounds, duration, buffer_bw_rounds):
@@ -384,7 +387,7 @@ class Rounds(webapp2.RequestHandler):
         # The view requires at least a lead-in question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('No lead-in question exists; cannot add new rounds yet.', handler=self)
+            utils.error('Error! No lead-in question exists; cannot add new rounds yet.', handler=self)
             # And redirect
             return self.redirect('/')
         #end
@@ -412,7 +415,7 @@ class Rounds(webapp2.RequestHandler):
         # And update the section
         self.update_section_rounds(rounds[-1].number, section)
         # And send a success message
-        utils.log('Successfully deleted round {0}'.format(round_id), type='S', handler=self)
+        utils.log('Successfully deleted round {0}'.format(round_id), type='Success!', handler=self)
     #end delete_rounds
 
     def shift_rounds(self, rounds, round_id):
@@ -453,7 +456,7 @@ class Rounds(webapp2.RequestHandler):
         # The view requires at least a lead-in question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('No lead-in question exists; cannot add new rounds yet.', handler=self)
+            utils.error('Error! No lead-in question exists; cannot add new rounds yet.', handler=self)
             # And redirect
             return self.redirect('/')
         #end
@@ -478,7 +481,7 @@ class Rounds(webapp2.RequestHandler):
                 # end time
                 if start_time < previous_end:
                     # Send an error if so
-                    utils.error('Cannot set new start time earlier than \
+                    utils.error('Error! Cannot set new start time earlier than \
                             deadline of round {0}.'.format(i-1), handler=self)
                     # And exit
                     break
@@ -529,7 +532,7 @@ class Rounds(webapp2.RequestHandler):
         # The view requires at least a lead-in question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('No lead-in question exists; cannot start yet.', handler=self)
+            utils.error('Error! No lead-in question exists; cannot start yet.', handler=self)
             # And redirect
             return self.redirect('/')
         #end
@@ -538,7 +541,7 @@ class Rounds(webapp2.RequestHandler):
         section.current_round = 1
         section.put()
         # And send a success message
-        utils.log('Successfully started the first round.', type='S', handler=self)
+        utils.log('Successfully started the first round.', type='Success!', handler=self)
     #end
 
 
