@@ -12,6 +12,7 @@ Implements the APIs for Instructor control over group formation within the app.
 """
 import json
 
+import random
 import webapp2
 from google.appengine.api import users
 
@@ -63,6 +64,10 @@ class Groups(webapp2.RequestHandler):
 
         """
         # Double check that the passed in groups is non-null
+        #for keys, values in groups.items():
+        #   print(keys)
+        #   print(values)
+        #   print("--------------")
         if not groups:
             # Error if so
             utils.error('Groups information not available.', handler=self)
@@ -75,6 +80,29 @@ class Groups(webapp2.RequestHandler):
                     student.group = int(groups[student.email])
                     # And then grab that group model from the database
                     group = models.Group.get_by_id(student.group, parent=section.key)
+                    group_id=1
+                    while (group_id<=section.groups):
+                        pre_group=models.Group.get_by_id(group_id, parent=section.key)
+                        if not pre_group:
+                            group_id+=1
+                            continue
+                        if student.email in pre_group.members:
+                            break
+                        group_id+=1
+                    #print("--------------")
+                    #print(student.email)
+                    #print("current ID:"+str(group_id))
+                    #print("new ID:"+str(student.group))
+                    #print("--------------")
+
+                    #test_group=models.Group.get_by_id(2, parent=section.key)
+                    #test_group.members.remove("11@osu.edu")
+                    #test_group.put()
+
+                    if group_id <= section.groups and group_id!=student.group:
+                        pre_group.members.remove(student.email)
+                        pre_group.size =len(pre_group.members)
+                        pre_group.put()
                     # Double check that it actually exists
                     if not group:
                         # And create it if not, giving it the proper number
@@ -86,13 +114,34 @@ class Groups(webapp2.RequestHandler):
                         # If not, add that student in to the group
                         group.members.append(student.email)
                         # Update the size
-                        group.size += 1
+                        group.size =len(group.members)
                         # Set the student's alias for that group
                         student.alias = 'S' + str(group.size)
                         # And commit the changes to the group
                         group.put()
                     #end
                 #end
+                else:
+                    group_id=1
+                    while group_id<=section.groups:
+                        pre_group=models.Group.get_by_id(group_id, parent=section.key)
+                        if not pre_group:
+                            group_id+=1
+                            continue
+                        if student.email in pre_group.members:
+                            break;
+                        group_id+=1
+
+                    if group_id>section.groups :
+                        random_group_id=random.randint(1,section.groups)
+                        random_group=models.Group.get_by_id(random_group_id, parent=section.key)
+                        while not random_group:
+                            random_group_id =(random_group+1)%section.groups+1
+                            random_group = models.Group.get_by_id(random_group_id, parent=section.key)
+                        random_group.members.append(student.email)
+                        random_group.size=len(random_group.members)
+                        student.alias = 'S' + str(random_group.size)
+                        random_group.put()
             #end
             # Commit the changes to the section and log it
             section.put()
@@ -127,9 +176,19 @@ class Groups(webapp2.RequestHandler):
             current_section = template_values['selectedSectionObject']
             # Check that the current section has at least one round
             if current_section.rounds > 0:
+
                 # Grab the responses from the lead-in question
                 response = models.Response.query(
                         ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                round_id=2;
+                while (round_id<=current_section.rounds):
+                    temp_response=models.Response.query(
+                        ancestor=models.Round.get_by_id(round_id, parent=current_section.key).key).fetch()
+                    for temp_res in temp_response:
+                        if temp_res not in response:
+                            response.append(temp_res)
+                    round_id+=1
+
                 # Loop over the responses
                 for res in response:
                     # And loop over the students in this section
@@ -139,6 +198,7 @@ class Groups(webapp2.RequestHandler):
                             # And set the group of the response to the
                             # group of the student who made that response
                             res.group = stu.group
+                            print stu.email
                         #end
                     #end
                 #end

@@ -59,12 +59,13 @@
 
 <div class="card">
 <div class="card-title">
-<h4>Following are the responses from students of {{selectedSection}}:</h4>
+<h4>Following are the responses of students for {{selectedSection}}:</h4>
 </div>
 <div class="card-body">
 <div class="table-responsive">
   <form id="form_table" method="post" action="/groups">
     <table class="table table-striped" id="group_table">
+
       <thead>
         {%- if responses -%}
         <tr>
@@ -96,6 +97,9 @@
           No responses submitted yet.
         {% endfor %}
       </tbody>
+
+
+
     </table>
       {% if responses -%}
         <div class="form-group" style="text-align:center;">
