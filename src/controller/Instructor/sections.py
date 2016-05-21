@@ -4,19 +4,16 @@ section.py
 Implements the APIs for Instructor control of adding/removing sections.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 21, 2016
 
 --------------------
 
 
 """
-import json
 
 import webapp2
-from google.appengine.api import users
 
-from src import models
-from src import utils
+from src import model, utils
 
 
 class Sections(webapp2.RequestHandler):
@@ -36,16 +33,16 @@ class Sections(webapp2.RequestHandler):
 
         """
         # First, start by grabbing the section passed in from the database
-        section = models.Section.get_by_id(section_name, parent=course.key)
+        _section = model.Section.get_by_id(section_name, parent=course.key)
         # Double check that it doesn't already exist
-        if section:
+        if _section:
             # And send an error if it does
             utils.error(section_name + ' already exists', handler=self)
         else:
             # Otherwise, create it, save it to the database, and log it
-            section = models.Section(parent=course.key, id=section_name)
-            section.name = section_name
-            section.put()
+            _section = model.Section(parent=course.key, id=section_name)
+            _section.name = section_name
+            _section.put()
             utils.log(section_name + ' added', type='Success!')
         #end
     #end add_section
@@ -62,12 +59,12 @@ class Sections(webapp2.RequestHandler):
 
         """
         # First, start by grabbing the section from the passed in value
-        section = models.Section.get_by_id(section_name, parent=course.key)
+        _section = model.Section.get_by_id(section_name, parent=course.key)
         # Double check that it actually exists
-        if section:
+        if _section:
             # Toggle the section to active, save it to the database, and log it
-            section.is_active = not section.is_active
-            section.put()
+            _section.is_active = not _section.is_active
+            _section.put()
             utils.log('Status changed for ' + section_name, type='Success!')
         else:
             # Send an error if the section passed in doesn't exist
@@ -80,8 +77,8 @@ class Sections(webapp2.RequestHandler):
         HTTP POST method to add a section to a course.
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
-        if not instructor:
+        _instructor = utils.check_privilege(model.Role.instructor)
+        if not _instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
         #end
@@ -96,7 +93,7 @@ class Sections(webapp2.RequestHandler):
             utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
             # Otherwise, grab the course from the database
-            course = models.Course.get_by_id(course_name.upper(), parent=instructor.key)
+            course =  model.Course.get_by_id(course_name.upper(), parent=_instructor.key)
             # And check that it exists and is active
             if not course or not course.is_active:
                 # Error if not

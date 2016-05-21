@@ -4,19 +4,17 @@ courses.py
 Implements the APIs for Instructor Courses views.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 21, 2016
 
 --------------------
 
 
 """
-import json
 
 import webapp2
 from google.appengine.api import users
 
-from src import models
-from src import utils
+from src import model, utils
 
 
 class Courses(webapp2.RequestHandler):
@@ -36,17 +34,17 @@ class Courses(webapp2.RequestHandler):
 
         """
         # Start by trying to grab the course from the database
-        course = models.Course.get_by_id(course_name, parent=instructor.key)
+        course = model.Course.get_by_id(course_name, parent=instructor.key)
         # Check to see if it already exists
         if course:
             # And error if so
             utils.error(course_name + ' already exists', handler=self)
         else:
             # Otherwise, create it, store it in the database, and log it
-            course = models.Course(parent=instructor.key, id=course_name)
+            course = model.Course(parent=instructor.key, id=course_name)
             course.name = course_name
             course.put()
-            utils.log(course_name + ' added', type='Success!',handler=self)
+            utils.log(course_name + ' added', type='Success!', handler=self)
         #end
     #end add_course
 
@@ -62,11 +60,11 @@ class Courses(webapp2.RequestHandler):
 
         """
         # First, grab the course from the database
-        course = models.Course.get_by_id(course_name, parent=instructor.key)
+        course = model.Course.get_by_id(course_name, parent=instructor.key)
         if course:
             course.is_active = not course.is_active
             course.put()
-            utils.log('Status changed for ' + course_name, type='Success!',handler=self)
+            utils.log('Status changed for ' + course_name, type='Success!', handler=self)
         else:
             utils.error('Course ' + course_name + ' not found', handler=self)
         #end
@@ -77,7 +75,7 @@ class Courses(webapp2.RequestHandler):
         HTTP POST method for handling course requests.
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
+        instructor = utils.check_privilege(model.Role.instructor)
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
@@ -100,7 +98,7 @@ class Courses(webapp2.RequestHandler):
                 self.toggle_course(instructor, course_name.upper())
             else:
                 # If any other action, log it as an error
-                utils.error('Unexpected action: ' + action,handler=self)
+                utils.error('Unexpected action: ' + action, handler=self)
             #end
         #end
     #end post
@@ -110,7 +108,7 @@ class Courses(webapp2.RequestHandler):
         Display the Course list for this Instructor.
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
+        instructor = utils.check_privilege(model.Role.instructor)
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
@@ -123,13 +121,13 @@ class Courses(webapp2.RequestHandler):
         # And start building the template values
         template_values = {'logouturl': logout_url, 'expand': self.request.get('course')}
         # Grab the list of courses attributed to the logged in instructor
-        courses = models.Course.query(ancestor=instructor.key).fetch()
+        courses = model.Course.query(ancestor=instructor.key).fetch()
         # Double check that they actually have courses
         if courses:
             # Then loop over them
             for course in courses:
                 # And grab all the sections attributed to that course
-                course.sections = models.Section.query(ancestor=course.key).fetch()
+                course.sections = model.Section.query(ancestor=course.key).fetch()
             #end
             # Add all the instructor's courses to the template values
             template_values['courses'] = courses

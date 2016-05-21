@@ -4,7 +4,7 @@ admin.py
 APIs for handling admin specific tasks of the app, like adding an instructor.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 24, 2015
+- Last Modified: May 21, 2016
 
 --------------------
 
@@ -14,8 +14,7 @@ APIs for handling admin specific tasks of the app, like adding an instructor.
 import webapp2
 from google.appengine.api import users
 
-import models
-import utils
+from src import model, utils
 
 
 class AdminPage(webapp2.RequestHandler):
@@ -33,9 +32,9 @@ class AdminPage(webapp2.RequestHandler):
 
         """
         if email:
-            instructor = models.Instructor(id=email)
-            instructor.email = email
-            instructor.put()
+            _instructor = model.Instructor(id=email)
+            _instructor.email = email
+            _instructor.put()
             utils.log(email + ' has been added as an Instructor', type='Success!', handler=self)
         else:
             utils.error('Invalid arguments: email')
@@ -50,10 +49,10 @@ class AdminPage(webapp2.RequestHandler):
 
         """
         if email:
-            instructor = models.Instructor.query(models.Instructor.email == email).get()
-            if instructor:
-                instructor.is_active = not instructor.is_active
-                instructor.put()
+            _instructor = model.Instructor.query(model.Instructor.email == email).get()
+            if _instructor:
+                _instructor.is_active = not _instructor.is_active
+                _instructor.put()
                 utils.log('Status changed for ' + email, handler=self)
             else:
                 utils.error('Instructor (' + email + ') not found')
@@ -70,7 +69,7 @@ class AdminPage(webapp2.RequestHandler):
             template_values = {
                 'logouturl': logout_url
             }
-            instructors = models.Instructor.query().fetch()
+            instructors = model.Instructor.query().fetch()
             if instructors:
                 template_values['instructors'] = instructors
             template = utils.jinja_env().get_template('admin.html')

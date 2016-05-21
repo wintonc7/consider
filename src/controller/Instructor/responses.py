@@ -4,19 +4,17 @@ responses.py
 Implements the APIs for Instructor control over student responses within the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 21, 2016
 
 --------------------
 
 
 """
-import json
 
 import webapp2
 from google.appengine.api import users
 
-from src import models
-from src import utils
+from src import model, utils
 
 
 class Responses(webapp2.RequestHandler):
@@ -29,7 +27,7 @@ class Responses(webapp2.RequestHandler):
         HTTP GET method to retrieve the responses.
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
+        instructor = utils.check_privilege(model.Role.instructor)
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
@@ -54,8 +52,8 @@ class Responses(webapp2.RequestHandler):
             resp = {}
             # And loop over the number of rounds (indexed at 1 for lead-in)
             for i in range(1, current_section.rounds + 1):
-                response = models.Response.query(
-                        ancestor=models.Round.get_by_id(i, parent=current_section.key).key).fetch()
+                response = model.Response.query(
+                        ancestor=model.Round.get_by_id(i, parent=current_section.key).key).fetch()
                 # response is a list of all the responses for the round i
                 if response:
                     resp[str(i)] = response

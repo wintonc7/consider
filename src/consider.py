@@ -8,19 +8,13 @@ consider.py
 
 Main module of the app. Implements the ``application`` object; handlers for error, home and root pages; and redirects URL to appropriate handler classes.
 """
-
 import webapp2
 from google.appengine.api import users
 
-import admin
-import student
-import utils
-from models import Role
-
 # Import all of the instructor controller modules
 # Modify __init__.py in the Instructor directory to add or remove modules
-import Instructor
-
+import model, utils
+from src.controller import admin, student, Instructor
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -82,11 +76,11 @@ class MainPage(webapp2.RequestHandler):
         """
         role, user = utils.get_role_user()
         if user:
-            if role == Role.admin:
+            if role == model.Role.admin:
                 self.redirect('/admin')
-            elif role == Role.instructor:
+            elif role == model.Role.instructor:
                 self.redirect('/courses')
-            elif role == Role.student:
+            elif role == model.Role.student:
                 self.redirect('/student_home')
             else:
                 utils.log(str(user) + ' navigated to Error')
@@ -98,7 +92,7 @@ class MainPage(webapp2.RequestHandler):
             }
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
-            
+
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),

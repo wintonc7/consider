@@ -4,19 +4,17 @@ group_responses.py
 Implements the APIs for Instructor role in the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 21, 2016
 
 --------------------
 
 
 """
-import json
 
 import webapp2
 from google.appengine.api import users
 
-from src import models
-from src import utils
+from src import model, utils
 
 
 class GroupResponses(webapp2.RequestHandler):
@@ -29,11 +27,11 @@ class GroupResponses(webapp2.RequestHandler):
         HTTP GET method to retrieve the group responses.
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
+        instructor = utils.check_privilege(model.Role.instructor)
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -42,7 +40,7 @@ class GroupResponses(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # And grab the other courses and sections from this instructor
         template_values = utils.get_template_all_courses_and_sections(
-                            instructor, course_name, selected_section_name)
+            instructor, course_name, selected_section_name)
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -61,13 +59,13 @@ class GroupResponses(webapp2.RequestHandler):
                     for r in range(1, current_section.rounds + 1):
                         # Now set an empty list for each group and round
                         resp['group_' + str(g) + '_' + str(r)] = []
-                    #end
-                #end
+                        # end
+                # end
                 # Loop over the number of rounds (indexed by 1)
                 for r in range(1, current_section.rounds + 1):
                     # Grab the responses for that round from the db
-                    responses = models.Response.query(
-                            ancestor=models.Round.get_by_id(r, parent=current_section.key).key).fetch()
+                    responses = model.Response.query(
+                        ancestor=model.Round.get_by_id(r, parent=current_section.key).key).fetch()
                     # Double check that the responses actually exist
                     if responses:
                         # And loop over the responses
@@ -84,19 +82,19 @@ class GroupResponses(webapp2.RequestHandler):
                                     # group and round
                                     resp['group_' + str(s.group) + '_' + str(r)].append(res)
                                     break
-                                #end
-                            #end
-                        #end
-                    #end
-                #end
+                                    # end
+                                    # end
+                                    # end
+                                    # end
+                # end
                 # And set the template values for all the responses
                 template_values['responses'] = resp
-            #end
-        #end
+                # end
+        # end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/groups_responses.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class GroupResponses
+# end class GroupResponses

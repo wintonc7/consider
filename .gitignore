@@ -60,3 +60,6 @@ docs/build/*
 
 # PyBuilder
 target/
+
+# Temporary, generated files
+temp/

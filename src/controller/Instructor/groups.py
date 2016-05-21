@@ -4,7 +4,7 @@ groups.py
 Implements the APIs for Instructor control over group formation within the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 21, 2016
 
 --------------------
 
@@ -15,8 +15,7 @@ import json
 import webapp2
 from google.appengine.api import users
 
-from src import models
-from src import utils
+from src import model, utils
 
 
 class Groups(webapp2.RequestHandler):
@@ -74,11 +73,11 @@ class Groups(webapp2.RequestHandler):
                     # Set the student's group number to the index of the group
                     student.group = int(groups[student.email])
                     # And then grab that group model from the database
-                    group = models.Group.get_by_id(student.group, parent=section.key)
+                    group = model.Group.get_by_id(student.group, parent=section.key)
                     # Double check that it actually exists
                     if not group:
                         # And create it if not, giving it the proper number
-                        group = models.Group(parent=section.key, id=student.group)
+                        group = model.Group(parent=section.key, id=student.group)
                         group.number = student.group
                     #end
                     # Now check if the student is listed in the correct group
@@ -106,7 +105,7 @@ class Groups(webapp2.RequestHandler):
 
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
+        instructor = utils.check_privilege(model.Role.instructor)
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
@@ -119,7 +118,7 @@ class Groups(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # Grab all the courses and sections for the logged in instructor
         template_values = utils.get_template_all_courses_and_sections(instructor,
-                            course_name.upper(), selected_section_name.upper())
+                                                                      course_name.upper(), selected_section_name.upper())
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -128,8 +127,8 @@ class Groups(webapp2.RequestHandler):
             # Check that the current section has at least one round
             if current_section.rounds > 0:
                 # Grab the responses from the lead-in question
-                response = models.Response.query(
-                        ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
+                response = model.Response.query(
+                        ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
                 # Loop over the responses
                 for res in response:
                     # And loop over the students in this section
@@ -158,7 +157,7 @@ class Groups(webapp2.RequestHandler):
         HTTP POST method to create groups.
         """
         # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(models.Role.instructor)
+        instructor = utils.check_privilege(model.Role.instructor)
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')

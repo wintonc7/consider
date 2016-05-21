@@ -1,18 +1,5 @@
-"""
-model.py
-~~~~~~~~~~~~~~~~~
-Implements the data model for the app.
-
-All the entities derive from ``ndb`` class of Google App Engine.
-
-- Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Dec. 18, 2015
-
---------------------
-
-
-"""
 from google.appengine.ext import ndb
+
 
 class Course(ndb.Model):
     """
@@ -142,11 +129,12 @@ class Round(ndb.Model):
     quiz = ndb.StructuredProperty(Question, indexed=False)
     """ A `Question`_ property. Contains the question if this is a quiz round."""
 
-    #NEW ATTRIBUTES FOR DYNAMIC ROUNDS: PART 1
+    # NEW ATTRIBUTES FOR DYNAMIC ROUNDS: PART 1
     starttime = ndb.StringProperty(required=True, indexed=False)
     """ String. Represents the start of the round in the format %Y-%m-%dT%H:%M """
     buffer_time = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Represents the buffer time between rounds."""
+
 
 class Response(ndb.Model):
     """
