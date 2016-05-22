@@ -96,10 +96,12 @@ class Rounds(webapp2.RequestHandler):
                 # one (to account for the eventual summary round)
                 template_values['nextRound'] = current_section.rounds + 1
                 # end
+            template_values['anon'] = 'Yes' if current_section.is_anonymous else 'No'
+            template_values['round_structure'] = 'Yes' if current_section.has_rounds else 'No'
         # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
-        template = utils.jinja_env().get_template('instructor/rounds_test.html')
+        template = utils.jinja_env().get_template('instructor/rounds.html')
         self.response.write(template.render(template_values))
 
     # end get
@@ -150,6 +152,10 @@ class Rounds(webapp2.RequestHandler):
                 # Grab the subject of the email
                 subject = self.request.get('subject')
                 utils.send_mail(instructor.email, email_section, subject, message)
+            elif action == 'toggle_anon':
+                self.toggle_anonymity(instructor)
+            elif action == 'toggle_round_structure':
+                self.toggle_round_structure(instructor)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Error! Unexpected action: ' + action, handler=self)
@@ -158,6 +164,29 @@ class Rounds(webapp2.RequestHandler):
 
     # end post
 
+    def toggle_anonymity(self, instructor):
+        # So first we need to get at the course and section
+        course, section = utils.get_course_and_section_objs(self.request, instructor)
+        if section:
+            section.is_anonymous = not section.is_anonymous
+            section.put()
+            utils.log('Anonymity toggled to: ' + str(section.is_anonymous))
+        else:
+            utils.error('Section not found')
+
+    # end toggle_anonymity
+
+    def toggle_round_structure(self, instructor):
+        # So first we need to get at the course and section
+        course, section = utils.get_course_and_section_objs(self.request, instructor)
+        if section:
+            section.has_rounds = not section.has_rounds
+            section.put()
+            utils.log('Rounds Structure toggled to: ' + str(section.has_rounds))
+        else:
+            utils.error('Section not found')
+
+    # end toggle_round_structure
 
     def add_leadin_summary(self, instructor):
         # So first we need to get at the course and section

@@ -3,7 +3,12 @@
 
 {% block content %}
 <h1 class="page-header">Rounds</h1>
-<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+
+<div class="card">
+<div class="card-title">
+    <h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+</div>
+<div class="card-body">
 <div class="row">
     <div class="col-md-6">
         <h4>Course</h4>
@@ -20,136 +25,222 @@
     <div class="col-md-6">
         <h4>Section</h4>
         {% if sections %}
-        <select id="sectionSelector" class="form-control">
-            {% for section in sections %}
-            <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
-            {% endfor %}
-        </select>
+            <select id="sectionSelector" class="form-control">
+                {% for section in sections %}
+                <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
+                {% endfor %}
+            </select>
         {% else %}
-        {% if courses %}
-        There are no sections in this Course
-        {% else %}
-        Please select a course to see sections
-        {% endif %}
+            {% if courses %}
+                There are no sections in this Course
+            {% else %}
+                Please select a course to see sections
+            {% endif %}
         {% endif %}
     </div>
 </div>
-<h4 class="sub-header">Current round</h4>
-{% if rounds %}
-<h5 class="well well-sm">{% if not activeRound %}No round {% else %} Round {{activeRound}} is {% endif %}in
-    progress</h5>
-<div class="row">
-    <div class="col-md-2">
-        <select id="roundSelector" class="form-control">
-            {% for round in rounds %}
-            <option {% if activeRound== round.number %}selected="selected" {% endif %}>{{round.number}}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-2">
-        <button type="button" class="btn btn-default" onclick="makeActive()"
-                aria-label="Activate Round">
-            <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> Make Active
-        </button>
-    </div>
 </div>
-{% endif %}
-<h4 class="sub-header">Lead-in Question:</h4>
+</div>
+
+<!--Section features: Anonymity and Rounds-based discussion-->
+<div class="card">
+<div class="card-title">
+    <h4>Discussion Features</h4>
+</div>
+<div class="card-body">
+    {% if selectedSection %}
+    <div class="table-responsive">
+        <table class="table table-striped" id="features-table">
+            <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Enabled?</th>
+                <th></th>
+            </tr>
+            <tr>
+                <td>Anonymity</td>
+                <td>{{ anon }}</td>
+                <td>
+                    <form id="toggleAnonymityForm" action="/rounds">
+                        <input type="hidden" name="course" value="{{selectedCourse}}"/>
+                        <input type="hidden" name="section" value="{{selectedSection}}"/>
+                        <button type="submit" class="btn btn-success btn-sm">Toggle</button>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td>Rounds-based Structure</td>
+                <td>{{ round_structure }}</td>
+                <td>
+                    <form id="toggleRoundStructureForm" action="/rounds">
+                        <input type="hidden" name="course" value="{{selectedCourse}}"/>
+                        <input type="hidden" name="section" value="{{selectedSection}}"/>
+                        <button type="submit" class="btn btn-success btn-sm">Toggle</button>
+                    </form>
+                </td>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    {% endif %}
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">
+    <h4>Lead-in Question</h4>
+</div>
+<div class="card-body"> 
 {% if selectedSection %}
-{% if leadInQuestion %}
-<button type="button" class="btn btn-default" onclick="addQuestion()"
-        aria-label="Edit Question">
-    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit Question
-</button>
-<div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Round</th>
-            <th>Deadline (GMT)</th>
-            <th>Question</th>
-            <th>Options</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>{{leadInQuestion.number}}</td>
-            <td>{{leadInQuestion.deadline}}</td>
-            <td>{{leadInQuestion.quiz.question}}</td>
-            <td>
-                <ul class="list-group">
-                    {% for option in leadInQuestion.quiz.options %}
-                    <li class="list-group-item">{{option}}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+    {% if leadInQuestion %}
+        {% if leadInQuestion.deadline|str_to_date|since_epoch > now|since_epoch %}
+            <button type="button" class="btn btn-default" id="edit-leadin" aria-label="Edit Question">
+                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> 
+                Edit Question
+            </button>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table table-striped" id="leadin-question-table">
+                <thead>
+                    <tr>
+                        <th>Round</th>
+                        <th>Deadline (GMT)</th>
+                        <th>Question</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr {% if selectedSectionObject.current_round == 1 %} class="row-highlight" {% endif %} >
+                        <td>{{leadInQuestion.number}}</td>
+                        <td data-deadline="{{leadInQuestion.deadline}}">{{leadInQuestion.deadline}}</td>
+                        <td class="question md">{{leadInQuestion.quiz.question}}</td>
+                        <td class="options">
+                            <ul class="list-group">
+                                {% for option in leadInQuestion.quiz.options %}
+                                <li class="md list-group-item">{{option}}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <button type="button" class="btn btn-default" id="addLeadIn" aria-label="Add Question">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
+        </button>
+    {% endif %}
 {% else %}
-<button type="button" class="btn btn-default" onclick="addQuestion()" style=""
-        aria-label="Add Question">
-    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
-</button>
-{% endif %}
-{% else %}
+
 <p>Select a section to continue.</p>
 {% endif %}
-<h4 class="sub-header">Discussions:</h4>
-{% if leadInQuestion %}
-{% if discussionRounds %}
-{% if not summaryQuestion %}
-<button type="button" class="btn btn-default" onclick="addDiscussion()"
-        aria-label="Add Discussion">
-    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussion
-</button>
-{% endif %}
+    </div>
+</div>
+
+<!-- THIS IS THE START OF THE DISCUSSIONS BLOCK -->
+<div class="card">
+
+<div class="card-title">
+    <h4>Discussions</h4>
+</div>
+<div class="card-body">
+<div class="row">
+	<div class="col-xs-6 col-sm-2">
+		<label for="total_disc">Number of Rounds</label>
+        <input class="form-control" id="total_discussions" value="" name="total_discussions" type="tel">
+        <div id="total_dis_error" class="alert alert-danger special-alert" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong></strong>
+        </div>
+	</div>
+	<div class="col-xs-6 col-sm-2">
+		<label for="durration">Duration (hours)</label>
+        <input class="form-control" id="duration" name="duration" type="tel" value="24">
+        <div id="duration_error" class="alert alert-danger special-alert" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong></strong>
+        </div>
+	</div>
+    <!-- this is for dynamic rounds
+    <div class="col-xs-6 col-sm-2">
+        <label for="buffer">Buffer (hours)</label>
+        <input class="form-control" id="buffer" name="buffer" type="tel" value="4">
+        <div id="duration_error" class="alert alert-danger" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Invalid Duration!</strong>
+        </div>
+    </div>
+    -->
+</div>
+<div class="row">
+    <div class="col-xs-12 col-sm-12">
+        <form id="addRoundsForm" action="/rounds">
+            <input type="hidden" name="course" value="{{selectedCourse}}" />    
+            <input type="hidden" name="section" value="{{selectedSection}}" />
+            <button style="margin-top: 5px" type="submit" class="btn btn-default"
+                    aria-label="Add Discussion">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussions
+            </button>
+        </form>
+    </div>
+</div>
+<br>
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped" id="round-table">
         <thead>
         <tr>
+            <th>Remove</th>
             <th>Round</th>
+            <th>Start Time (GMT)</th>
             <th>Deadline (GMT)</th>
-            <th>Anonymous Round</th>
             <th>Description</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
-        {% for obj in discussionRounds %}
-        <tr>
-            <td>{{obj.number}}</td>
-            <td>{{obj.deadline}}</td>
-            <td>{{obj.is_anonymous}}</td>
-            <td>{{obj.description}}</td>
-            <td>
-                <button class="btn btn-default" aria-label="Edit Discussion"><span class="glyphicon glyphicon-pencil"
-                                                                                   aria-hidden="true"></span></button>
-            </td>
-        </tr>
-        {% endfor %}
+        {% if discussionRounds %}
+	        {% for obj in discussionRounds %}
+	        <tr id="round_{{obj.number}}" {% if selectedSectionObject.current_round == obj.number %} class="row-highlight" {% endif %} >
+                <td>
+                    <button data-section="{{selectedSection}}" data-course="{{selectedCourse}}" data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Remove Discussion" {% if obj.starttime|str_to_date|since_epoch < now|since_epoch %}disabled{% endif %}>
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+	            <td>{{obj.number}}</td>
+                <td class="round_starttime">{{obj.starttime|default('n/a')}} <input type="hidden" value="{{obj.starttime|default('n/a')}}" /></td>
+	            <td class="round_deadline">{{obj.deadline}} <input type="hidden" value="{{obj.deadline}}" /></td>
+	            <td class="round_description md">{{obj.description}} <input type="hidden" value="{{obj.description}}" /></td>
+	            <td>
+	                <button data-round-key="{{obj.number}}" class="btn btn-default edit-round" aria-label="Edit Discussion" {% if obj.starttime|str_to_date|since_epoch < now|since_epoch %}disabled{% endif %}>
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    </button>
+	            </td>
+	        </tr>
+	        {% endfor %}
+        {% endif %}
         </tbody>
     </table>
 </div>
-{% else %}
-<button type="button" class="btn btn-default" onclick="addDiscussion()" style=""
-        aria-label="Start Discussion">
-    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Start Discussion
-</button>
-{% endif %}
-{% else %}
-<p>Not started.</p>
-{% endif %}
-<h4 class="sub-header">Summary Question:</h4>
-{% if discussionRounds %}
+<!-- END OF THE DISCUSSION BLOCK -->
+</div>
+</div>
+
+
+<!-- START OF SUMMARY QUESTION BLOCK-->
+<div class="card">
+<div class="card-title">
+    <h4>Summary Question</h4>
+</div>
+<div class="card-body">
+
 {% if summaryQuestion %}
-<button type="button" class="btn btn-default" onclick="addLastQuestion()"
-        aria-label="Edit Question">
+<button type="button" class="btn btn-default" id="edit-summary" aria-label="Edit Question">
     <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit Question
 </button>
+{% endif%}
+
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped" id="summary-question-table">
         <thead>
         <tr>
             <th>Round</th>
@@ -160,41 +251,156 @@
         </thead>
         <tbody>
         <tr>
-            <td>{{summaryQuestion.number}}</td>
-            <td>{{summaryQuestion.deadline}}</td>
-            <td>{{summaryQuestion.quiz.question}}</td>
-            <td>
-                <ul class="list-group">
-                    {% for option in summaryQuestion.quiz.options %}
-                    <li class="list-group-item">{{option}}</li>
-                    {% endfor %}
-                </ul>
-            </td>
+            {% if summaryQuestion %}
+                <td>{{summaryQuestion.number}}</td>
+                <td data-deadline="{{summaryQuestion.deadline}}">{{summaryQuestion.deadline}}</td>
+                <td class="question md">{{summaryQuestion.quiz.question}}</td>
+                <td class="options">
+                    <ul class="list-group">
+                        {% for option in summaryQuestion.quiz.options %}
+                        <li class="list-group-item">{{option}}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            {% endif %}
         </tr>
         </tbody>
     </table>
 </div>
-{% else %}
-<button type="button" class="btn btn-default" onclick="addLastQuestion()" style=""
+
+{% if not summaryQuestion %}
+<button type="button" class="btn btn-default" id="addSummary" style=""
         aria-label="Add Question">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
 </button>
 {% endif %}
-{% else %}
-<p>Not started.</p>
-{% endif %}
 
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+</div>
+</div>
+
+
+{% if leadInQuestion %}
+    {% if selectedSectionObject.current_round == 0 %}
+    <div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>Round Activation Control</h2>
+                <hr>
+
+                <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#editEmailModal">
+                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                    Start Rounds
+                </button>
+
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-sm-6 col-sm-offset-3">
+                <h1>Round {{activeRound}} is now active.</h1>
+            </div>
+        </div>
+    {% endif%}
+{% endif %}
+</div>
+</div>
+<!-- END OF SUMMARY BLOCK-->
+
+{# 
+# Modals 
+#}
+
+{# Lead In Modal #}
+<div class="modal fade" id="leadInModal" tabindex="-1" role="dialog" aria-labelledby="leadInModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Please add the question</h4>
+                <h4 class="modal-title" id="leadInModalLabel">Please add the question</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;"
+                <form class="form-horizontal" id="leadInModalForm" method="post" style="text-align: center;"
                       action="/rounds">
+                    <input type="hidden" name="course" value="{{selectedCourse}}" />
+                    <input type="hidden" name="section" value="{{selectedSection}}" />
+
+                    <div class="form-group">
+                        <label for="endTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="endTime" class="form-control dateTimePicker" name="endTime" required="true" />
+                        </div>
+                    </div>
+                    <div id="buffer_entry" class="form-group">
+                        <label for="startBuffer" class="col-sm-2 control-label">Buffer</label>
+                        <div class="col-sm-10">
+                            <input id="startBuffer" type="tel" class="form-control" {% if leadInQuestion %}value="{{leadInQuestion.buffer_time}}"{% endif %} name="startBuffer" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputLeadInQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputLeadInQuestion" name="question"
+                                      placeholder="Please enter the question..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputLeadInOptions" class="col-sm-2 control-label">Number of options</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="inputLeadInOptions" name="options">
+                                <option value="0" selected="selected">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputLeadInOptions1" class="col-sm-2 control-label">Options: </label>
+                        <div class="col-sm-10">
+                            <div class="theOptions">
+                                {% if leadInQuestion %}
+                                    {% for option in leadInQuestion.quiz.options %}
+                                        <input type="text" class="form-control" id="inputLeadInOptions{{loop.index}}" name="Options{{loop.index}}"
+                                               style="margin-bottom: 10px" value="{{option}}" required="true" onkeyup="showPreviewLeadIn()">
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+                 <label for="previewPlaceholder" class="col-sm-2 control-label">Preview:</label> 
+                <div class="col-sm-10 previewPlaceholder" id="previewPlaceholder"></div> 
+                <hr/>
+            </div>
+            <div style="text-align: right; padding: 15px">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitLeadInQuestion">Submit Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Summary Modal #}
+<div class="modal fade" id="summaryModal" tabindex="-1" role="dialog" aria-labelledby="summaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="summaryModalLabel">Please add the question</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="summaryModalForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <input type="hidden" name="course" value="{{selectedCourse}}" />
+                    <input type="hidden" name="section" value="{{selectedSection}}" />
+                    <input type="hidden" name="nextRound" value="{{nextRound}}" />
                     <div class="form-group">
                         <label for="endTime" class="col-sm-2 control-label">End time</label>
                         <div class="col-sm-10">
@@ -202,50 +408,54 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputQuestion" class="col-sm-2 control-label">Question</label>
+                        <label for="inputSummaryQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" rows="3" id="inputQuestion" name="question"
+                            <textarea class="form-control" rows="3" id="inputSummaryQuestion" name="question"
                                       placeholder="Please enter the question..." required></textarea>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputOptions" class="col-sm-2 control-label">Number of options</label>
+                        <label for="inputSummaryOptions" class="col-sm-2 control-label">Number of options</label>
                         <div class="col-sm-10">
-                            <select class="form-control" id="inputOptions" name="options">
+                            <select class="form-control" id="inputSummaryOptions" name="options">
+                                <option value="0" selected="selected">0</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
-                                <option value="4" selected="selected">4</option>
+                                <option value="4">4</option>
                                 <option value="5">5</option>
                                 <option value="6">6</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputOptions1" class="col-sm-2 control-label">Options: </label>
-                        <div class="col-sm-10" id="optionsContainer">
-                            <input type="text" class="form-control" id="inputOptions1" name="Options1"
-                                   style="margin-bottom: 10px" required="true">
-                            <input type="text" class="form-control" id="inputOptions2" name="Options2"
-                                   style="margin-bottom: 10px" required="true">
-                            <input type="text" class="form-control" id="inputOptions3" name="Options3"
-                                   style="margin-bottom: 10px" required="true">
-                            <input type="text" class="form-control" id="inputOptions4" name="Options4"
-                                   style="margin-bottom: 10px" required="true">
+                        <label for="inputSummaryOptions1" class="col-sm-2 control-label">Options: </label>
+                        <div class="col-sm-10">
+                            <div class="theOptions">
+                                {% if summaryQuestion %}
+                                    {% for option in summaryQuestion.quiz.options %}
+                                        <input type="text" class="form-control" id="inputSummaryOptions{{loop.index}}" name="Options{{loop.index}}" style="margin-bottom: 10px" required="true" value="{{option}}" onkeyup="showPreviewSummary()">
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="hide"></button>
                 </form>
+                 <label for="previewPlaceholder" class="col-sm-2 control-label">Preview:</label> 
+                <div class="col-sm-10 previewPlaceholder" id="previewPlaceholder"></div> 
+                <hr/>
             </div>
-            <div class="modal-footer">
+            <div style="text-align: right; padding: 15px">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="submitQuestion()">Submit Question</button>
+                <button type="button" class="btn btn-primary" id="submitSummaryQuestion">Submit Question</button>
             </div>
         </div>
     </div>
 </div>
-{% if not summaryQuestion %}
-<div class="modal fade" id="discussionModal" tabindex="-1" role="dialog" aria-labelledby="discussionModalLabel"
+
+{# Edit Round Modal #}
+<div class="modal fade" id="editDiscussionModal" tabindex="-1" role="dialog" aria-labelledby="editDiscussionModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -255,8 +465,18 @@
                 <h4 class="modal-title" id="discussionModalLabel">Please add a description</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" id="discussionForm" method="post" style="text-align: center;"
+                <form class="form-horizontal" id="editDiscussionForm" method="post" style="text-align: center;"
                       action="/rounds">
+                    <input type="hidden" name="course" value="{{selectedCourse}}" />
+                    <input type="hidden" name="section" value="{{selectedSection}}" />
+                    <input type="hidden" name="action" value="edit_round" />
+                    <input type="hidden" name="round_id" value="" />
+                    <div class="form-group">
+                        <label for="discussionStartTime" class="col-sm-2 control-label">Start time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionStartTime" class="form-control dateTimePicker" name="discussionStartTime" required="true" />
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
                         <div class="col-sm-10">
@@ -264,20 +484,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">Anonymous discussion</label>
-                        <div class="col-sm-8 text-left">
-                            <label class="radio-inline">
-                                <input type="radio" name="anonymousDiscussion" id="anonymousYes" value="yes" checked> Yes
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="anonymousDiscussion" id="anonymousNo" value="no"> No
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputDiscussionQuestion" class="col-sm-2 control-label">Description</label>
+                        <label for="inputEditDiscussionDescription" class="col-sm-2 control-label">Description</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" rows="3" id="inputDiscussionQuestion"
+                            <textarea class="form-control" rows="3" id="inputEditDiscussionDescription"
                                       name="discussionQuestion" placeholder="Please enter a description..."
                                       required></textarea>
                         </div>
@@ -287,20 +496,65 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="submitDiscussion()">Submit Round</button>
+                <button type="button" class="btn btn-primary" id="submitEditDiscussion">Update Round</button>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
+
+
+
+{# Edit Email Modal #}
+<div class="modal fade" id="editEmailModal" tabindex="-1" role="dialog" aria-labelledby="editEmailModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editEmailModalLabel">Notification Email Message</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="editEmailForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <input type="hidden" name="course" value="{{selectedCourse}}" />
+                    <input type="hidden" name="section" value="{{selectedSection}}" />
+                    <input type="hidden" name="action" value="start" />
+                    
+                    <div class="form-group">
+                        <label for="subject" class="col-sm-2 control-label">Subject</label>
+                        <div class="col-sm-10">
+                            <input id="subject" class="form-control" name="subject" required="true" value="CONSIDER rounds have begun" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message" class="col-sm-2 control-label">Message</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputEditEmailMessage"
+                                      name="message"
+                                      required>The lead-in round for CONSIDER has begun. Please visit the following link to submit your answer: http://go.osu.edu/consider</textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitEmail">Activate & Send</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
 <script src="/js/moment.js"></script>
 <script src="/js/bootstrap-datetimepicker.js"></script>
+<script src="/js/showdown.min.js"></script>
+<script src="/js/instructor_rounds.js"></script>
 <link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-<script>
-
+<!-- NEW LOGICS -->
+<script type="text/javascript">
     $('#courseSelector').on('change', function () {
         location.href = "/rounds?course=" + this.value;
     });
@@ -308,141 +562,5 @@
     $('#sectionSelector').on('change', function () {
         location.href = "/rounds?course={{selectedCourse}}&section=" + this.value;
     });
-
-    var lastQuestion = false;
-
-    function addQuestion() {
-        lastQuestion = false;
-        $("#myModal").modal('show');
-    }
-
-    function addLastQuestion() {
-        lastQuestion = true;
-        $("#myModal").modal('show');
-    }
-
-    function submitQuestion() {
-        $("#modalForm").find('[type="submit"]').trigger('click');
-    }
-
-    function makeActive() {
-        r = $("#roundSelector").val();
-
-        $.post("/rounds", {
-            course: "{{selectedCourse}}", section: "{{selectedSection}}", round: r, action: 'activate'
-        }, function (data) {
-            if (data.charAt(0) == 'E') {
-                bootbox.alert(data.substring(1));
-            }
-            else {
-                bootbox.alert(data.substring(1), function () {
-                    location.reload();
-                });
-            }
-        });
-    }
-
-    $(".dateTimePicker").on('mouseenter', function() {
-        $(this).datetimepicker();
-    });
-
-    $("#modalForm").submit(function (event) {
-        event.preventDefault();
-        // First we need to check that a date has been selected
-        var $form = $(this),
-                question = $form.find("textarea").val(),
-                options = $form.find("select").val(),
-                url = $form.attr("action");
-
-        var optionVals = [];
-        for (var i = 1; i <= options; i++) {
-            var val = $("#inputOptions" + i).val();
-            optionVals.push(val);
-        }
-        optionVals = JSON.stringify(optionVals);
-
-        var time_val = moment(new Date($("#endTime").val())).format("YYYY-MM-DD[T]HH:MM");
-        console.log(question + options + time_val + optionVals);
-
-        if (!lastQuestion) {
-            // do the POST and get the callback
-            $.post(url, {
-                time: time_val, question: question, number: options, options: optionVals, course: "{{selectedCourse}}",
-                section: "{{selectedSection}}", round: 1, roundType: 'leadin', action: 'add'
-            }, function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data.substring(1));
-                }
-                else {
-                    bootbox.alert(data.substring(1), function () {
-                        location.reload();
-                    });
-                }
-            });
-        }
-        else {
-            // do the POST and get the callback
-            $.post(url, {
-                time: time_val, question: question, number: options, options: optionVals, course: "{{selectedCourse}}",
-                section: "{{selectedSection}}", round: '{{nextRound}}', roundType: 'summary', action: 'add'
-            }, function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data.substring(1));
-                }
-                else {
-                    bootbox.alert(data.substring(1), function () {
-                        location.reload();
-                    });
-                }
-            });
-        }
-    });
-
-    {% if not summaryQuestion %}
-    function addDiscussion() {
-        $("#discussionModal").modal('show');
-    }
-
-    function submitDiscussion() {
-        $("#discussionForm").find('[type="submit"]').trigger('click');
-    }
-
-    $("#discussionForm").submit(function (event) {
-        //Prevent the default behaviour
-        event.preventDefault();
-
-        //collect form elements
-        var $form = $(this),
-        time_val = moment(new Date($("#discussionEndTime").val())).format("YYYY-MM-DD[T]HH:MM"),
-                description = $form.find("textarea").val(),
-                anonymity = $('input[name="anonymousDiscussion"]:checked').val();
-                url = $form.attr("action");
-
-        // do the POST and get the callback
-        $.post(url, {
-            time: time_val, round: "{{nextRound}}", description: description, course: "{{selectedCourse}}",
-            section: "{{selectedSection}}", roundType: 'discussion', anonymity:anonymity, action: 'add'
-        }, function (data) {
-            if (data.charAt(0) == 'E') {
-                bootbox.alert(data.substring(1));
-            }
-            else {
-                bootbox.alert(data.substring(1), function () {
-                    location.reload();
-                });
-            }
-        });
-    });
-    {% endif %}
-
-    $("#inputOptions").change(function () {
-        var select = parseInt($('#inputOptions').val(), 10);
-        var html = '';
-        for (var i = 1; i <= select; i++) {
-            html += '<input type="text" class="form-control" id="inputOptions' + i + '" name="Options' + i + '" placeholder="Option ' + i + '" style="margin-bottom: 10px" required="true">';
-        }
-        $('#optionsContainer').empty().html(html);
-    }).change();
-
 </script>
 {% endblock %}

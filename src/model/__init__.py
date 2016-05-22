@@ -51,6 +51,10 @@ class Section(ndb.Model):
     """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if this section is active or not. """
+    is_anonymous = ndb.BooleanProperty(default=True, indexed=False)
+    """ Boolean. If ``True``, discussions in this `Section`_ are anonymous; if ``False``, identities are revealed."""
+    has_rounds = ndb.BooleanProperty(default=True, indexed=False)
+    """ Boolean. If ``True``, asynchronous, rounds-based discussion, else sequential """
 
 
 class Instructor(ndb.Model):
@@ -122,8 +126,6 @@ class Round(ndb.Model):
     """ Integer. Index of the round."""
     description = ndb.StringProperty(indexed=False)
     """ String. Description or brief instructions for the round."""
-    is_anonymous = ndb.BooleanProperty(default=True, indexed=False)
-    """ Boolean. If ``True``, this is an anonymous round; if ``False``, identities will be revealed."""
     is_quiz = ndb.BooleanProperty(default=False, indexed=False)
     """ Boolean. If ``True``, this is a quiz round (e.g., lead-in question); if ``False``, a discussion round."""
     quiz = ndb.StructuredProperty(Question, indexed=False)

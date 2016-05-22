@@ -151,7 +151,7 @@ class Rounds(webapp2.RequestHandler):
             template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
             template_values['rounds'] = section.current_round
-            template_values['show_name'] = not requested_round.is_anonymous
+            template_values['show_name'] = not section.is_anonymous
             logout_url = users.create_logout_url(self.request.uri)
             template_values['logouturl'] = logout_url
             template_values['curr_page'] = requested_round_number
@@ -254,7 +254,7 @@ class Rounds(webapp2.RequestHandler):
                     if s.email == _student:
                         # Grab their alias, email, comment, and response
                         comment = {'alias': s.alias,
-                                   'email': s.email,
+                                   'email': s.email, # TODO: Change to student's name
                                    'response': response.comment,
                                    'opinion': response.response
                                    }
