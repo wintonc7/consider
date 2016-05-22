@@ -1,0 +1,128 @@
+<div class="card-body">
+<div class="row">
+	<div class="col-xs-6 col-sm-2">
+		<label for="total_disc">Number of Rounds</label>
+        <input class="form-control" id="total_discussions" value="" name="total_discussions" type="tel">
+        <div id="total_dis_error" class="alert alert-danger special-alert" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong></strong>
+        </div>
+	</div>
+	<div class="col-xs-6 col-sm-2">
+		<label for="durration">Duration (hours)</label>
+        <input class="form-control" id="duration" name="duration" type="tel" value="24">
+        <div id="duration_error" class="alert alert-danger special-alert" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong></strong>
+        </div>
+	</div>
+    <!-- this is for dynamic rounds
+    <div class="col-xs-6 col-sm-2">
+        <label for="buffer">Buffer (hours)</label>
+        <input class="form-control" id="buffer" name="buffer" type="tel" value="4">
+        <div id="duration_error" class="alert alert-danger" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Invalid Duration!</strong>
+        </div>
+    </div>
+    -->
+</div>
+<div class="row">
+    <div class="col-xs-12 col-sm-12">
+        <form id="addRoundsForm" action="/rounds">
+            <input type="hidden" name="course" value="{{selectedCourse}}" />
+            <input type="hidden" name="section" value="{{selectedSection}}" />
+            <button style="margin-top: 5px" type="submit" class="btn btn-default"
+                    aria-label="Add Discussion">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Discussions
+            </button>
+        </form>
+    </div>
+</div>
+<br>
+<div class="table-responsive">
+    <table class="table table-striped" id="round-table">
+        <thead>
+        <tr>
+            <th>Remove</th>
+            <th>Round</th>
+            <th>Start Time (GMT)</th>
+            <th>Deadline (GMT)</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if discussionRounds %}
+	        {% for obj in discussionRounds %}
+	        <tr id="round_{{obj.number}}" {% if selectedSectionObject.current_round == obj.number %} class="row-highlight" {% endif %} >
+                <td>
+                    <button data-section="{{selectedSection}}" data-course="{{selectedCourse}}" data-round-key="{{obj.number}}" class="btn btn-default remove-round" aria-label="Remove Discussion" {% if obj.starttime|str_to_date|since_epoch < now|since_epoch %}disabled{% endif %}>
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+	            <td>{{obj.number}}</td>
+                <td class="round_starttime">{{obj.starttime|default('n/a')}} <input type="hidden" value="{{obj.starttime|default('n/a')}}" /></td>
+	            <td class="round_deadline">{{obj.deadline}} <input type="hidden" value="{{obj.deadline}}" /></td>
+	            <td class="round_description md">{{obj.description}} <input type="hidden" value="{{obj.description}}" /></td>
+	            <td>
+	                <button data-round-key="{{obj.number}}" class="btn btn-default edit-round" aria-label="Edit Discussion" {% if obj.starttime|str_to_date|since_epoch < now|since_epoch %}disabled{% endif %}>
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    </button>
+	            </td>
+	        </tr>
+	        {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+<!-- END OF THE DISCUSSION BLOCK -->
+</div>
+
+{# Edit Round Modal #}
+<div class="modal fade" id="editDiscussionModal" tabindex="-1" role="dialog" aria-labelledby="editDiscussionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="discussionModalLabel">Please add a description</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="editDiscussionForm" method="post" style="text-align: center;"
+                      action="/rounds">
+                    <input type="hidden" name="course" value="{{selectedCourse}}" />
+                    <input type="hidden" name="section" value="{{selectedSection}}" />
+                    <input type="hidden" name="action" value="edit_round" />
+                    <input type="hidden" name="round_id" value="" />
+                    <div class="form-group">
+                        <label for="discussionStartTime" class="col-sm-2 control-label">Start time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionStartTime" class="form-control dateTimePicker" name="discussionStartTime" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="discussionEndTime" class="col-sm-2 control-label">End time</label>
+                        <div class="col-sm-10">
+                            <input id="discussionEndTime" class="form-control dateTimePicker" name="discussionEndTime" required="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEditDiscussionDescription" class="col-sm-2 control-label">Description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="inputEditDiscussionDescription"
+                                      name="discussionQuestion" placeholder="Please enter a description..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitEditDiscussion">Update Round</button>
+            </div>
+        </div>
+    </div>
+</div>

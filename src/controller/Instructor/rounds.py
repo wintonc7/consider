@@ -156,6 +156,8 @@ class Rounds(webapp2.RequestHandler):
                 self.toggle_anonymity(instructor)
             elif action == 'toggle_round_structure':
                 self.toggle_round_structure(instructor)
+            elif action == 'save_seq_disc':
+                self.save_seq_disc(instructor)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Error! Unexpected action: ' + action, handler=self)
@@ -163,6 +165,14 @@ class Rounds(webapp2.RequestHandler):
                 # end
 
     # end post
+
+    def save_seq_disc(self, instructor):
+        course, section = utils.get_course_and_section_objs(self.request, instructor)
+        start_time = self.request.get('start_time')
+        end_time = self.request.get('end_time')
+        utils.log('start = ' + str(start_time) + ', end = ' + str(end_time))
+
+    # end save_seq_disc
 
     def toggle_anonymity(self, instructor):
         # So first we need to get at the course and section
