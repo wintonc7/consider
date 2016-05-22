@@ -33,16 +33,16 @@ class Sections(webapp2.RequestHandler):
 
         """
         # First, start by grabbing the section passed in from the database
-        _section = model.Section.get_by_id(section_name, parent=course.key)
+        section = model.Section.get_by_id(section_name, parent=course.key)
         # Double check that it doesn't already exist
-        if _section:
+        if section:
             # And send an error if it does
             utils.error(section_name + ' already exists', handler=self)
         else:
             # Otherwise, create it, save it to the database, and log it
-            _section = model.Section(parent=course.key, id=section_name)
-            _section.name = section_name
-            _section.put()
+            section = model.Section(parent=course.key, id=section_name)
+            section.name = section_name
+            section.put()
             utils.log(section_name + ' added', type='Success!')
         #end
     #end add_section

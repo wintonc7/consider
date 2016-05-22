@@ -406,7 +406,8 @@ $(document).ready(function () {
         event.preventDefault();
         var $form = $(this),
             startTime = moment($form.find("#startTimeSeqDisc").val()).format("YYYY-MM-DD[T]HH:mm"),
-            endTime = moment($form.find("#endTimeSeqDisc").val()).format("YYYY-MM-DD[T]HH:mm");
+            endTime = moment($form.find("#endTimeSeqDisc").val()).format("YYYY-MM-DD[T]HH:mm"),
+            description = $form.find("#descroptionSeqDisc").val();
         console.log('seqDiscussionModalForm' + '; startTime = ' + startTime);
 
         $.post($form.attr("action"),
@@ -415,7 +416,8 @@ $(document).ready(function () {
                 section: $form.find('[name="section"]').val(),
                 action: 'save_seq_disc',
                 start_time: startTime,
-                end_time: endTime
+                end_time: endTime,
+                description: description
             },
             function (data) {
                 if (data.charAt(0)=='E') {

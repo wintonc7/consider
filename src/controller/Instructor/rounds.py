@@ -98,6 +98,15 @@ class Rounds(webapp2.RequestHandler):
                 # end
             template_values['anon'] = 'Yes' if current_section.is_anonymous else 'No'
             template_values['round_structure'] = 'Yes' if current_section.has_rounds else 'No'
+
+            if not current_section.has_rounds:
+                # grab the seq_discussion object for this section
+                seq_discussion = model.SeqDiscussion.get_by_id(current_section.name, parent=current_section.key)
+                if seq_discussion:
+                    template_values['start_time_seq'] = seq_discussion.start_time
+                    template_values['end_time_seq'] = seq_discussion.end_time
+                    template_values['description_seq'] = seq_discussion.description
+
         # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
@@ -170,7 +179,22 @@ class Rounds(webapp2.RequestHandler):
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         start_time = self.request.get('start_time')
         end_time = self.request.get('end_time')
+        description = self.request.get('description')
         utils.log('start = ' + str(start_time) + ', end = ' + str(end_time))
+        if section.has_rounds:
+            utils.error('This section is supposed to have rounds-based discussions!', handler=self)
+        else:
+            # build the SeqDiscussion object and add it to the section
+            # First, try to extract the SeqDiscussion object
+            seq_discussion = model.SeqDiscussion.get_by_id(section.name, parent=section.key)
+            # if it does not exist, create it
+            if not seq_discussion:
+                seq_discussion = model.SeqDiscussion(parent=section.key, id=section.name)
+            seq_discussion.start_time = start_time
+            seq_discussion.end_time = end_time
+            seq_discussion.description = description
+            seq_discussion.put()
+            utils.log('seq_discussion object updated')
 
     # end save_seq_disc
 

@@ -158,6 +158,31 @@ class Response(ndb.Model):
     """ String. Email of the `Student`_ who is the author of this response."""
 
 
+class SeqDiscussion(ndb.Model):
+    """
+    .. _SeqDiscussion:
+
+    An object to represent sequential (non round-structured) discussions.
+    """
+    start_time = ndb.StringProperty(required=True, indexed=False)
+    end_time = ndb.StringProperty(required=True, indexed=False)
+    description = ndb.StringProperty(required=False, indexed=False)
+
+
+class SeqResponse(ndb.Model):
+    """
+    .. _SeqResponse:
+
+    An object to represent the sequential response.
+    """
+    index = ndb.IntegerProperty(required=True, indexed=True)
+    """ Integer. Index of the response. """
+    timestamp = ndb.StringProperty(required=True, indexed=True)
+    """ String. Timestamp at which the post was made. """
+    author = ndb.StringProperty(required=True)
+    """ String. Email of the `Student`_ who is the author of this post. """
+
+
 class Role:
     def __init__(self):
         pass
