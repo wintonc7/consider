@@ -33,7 +33,7 @@ class GroupResponses(webapp2.RequestHandler):
             return self.redirect('/')
         # end
 
-        # TODO: How do you show the seq. responses?
+        # TODO: Display seq. responses, like in response.py
 
         # Otherwise, create a logout url
         logout_url = users.create_logout_url(self.request.uri)

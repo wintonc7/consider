@@ -65,6 +65,26 @@
         {% for r in range(1, round+1) %}
         <div role="tabpanel" class="tab-pane fade {% if loop.first -%}in active{%- endif -%}" id="round_{{loop.index}}">
             <table class="table table-striped" id="table_{{loop.index}}">
+                {% if r==2 and seq_responses %}
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Index</th>
+                    <th>Student</th>
+                    <th>Post</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for seq_response in seq_responses %}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{seq_response.index}}</td>
+                    <td>{{seq_response.author}}</td>
+                    <td>{{seq_response.text}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                {% else %} <!--else of if r == 2 .. -->
                 {% if responses[r|string] %}
                 <thead>
                 <tr>
@@ -76,6 +96,7 @@
                     <th>Summary</th>
                 </tr>
                 </thead>
+                {% endif %} <!-- end if responses[..] -->
                 <tbody>
                 {% for response in responses[r|string] %}
                 <tr>
@@ -92,13 +113,11 @@
                     </td>
                     <td>{{response.summary}}</td>
                 </tr>
-                {% else %}
-                No responses submitted yet.
-                {% endfor %}
+                {% else %} <!-- else of for responses in .. -->
+                <tr><td>No responses yet.</td></tr>
+                {% endfor %} <!-- end for responses in .. -->
+                {% endif %} <!--end of if r == 2-->
                 </tbody>
-                {% else %}
-                <br>No responses yet.
-                {% endif %}
             </table>
         </div>
         {% endfor %}

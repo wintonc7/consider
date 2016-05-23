@@ -77,7 +77,7 @@ def error(message, handler=None):
           Handler to post the same message back to user.
 
     """
-    log(message, type='E', handler=handler)
+    log(message, type='E', handler=handler)  # FIXME: E vs Error!
 
 
 def get_role_user():
@@ -388,12 +388,13 @@ def send_mail(senders_email, section, subject, message):
 
 
 def get_student_info(email,students):
-    for student in students:
-        if student.email == email:
-            return student
+    for student_info in students:
+        if student_info.email == email:
+            return student_info
     return None
 
-# end 
+
+# end
 
 
 # Simple class to serialize Round objects

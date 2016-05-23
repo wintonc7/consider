@@ -31,9 +31,7 @@ class Responses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
-
-        # TODO: How do you show the seq. responses?
+        # end
 
         # Create logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -42,7 +40,7 @@ class Responses(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # And grab all the other courses and sections for this instructor
         template_values = utils.get_template_all_courses_and_sections(
-                            instructor, course_name, selected_section_name)
+            instructor, course_name, selected_section_name)
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -54,20 +52,28 @@ class Responses(webapp2.RequestHandler):
             resp = {}
             # And loop over the number of rounds (indexed at 1 for lead-in)
             for i in range(1, current_section.rounds + 1):
-                response = model.Response.query(
-                        ancestor=model.Round.get_by_id(i, parent=current_section.key).key).fetch()
-                # response is a list of all the responses for the round i
-                if response:
-                    resp[str(i)] = response
-                #end
-            #end
-            # Add the responses to the template values
-            template_values['responses'] = resp
-        #end
+                # if seq. discussion and round==2, grab all the groups
+                if not current_section.has_rounds and i == 2:
+                    # extract all responses in each group
+                    groups = model.Group.query(ancestor=current_section.key).fetch()
+                    all_seq_responses = []
+                    for g in groups:
+                        seq_responses = model.SeqResponse.query(ancestor=g.key).order(model.SeqResponse.index).fetch()
+                        all_seq_responses += seq_responses
+                    template_values['seq_responses'] = all_seq_responses
+                else:
+                    round_i = model.Round.get_by_id(i, parent=current_section.key)
+                    response = model.Response.query(ancestor=round_i.key).fetch()
+                    # response is a list of all the responses for the round i
+                    if response:
+                        resp[str(i)] = response
+                    # Add the responses to the template values
+                    template_values['responses'] = resp
+        # end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/responses.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class Responses
+# end class Responses

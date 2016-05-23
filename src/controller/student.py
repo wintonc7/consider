@@ -72,7 +72,7 @@ class Rounds(webapp2.RequestHandler):
         HTTP POST method to submit the response.
         """
         # First, check that the logged in user is a student
-        student = utils.check_privilege(model.Role.student)
+        student = model.Student(utils.check_privilege(model.Role.student))
         if not student:
             # Redirect home if not a student
             return self.redirect('/home')
@@ -92,7 +92,8 @@ class Rounds(webapp2.RequestHandler):
                     current_round = model.Round.get_by_id(section.current_round, parent=section.key)
                     # And double check that it's valid
                     if current_round:
-                        # If this is a quiz round or if this section has roudns based discussions, save it in the usual way
+                        # If this is a quiz round or if this section has roudns based discussions,
+                        # save it in the usual way
                         if section.has_rounds or current_round.is_quiz:
                             self.save_submission(student, current_round)
                         else:
