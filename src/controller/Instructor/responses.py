@@ -33,6 +33,8 @@ class Responses(webapp2.RequestHandler):
             return self.redirect('/')
         #end
 
+        # TODO: How do you show the seq. responses?
+
         # Create logout url
         logout_url = users.create_logout_url(self.request.uri)
         # And grab the course and section name from the page

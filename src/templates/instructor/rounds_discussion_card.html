@@ -1,31 +1,22 @@
 <div class="card-body">
+{% if round_structure=='Yes' or not discussionRounds %}
 <div class="row">
 	<div class="col-xs-6 col-sm-2">
-		<label for="total_disc">Number of Rounds</label>
-        <input class="form-control" id="total_discussions" value="" name="total_discussions" type="tel">
+		<label for="total_discussions">Number of Rounds</label>
+        <input class="form-control" id="total_discussions" value="1" name="total_discussions" type="number" min="1" {%- if round_structure=='Yes' %}max="9"{%-else-%}max="1"{%-endif-%}>
         <div id="total_dis_error" class="alert alert-danger special-alert" role="alert">
             <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <strong></strong>
         </div>
 	</div>
 	<div class="col-xs-6 col-sm-2">
-		<label for="durration">Duration (hours)</label>
-        <input class="form-control" id="duration" name="duration" type="tel" value="24">
+		<label for="duration">Duration (hours)</label>
+        <input class="form-control" id="duration" name="duration" type="number" value="24" min="1">
         <div id="duration_error" class="alert alert-danger special-alert" role="alert">
             <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <strong></strong>
         </div>
 	</div>
-    <!-- this is for dynamic rounds
-    <div class="col-xs-6 col-sm-2">
-        <label for="buffer">Buffer (hours)</label>
-        <input class="form-control" id="buffer" name="buffer" type="tel" value="4">
-        <div id="duration_error" class="alert alert-danger" role="alert">
-            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Invalid Duration!</strong>
-        </div>
-    </div>
-    -->
 </div>
 <div class="row">
     <div class="col-xs-12 col-sm-12">
@@ -40,6 +31,8 @@
     </div>
 </div>
 <br>
+{% endif %}
+{% if discussionRounds %}
 <div class="table-responsive">
     <table class="table table-striped" id="round-table">
         <thead>
@@ -53,7 +46,7 @@
         </tr>
         </thead>
         <tbody>
-        {% if discussionRounds %}
+
 	        {% for obj in discussionRounds %}
 	        <tr id="round_{{obj.number}}" {% if selectedSectionObject.current_round == obj.number %} class="row-highlight" {% endif %} >
                 <td>
@@ -72,10 +65,10 @@
 	            </td>
 	        </tr>
 	        {% endfor %}
-        {% endif %}
         </tbody>
     </table>
 </div>
+{% endif %} <!-- ./ if discussion_rounds -->
 <!-- END OF THE DISCUSSION BLOCK -->
 </div>
 

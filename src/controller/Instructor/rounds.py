@@ -99,14 +99,6 @@ class Rounds(webapp2.RequestHandler):
             template_values['anon'] = 'Yes' if current_section.is_anonymous else 'No'
             template_values['round_structure'] = 'Yes' if current_section.has_rounds else 'No'
 
-            if not current_section.has_rounds:
-                # grab the seq_discussion object for this section
-                seq_discussion = model.SeqDiscussion.get_by_id(current_section.name, parent=current_section.key)
-                if seq_discussion:
-                    template_values['start_time_seq'] = seq_discussion.start_time
-                    template_values['end_time_seq'] = seq_discussion.end_time
-                    template_values['description_seq'] = seq_discussion.description
-
         # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
@@ -165,8 +157,6 @@ class Rounds(webapp2.RequestHandler):
                 self.toggle_anonymity(instructor)
             elif action == 'toggle_round_structure':
                 self.toggle_round_structure(instructor)
-            elif action == 'save_seq_disc':
-                self.save_seq_disc(instructor)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Error! Unexpected action: ' + action, handler=self)
@@ -175,54 +165,8 @@ class Rounds(webapp2.RequestHandler):
 
     # end post
 
-    def save_seq_disc(self, instructor):
-        course, section = utils.get_course_and_section_objs(self.request, instructor)
-        start_time = self.request.get('start_time')
-        end_time = self.request.get('end_time')
-        description = self.request.get('description')
-        utils.log('start = ' + str(start_time) + ', end = ' + str(end_time))
-        if section.has_rounds:
-            utils.error('This section is supposed to have rounds-based discussions!', handler=self)
-        else:
-            # First, some sanity checks
-            # 1. Make sure this is not the first round being added
-            initial_question = model.Round.query(ancestor=section.key).filter(model.Round.number == 1).get()
-            if not initial_question:
-                utils.error('Add the initial question first.', handler=self)
-                return
-            # 2. And that start time of discussion is after the initial question's deadline
-            if utils.convert_time(initial_question.deadline) > utils.convert_time(start_time):
-                utils.error('Start time cannot be before leadin question\'s deadline.', handler=self)
-                return
-            # 3. And end time is before summary's start, if summary exists
-            summary_question = model.Round.query(ancestor=section.key).filter(
-                model.Round.number == 2).get()  # Assuming summary's number is always 2 for seqDiscussions
-            if summary_question and utils.convert_time(summary_question.starttime) < utils.convert_time(end_time):
-                utils.error('End time cannot be after summary question\'s start time.', handler=self)
-                return
-            # 4. No deadline in the past!
-            if datetime.datetime.now() > utils.convert_time(end_time):
-                utils.error('Cannot create deadline in the past.', handler=self)
-                return
-            # 5. start time before end time
-            if utils.convert_time(start_time) >= utils.convert_time(end_time):
-                utils.error('Start time cannot be after end time.', handler=self)
-                return
 
-            # Try to fetch the SeqDiscussion object for this section
-            seq_discussion = model.SeqDiscussion.get_by_id(section.name, parent=section.key)
-            # if it does not exist, create it
-            if not seq_discussion:
-                seq_discussion = model.SeqDiscussion(parent=section.key, id=section.name)
-            seq_discussion.start_time = start_time
-            seq_discussion.end_time = end_time
-            seq_discussion.description = description
-            seq_discussion.put()
-            utils.log('seq_discussion object updated')
-
-    # end save_seq_disc
-
-    def toggle_anonymity(self, instructor):
+    def toggle_anonymity(self, instructor):  # TODO: when to disable it?
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         if section:
@@ -234,7 +178,7 @@ class Rounds(webapp2.RequestHandler):
 
     # end toggle_anonymity
 
-    def toggle_round_structure(self, instructor):
+    def toggle_round_structure(self, instructor):  # TODO: when to disable it?
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         if section:
@@ -350,6 +294,7 @@ class Rounds(webapp2.RequestHandler):
         # We'll simply use unix epoch as the start time for leadin questions
         epoch = datetime.datetime(1970, 1, 1)
         round_obj.starttime = utils.convert_time(epoch)
+        # TODO: Add start_time field for leadin and summary rounds too, and show it on the page
         # Now we need to check if there are more rounds
         if rounds and len(rounds) > 1:
             # Discussion directly after the lead-in will always be index 1

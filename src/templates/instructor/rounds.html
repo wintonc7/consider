@@ -144,11 +144,7 @@
     <h4>Discussions</h4>
 </div>
 
-{% if round_structure=='Yes' %}
-    {% include '/instructor/discussion_card_body_rounds.html' %}
-{% else %}
-    {% include '/instructor/discussion_card_body_sequential.html' %}
-{% endif %}
+{% include '/instructor/rounds_discussion_card.html' %}
 
 </div> <!-- END ./div class=card for Discussion Block -->
 

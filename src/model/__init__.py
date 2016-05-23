@@ -159,17 +159,6 @@ class Response(ndb.Model):
     """ String. Email of the `Student`_ who is the author of this response."""
 
 
-class SeqDiscussion(ndb.Model):
-    """
-    .. _SeqDiscussion:
-
-    An object to represent sequential (non round-structured) discussions.
-    """
-    start_time = ndb.StringProperty(required=True, indexed=False)
-    end_time = ndb.StringProperty(required=True, indexed=False)
-    description = ndb.StringProperty(required=False, indexed=False)
-
-
 class SeqResponse(ndb.Model):
     """
     .. _SeqResponse:

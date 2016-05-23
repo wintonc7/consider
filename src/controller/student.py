@@ -88,37 +88,37 @@ class Rounds(webapp2.RequestHandler):
                 # And double check that it's valid
 
                 if section:
-                    if section.has_rounds:
-                        # Grab the current round from the database
-                        current_round = model.Round.get_by_id(section.current_round, parent=section.key)
-                        # And double check that it's valid
-                        if not current_round:
-                            # Error if not
-                            utils.error('Sorry! The round is not visible, please try again later.', handler=self)
-                        else:
+                    # Grab the current round from the database
+                    current_round = model.Round.get_by_id(section.current_round, parent=section.key)
+                    # And double check that it's valid
+                    if current_round:
+                        # If this is a quiz round or if this section has roudns based discussions, save it in the usual way
+                        if section.has_rounds or current_round.is_quiz:
                             self.save_submission(student, current_round)
-                    else:
-                        # Seq Discussion
-                        # 1. Make sure the author email passed from view is same as current student's email
-                        author_email = student.email
-                        student_info = utils.get_student_info(author_email, section.students)
-                        group_id = student_info.group
-                        group = model.Group.get_by_id(id=group_id, parent=section.key)
-
-                        # 2. create the post in that group
-                        if group:
-                            post = model.SeqResponse(parent=group.key)
-                            post.author = author_email
-                            post.author_alias = student_info.alias
-                            post.timestamp = str(datetime.datetime.now())
-                            post.text = self.request.get('text')
-                            post.index = group.num_seq_responses + 1
-                            post.put()
-                            group.num_seq_responses += 1
-                            group.put()
-                            utils.log('Post created:' + str(post))
                         else:
-                            utils.error('Group is null')
+                            # Otherwise, save as a Seq Discussion
+                            # 1. Make sure the author email passed from view is same as current student's email
+                            author_email = student.email
+                            student_info = utils.get_student_info(author_email, section.students)
+                            group_id = student_info.group
+                            group = model.Group.get_by_id(id=group_id, parent=section.key)
+
+                            # 2. create the post in that group
+                            if group:
+                                post = model.SeqResponse(parent=group.key)
+                                post.author = author_email
+                                post.author_alias = student_info.alias
+                                post.timestamp = str(datetime.datetime.now())
+                                post.text = self.request.get('text')
+                                post.index = group.num_seq_responses + 1
+                                post.put()
+                                group.num_seq_responses += 1
+                                group.put()
+                                utils.log('Post created:' + str(post))
+                            else:
+                                utils.error('Group is null')
+                    else:
+                        utils.error('Sorry! The round is not visible, please try again later.', handler=self)
                 else:  # section is null
                     utils.error('Section is null', handler=self)
             except Exception as e:
@@ -131,11 +131,6 @@ class Rounds(webapp2.RequestHandler):
     # end post
 
     def render_template(self, student, section):
-        # If the discussion is sequential, render appropriate page
-        if not section.has_rounds:
-            self.render_seq_discussion(student, section)
-            return
-
         # update the database to the current round based on time
         database_round = utils.get_current_round(section)
         # Get the requested round number from the page
@@ -186,10 +181,15 @@ class Rounds(webapp2.RequestHandler):
                 # And set the right template
                 template = utils.jinja_env().get_template('students/round.html')
             else:
-                # Otherwise, set up template values for discussion round
-                self.discussion_view_template(student, section, requested_round_number, template_values)
-                # And set the right template
-                template = utils.jinja_env().get_template('students/discussion.html')
+                # Otherwise, set up template values for appropriate discussion round
+                if section.has_rounds:
+                    self.discussion_view_template(student, section, requested_round_number, template_values)
+                    # And set the right template
+                    template = utils.jinja_env().get_template('students/discussion.html')
+                else:
+                    self.seq_discussion_view_template(student, section, template_values)
+                    template_values['description'] = requested_round.description
+                    template = utils.jinja_env().get_template('students/seq_discussion.html')
             # end
             # Now, render it.
             self.response.write(template.render(template_values))
@@ -197,19 +197,7 @@ class Rounds(webapp2.RequestHandler):
 
     # end render_templates
 
-    def render_seq_discussion(self, student, section):
-        template_values = {}
-        # TODO: factor out the common ones
-        template_values['rounds'] = 0
-        seq_discussion = model.SeqDiscussion.get_by_id(id=section.name, parent=section.key)
-        deadline = utils.convert_time(seq_discussion.end_time)
-        template_values['expired'] = deadline < datetime.datetime.now()
-        template_values['deadline'] = seq_discussion.end_time
-        template_values['description'] = seq_discussion.description
-        template_values['sectionKey'] = self.request.get('section')
-        template_values['show_name'] = not section.is_anonymous
-        template_values['logouturl'] = users.create_logout_url(self.request.uri)
-
+    def seq_discussion_view_template(self, student, section, template_values):
         student_info = utils.get_student_info(student.email, section.students)
         if student_info:
             # 1. Grab student's alias and group from db
@@ -223,10 +211,12 @@ class Rounds(webapp2.RequestHandler):
                 # 3. Send all the posts to the template
                 template_values['posts'] = posts
 
-        template = utils.jinja_env().get_template('students/seq_discussion.html')
-        self.response.write(template.render(template_values))
+                # 4. Grab all posts from the previous round (leadin)
+                leadin = model.Round.get_by_id(1, parent=section.key)
+                initial_answers = self.group_comments(group, section, leadin)
+                template_values['initial_answers'] = initial_answers
 
-    # end render_seq_discussion
+    # end seq_discussion_view_template
 
 
     def quiz_view_template(self, student, rround, template_values):
@@ -247,21 +237,10 @@ class Rounds(webapp2.RequestHandler):
     # end quiz_view_template
 
     def discussion_view_template(self, student, section, round_number, template_values):
-        # Init group_id and alias to "null" values
-        group_id = 0
-        # Loop over all the students in the section
-        for _student in section.students:
-            # And find the email that matches the current student
-            if _student.email == student.email:
-                # And grab the group and alias from there
-                group_id = _student.group
-                template_values['alias'] = _student.alias
-                break
-                # end
-        # end
-        # Double check that the student was found in this section
-        if group_id > 0 and template_values['alias']:
-            # Now grab the actual group from the db
+        student_info = utils.get_student_info(student.email, section.students)
+        if student_info:
+            template_values['alias'] = student_info.alias
+            group_id = student_info.group
             group = model.Group.get_by_id(group_id, parent=section.key)
             # Double check that it was found
             if group:

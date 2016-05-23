@@ -18,10 +18,29 @@
             {% if description %}
             <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
             {% endif %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Initial Answers</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="initial_answers_table">
+                            <tbody>
+                            {% for answer in initial_answers %}
+                            <tr>
+                                <th style="text-align: left">{{answer.email if show_name else answer.alias}}</th>
+                                <td style="text-align: left">{{answer.response}}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             {%- for post in posts -%}
             <div class="card">
                 <div class="card-title">
-                    <h4 style="text-align: left">#{{post.index}} &mdash; {%- if show_name -%}{{post.author}}{%- else -%}{{post.author_alias}}{%- endif -%}</h4>
+                    <h4 style="text-align: left">#{{post.index}} &mdash; {{post.author if show_name else post.author_alias}}</h4>
                 </div>
                 <div class="card-body" style="text-align: left">
                     {{post.text}}
