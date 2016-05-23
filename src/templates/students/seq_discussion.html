@@ -31,7 +31,11 @@
         </div><!-- ./card-body -->
     </div><!-- ./card -->
     <form id="seqDiscussionForm" method="post" action="/student_rounds">
-        <button type="submit" id="seqDiscussionButton" class="btn btn-lg btn-success">Submit</button>
+        <textarea class="form-control" rows="5" id="seqDiscussionPost"
+                  placeholder="Enter your response here" required {% if expired -%}
+                  disabled="true" {%- endif -%}></textarea>
+
+        <button type="submit" id="seqDiscussionButton" class="btn btn-lg btn-success" style="margin-top: 15px"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
     </form>
 </div><!-- ./container -->
 {% endblock content %}
@@ -47,7 +51,7 @@
         $.post(url,
                 {
                     section: '{{sectionKey}}',
-                    text: 'Dummy Text'
+                    text: $form.find('textarea').val()
                 },
                 function (data) {
                     if (data.charAt(0) == 'E') {

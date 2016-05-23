@@ -63,4 +63,5 @@ target/
 
 # Temporary, generated files
 temp/
+bower_components/
 index.yaml

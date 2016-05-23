@@ -24,8 +24,18 @@ $(document).ready(function () {
     });
 
     $('#addSequentialDiscussion').click(function () {
-        console.log('add or edit');
         $('#seqDiscussionModal').modal('show');
+    });
+
+    $('#editSequentialDiscussion').click(function () {
+        var modal = $('#seqDiscussionModal'),
+            start_time = $('#startTimeSeq').text(),
+            end_time = $('#endTimeSeq').text(),
+            description = $('#descriptionSeq').text();
+        modal.find('#startTimeSeqDisc').val(moment(start_time).format("MM/DD/YYYY hh:mm A"));
+        modal.find('#endTimeSeqDisc').val(moment(end_time).format("MM/DD/YYYY hh:mm A"));
+        modal.find('#descriptionSeqDisc').val(description);
+        modal.modal('show');
     });
 
     $('#submitSummaryQuestion').click(function () {
@@ -407,7 +417,7 @@ $(document).ready(function () {
         var $form = $(this),
             startTime = moment($form.find("#startTimeSeqDisc").val()).format("YYYY-MM-DD[T]HH:mm"),
             endTime = moment($form.find("#endTimeSeqDisc").val()).format("YYYY-MM-DD[T]HH:mm"),
-            description = $form.find("#descroptionSeqDisc").val();
+            description = $form.find("#descriptionSeqDisc").val();
         console.log('seqDiscussionModalForm' + '; startTime = ' + startTime);
 
         $.post($form.attr("action"),
@@ -420,7 +430,7 @@ $(document).ready(function () {
                 description: description
             },
             function (data) {
-                if (data.charAt(0)=='E') {
+                if (data.charAt(0) == 'E') {
                     bootbox.alert(data);
                 } else {
                     location.reload();

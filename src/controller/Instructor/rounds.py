@@ -184,8 +184,32 @@ class Rounds(webapp2.RequestHandler):
         if section.has_rounds:
             utils.error('This section is supposed to have rounds-based discussions!', handler=self)
         else:
-            # build the SeqDiscussion object and add it to the section
-            # First, try to extract the SeqDiscussion object
+            # First, some sanity checks
+            # 1. Make sure this is not the first round being added
+            initial_question = model.Round.query(ancestor=section.key).filter(model.Round.number == 1).get()
+            if not initial_question:
+                utils.error('Add the initial question first.', handler=self)
+                return
+            # 2. And that start time of discussion is after the initial question's deadline
+            if utils.convert_time(initial_question.deadline) > utils.convert_time(start_time):
+                utils.error('Start time cannot be before leadin question\'s deadline.', handler=self)
+                return
+            # 3. And end time is before summary's start, if summary exists
+            summary_question = model.Round.query(ancestor=section.key).filter(
+                model.Round.number == 2).get()  # Assuming summary's number is always 2 for seqDiscussions
+            if summary_question and utils.convert_time(summary_question.starttime) < utils.convert_time(end_time):
+                utils.error('End time cannot be after summary question\'s start time.', handler=self)
+                return
+            # 4. No deadline in the past!
+            if datetime.datetime.now() > utils.convert_time(end_time):
+                utils.error('Cannot create deadline in the past.', handler=self)
+                return
+            # 5. start time before end time
+            if utils.convert_time(start_time) >= utils.convert_time(end_time):
+                utils.error('Start time cannot be after end time.', handler=self)
+                return
+
+            # Try to fetch the SeqDiscussion object for this section
             seq_discussion = model.SeqDiscussion.get_by_id(section.name, parent=section.key)
             # if it does not exist, create it
             if not seq_discussion:
