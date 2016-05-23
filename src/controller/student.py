@@ -81,38 +81,61 @@ class Rounds(webapp2.RequestHandler):
         # First, grab the section key from the page
         section_key = self.request.get('section')
         # Double check that we actually got a section key
-        if not section_key:
-            # Error if not
-            utils.error('Invalid Parameters: section_key is null', handler=self)
-        else:
+        if section_key:
             try:
                 # Grab the section from the database
                 section = ndb.Key(urlsafe=section_key).get()
                 # And double check that it's valid
-                if not section:
-                    # Error if not
-                    utils.error('Section is null', handler=self)
-                else:
-                    # Grab the current round from the database
-                    current_round = model.Round.get_by_id(section.current_round, parent=section.key)
-                    # And double check that it's valid
-                    if not current_round:
-                        # Error if not
-                        utils.error('Sorry! The round is not visible, please try again later.', handler=self)
+
+                if section:
+                    if section.has_rounds:
+                        # Grab the current round from the database
+                        current_round = model.Round.get_by_id(section.current_round, parent=section.key)
+                        # And double check that it's valid
+                        if not current_round:
+                            # Error if not
+                            utils.error('Sorry! The round is not visible, please try again later.', handler=self)
+                        else:
+                            self.save_submission(student, current_round)
                     else:
-                        self.save_submission(student, current_round)
-                        # end
-                        # end
-            except:
-                utils.error('Sorry! There was some error submitting your response please try again later.',
-                            handler=self)
-                # end
-                # end
-                # end
+                        # Seq Discussion
+                        # 1. Make sure the author email passed from view is same as current student's email
+                        author_email = student.email
+                        student_info = utils.get_student_info(author_email, section.students)
+                        group_id = student_info.group
+                        group = model.Group.get_by_id(id=group_id, parent=section.key)
+
+                        # 2. create the post in that group
+                        if group:
+                            post = model.SeqResponse(parent=group.key)
+                            post.author = author_email
+                            post.author_alias = student_info.alias
+                            post.timestamp = str(datetime.datetime.now())
+                            post.text = self.request.get('text')
+                            post.index = group.num_seq_responses + 1
+                            post.put()
+                            group.num_seq_responses += 1
+                            group.put()
+                            utils.log('Post created:' + str(post))
+                        else:
+                            utils.error('Group is null')
+                else:  # section is null
+                    utils.error('Section is null', handler=self)
+            except Exception as e:
+                utils.error(
+                    'Sorry! There was some error submitting your response please try again later. Exception: ' + e.message,
+                    handler=self)  # TODO: use exceptions in all classes?
+        else:
+            utils.error('Invalid Parameters: section_key is null', handler=self)
 
     # end post
 
     def render_template(self, student, section):
+        # If the discussion is sequential, render appropriate page
+        if not section.has_rounds:
+            self.render_seq_discussion(student, section)
+            return
+
         # update the database to the current round based on time
         database_round = utils.get_current_round(section)
         # Get the requested round number from the page
@@ -174,6 +197,38 @@ class Rounds(webapp2.RequestHandler):
 
     # end render_templates
 
+    def render_seq_discussion(self, student, section):
+        template_values = {}
+        # TODO: factor out the common ones
+        template_values['rounds'] = 0
+        seq_discussion = model.SeqDiscussion.get_by_id(id=section.name, parent=section.key)
+        deadline = utils.convert_time(seq_discussion.end_time)
+        template_values['expired'] = deadline < datetime.datetime.now()
+        template_values['deadline'] = seq_discussion.end_time
+        template_values['description'] = seq_discussion.description
+        template_values['sectionKey'] = self.request.get('section')
+        template_values['show_name'] = not section.is_anonymous
+        template_values['logouturl'] = users.create_logout_url(self.request.uri)
+
+        student_info = utils.get_student_info(student.email, section.students)
+        if student_info:
+            # 1. Grab student's alias and group from db
+            template_values['alias'] = student_info.alias
+            group_id = student_info.group
+            group = model.Group.get_by_id(group_id, parent=section.key)
+            if group:
+                # 2. Extract all the posts in that group from db
+                posts = model.SeqResponse.query(ancestor=group.key).order(model.SeqResponse.index).fetch()
+                utils.log('Posts: ' + str(posts))
+                # 3. Send all the posts to the template
+                template_values['posts'] = posts
+
+        template = utils.jinja_env().get_template('students/seq_discussion.html')
+        self.response.write(template.render(template_values))
+
+    # end render_seq_discussion
+
+
     def quiz_view_template(self, student, rround, template_values):
         # Grab the response for this round by this student
         response = model.Response.get_by_id(student.email, parent=rround.key)
@@ -192,23 +247,22 @@ class Rounds(webapp2.RequestHandler):
     # end quiz_view_template
 
     def discussion_view_template(self, student, section, round_number, template_values):
-        # Init group and alias to "null" values
-        group = 0
-        alias = None
+        # Init group_id and alias to "null" values
+        group_id = 0
         # Loop over all the students in the section
         for _student in section.students:
             # And find the email that matches the current student
             if _student.email == student.email:
                 # And grab the group and alias from there
-                group = _student.group
+                group_id = _student.group
                 template_values['alias'] = _student.alias
                 break
                 # end
         # end
         # Double check that the student was found in this section
-        if group > 0 and template_values['alias']:
+        if group_id > 0 and template_values['alias']:
             # Now grab the actual group from the db
-            group = model.Group.get_by_id(group, parent=section.key)
+            group = model.Group.get_by_id(group_id, parent=section.key)
             # Double check that it was found
             if group:
                 # Depending on round number, we have to grab from
@@ -254,7 +308,7 @@ class Rounds(webapp2.RequestHandler):
                     if s.email == _student:
                         # Grab their alias, email, comment, and response
                         comment = {'alias': s.alias,
-                                   'email': s.email, # TODO: Change to student's name
+                                   'email': s.email,  # TODO: Change to student's name
                                    'response': response.comment,
                                    'opinion': response.response
                                    }

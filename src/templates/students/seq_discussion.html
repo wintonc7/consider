@@ -1,0 +1,62 @@
+{% extends "layouts/student_base.html" %}
+
+{% block title %}| Discussion{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link href="/css/discussion.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="card">
+        <div class="card-title">
+            <h1 class="lead">Welcome {{alias}}</h1>
+        </div>
+        <div class="card-body">
+            {% if description %}
+            <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
+            {% endif %}
+            {%- for post in posts -%}
+            <div class="card">
+                <div class="card-title">
+                    <h4 style="text-align: left">#{{post.index}} &mdash; {%- if show_name -%}{{post.author}}{%- else -%}{{post.author_alias}}{%- endif -%}</h4>
+                </div>
+                <div class="card-body" style="text-align: left">
+                    {{post.text}}
+                </div>
+            </div>
+            {%- endfor -%}
+        </div><!-- ./card-body -->
+    </div><!-- ./card -->
+    <form id="seqDiscussionForm" method="post" action="/student_rounds">
+        <button type="submit" id="seqDiscussionButton" class="btn btn-lg btn-success">Submit</button>
+    </form>
+</div><!-- ./container -->
+{% endblock content %}
+
+{% block script %}
+{{ super() }}
+<script>
+    $('#seqDiscussionForm').submit(function (event) {
+        event.preventDefault();
+
+        var $form = $(this),
+            url = $form.attr('action');
+        $.post(url,
+                {
+                    section: '{{sectionKey}}',
+                    text: 'Dummy Text'
+                },
+                function (data) {
+                    if (data.charAt(0) == 'E') {
+                        bootbox.alert(data);
+                    } else {
+                        location.reload();
+                    }
+                }
+        );
+    });
+</script>
+{% endblock script %}

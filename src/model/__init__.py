@@ -95,6 +95,7 @@ class Group(ndb.Model):
     """ List of Strings. Emails of the `Student`_\ s in this group. """
     size = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Size of this group. """
+    num_seq_responses = ndb.IntegerProperty(default=0, indexed=False)
 
 
 class Question(ndb.Model):
@@ -179,8 +180,12 @@ class SeqResponse(ndb.Model):
     """ Integer. Index of the response. """
     timestamp = ndb.StringProperty(required=True, indexed=True)
     """ String. Timestamp at which the post was made. """
-    author = ndb.StringProperty(required=True)
+    author = ndb.StringProperty(required=True, indexed=True)
     """ String. Email of the `Student`_ who is the author of this post. """
+    author_alias = ndb.StringProperty(default='NA', required=False, indexed=False)
+    """ String. Alias of the `Student`_ who is the author of this post. """
+    text = ndb.StringProperty(required=False, indexed=False)
+    """ String. Text of the response. """
 
 
 class Role:

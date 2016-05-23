@@ -95,13 +95,13 @@ def get_role_user():
         log('Logged in: user = ' + str(user))
         if users.is_current_user_admin():
             return model.Role.admin, user
-        _instructor = model.Instructor.query(
+        instructor = model.Instructor.query(
             model.Instructor.email == user.email().lower()).get()
-        if _instructor:
-            return model.Role.instructor, _instructor
-        _student = model.Student.query(model.Student.email == user.email().lower()).get()
-        if _student:
-            return model.Role.student, _student
+        if instructor:
+            return model.Role.instructor, instructor
+        student = model.Student.query(model.Student.email == user.email().lower()).get()
+        if student:
+            return model.Role.student, student
         else:
             return None, user
     else:
@@ -386,6 +386,12 @@ def send_mail(senders_email, section, subject, message):
                        subject=email_subject,
                        body=email_message)
 
+
+def get_student_info(email,students):
+    for student in students:
+        if student.email == email:
+            return student
+    return None
 
 # end 
 
