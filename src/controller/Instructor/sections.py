@@ -44,8 +44,9 @@ class Sections(webapp2.RequestHandler):
             section.name = section_name
             section.put()
             utils.log(section_name + ' added', type='Success!')
-        #end
-    #end add_section
+            # TODO copy students from one section to another
+
+    # end add_section
 
     def toggle_section(self, course, section_name):
         """
@@ -69,19 +70,20 @@ class Sections(webapp2.RequestHandler):
         else:
             # Send an error if the section passed in doesn't exist
             utils.error('Section ' + section_name + ' not found', handler=self)
-        #end
-    #end toggle_section
+            # end
+
+    # end toggle_section
 
     def post(self):
         """
         HTTP POST method to add a section to a course.
         """
         # First, check that the logged in user is an instructor
-        _instructor = utils.check_privilege(model.Role.instructor)
-        if not _instructor:
+        instructor = utils.check_privilege(model.Role.instructor)
+        if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, grab the course, section, and action from the webpage
         course_name = self.request.get('course')
@@ -93,7 +95,7 @@ class Sections(webapp2.RequestHandler):
             utils.error('Invalid arguments: course_name or section_name or action is null', handler=self)
         else:
             # Otherwise, grab the course from the database
-            course =  model.Course.get_by_id(course_name.upper(), parent=_instructor.key)
+            course = model.Course.get_by_id(course_name.upper(), parent=instructor.key)
             # And check that it exists and is active
             if not course or not course.is_active:
                 # Error if not
@@ -109,13 +111,12 @@ class Sections(webapp2.RequestHandler):
                 else:
                     # Error if the action is neither toggle or add
                     utils.error('Unexpected action:' + action, handler=self)
-                #end
-            #end
-        #end
-    #end post
+
+    # end post
 
     def get(self):
         self.redirect('/courses')
-    #end get
 
-#end class Section
+    # end get
+
+# end class Section

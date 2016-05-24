@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
 
+# TODO consistent naming of attributes
 
 class Course(ndb.Model):
     """
@@ -27,7 +28,7 @@ class StudentInfo(ndb.Model):
     """ String. Must be non-empty and unique. """
     alias = ndb.StringProperty(default='NA', indexed=False)
     """ String. Identifies a student within a discussion round. Takes values S1, S2, etc. """
-    group = ndb.IntegerProperty(default=0)
+    group = ndb.IntegerProperty(default=0)  # FIXME rename to indicate it's an integer
     """ Integer. The group this student is part of. """
 
 
@@ -41,13 +42,13 @@ class Section(ndb.Model):
     """
     name = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique within a course. """
-    groups = ndb.IntegerProperty(default=0, indexed=False)
+    groups = ndb.IntegerProperty(default=0, indexed=False)  # FIXME rename to indicate it's an integer
     """ Integer. Number of groups in this section. (default: 0) """
-    current_round = ndb.IntegerProperty(default=0, indexed=False)
+    current_round = ndb.IntegerProperty(default=0, indexed=False)  # FIXME rename to indicate it's an integer
     """ Integer. Index of the current round. (default: 0) """
-    rounds = ndb.IntegerProperty(default=0, indexed=False)
+    rounds = ndb.IntegerProperty(default=0, indexed=False)  # FIXME rename to indicate it's an integer
     """ Integer. Number of rounds for this section. (default: 0)"""
-    students = ndb.StructuredProperty(StudentInfo, repeated=True)
+    students = ndb.StructuredProperty(StudentInfo, repeated=True)  # FIXME rename to indicate it's student_info
     """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if this section is active or not. """
@@ -77,7 +78,8 @@ class Student(ndb.Model):
     """
     email = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique. Retrieved from Google automatically """
-    sections = ndb.KeyProperty(kind=Section, repeated=True, indexed=False)
+    sections = ndb.KeyProperty(kind=Section, repeated=True,
+                               indexed=False)  # FIXME rename to indicate it's a list of keys
     """ List of active `Section`_ s this student is enrolled in. """
 
 
@@ -113,7 +115,7 @@ class Question(ndb.Model):
     # TODO Templates for questions - MCQ, long answers, short answers, etc.
 
 
-class Round(ndb.Model):
+class Round(ndb.Model):  # FIXME move under a Group?
     """
     .. _Round:
 
@@ -150,12 +152,12 @@ class Response(ndb.Model):
     option = ndb.StringProperty(default='NA', indexed=False)
     """ String. Selected option from the multiple choices, if it's a response to a quiz round."""
     comment = ndb.StringProperty(required=True, indexed=False)
-    """ String. Comment no a peer's post from the previous round."""
-    response = ndb.StringProperty(repeated=True, indexed=False)
+    """ String. Comment on a peer's post from the previous round."""
+    response = ndb.StringProperty(repeated=True, indexed=False)  # FIXME: rename to responses
     """ List of Strings. Can take values ``support``, ``disagree`` or ``neutral``."""
     summary = ndb.StringProperty(indexed=False)
     """ String. The summary post in the last round."""
-    student = ndb.StringProperty(required=True)
+    student = ndb.StringProperty(required=True)  # FIXME: rename to indicate it's an email
     """ String. Email of the `Student`_ who is the author of this response."""
 
 
@@ -169,7 +171,7 @@ class SeqResponse(ndb.Model):
     """ Integer. Index of the response. """
     timestamp = ndb.StringProperty(required=True, indexed=True)
     """ String. Timestamp at which the post was made. """
-    author = ndb.StringProperty(required=True, indexed=True)
+    author = ndb.StringProperty(required=True, indexed=True)  # FIXME: rename to indicate it's an email
     """ String. Email of the `Student`_ who is the author of this post. """
     author_alias = ndb.StringProperty(default='NA', required=False, indexed=False)
     """ String. Alias of the `Student`_ who is the author of this post. """

@@ -96,8 +96,8 @@ class Rounds(webapp2.RequestHandler):
                 # one (to account for the eventual summary round)
                 template_values['nextRound'] = current_section.rounds + 1
                 # end
-            template_values['anon'] = 'Yes' if current_section.is_anonymous else 'No'
-            template_values['round_structure'] = 'Yes' if current_section.has_rounds else 'No'
+                template_values['anon'] = current_section.is_anonymous
+                template_values['round_structure'] = current_section.has_rounds
 
         # end
         # Set the template and render the page
@@ -165,8 +165,7 @@ class Rounds(webapp2.RequestHandler):
 
     # end post
 
-
-    def toggle_anonymity(self, instructor):  # TODO: when to disable it?
+    def toggle_anonymity(self, instructor):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         if section:
@@ -178,7 +177,7 @@ class Rounds(webapp2.RequestHandler):
 
     # end toggle_anonymity
 
-    def toggle_round_structure(self, instructor):  # TODO: when to disable it?
+    def toggle_round_structure(self, instructor):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         if section:
@@ -294,7 +293,6 @@ class Rounds(webapp2.RequestHandler):
         # We'll simply use unix epoch as the start time for leadin questions
         epoch = datetime.datetime(1970, 1, 1)
         round_obj.starttime = utils.convert_time(epoch)
-        # TODO: Add start_time field for leadin and summary rounds too, and show it on the page
         # Now we need to check if there are more rounds
         if rounds and len(rounds) > 1:
             # Discussion directly after the lead-in will always be index 1
@@ -417,8 +415,6 @@ class Rounds(webapp2.RequestHandler):
 
     # end get_new_times
 
-
-
     def delete_round(self, instructor, round_id):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -488,8 +484,6 @@ class Rounds(webapp2.RequestHandler):
 
     # end shift_rounds
 
-
-
     def edit_round(self, instructor, round_id):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -502,6 +496,8 @@ class Rounds(webapp2.RequestHandler):
             # And redirect
             return self.redirect('/')
         # end
+
+        # TODO allow editing the _deadline_ even after the round has started
 
         # Now grab the inputs from the page
         description = self.request.get('description')
@@ -565,8 +561,6 @@ class Rounds(webapp2.RequestHandler):
 
     # end
 
-
-
     def start_rounds(self, instructor):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -586,8 +580,7 @@ class Rounds(webapp2.RequestHandler):
         # And send a success message
         utils.log('Successfully started the first round.', type='Success!', handler=self)
 
-    # end
-
+    # end start_rounds
 
     def copy_summary(self, section, rounds, num_of_rounds):
         summary = None

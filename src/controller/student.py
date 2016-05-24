@@ -72,7 +72,7 @@ class Rounds(webapp2.RequestHandler):
         HTTP POST method to submit the response.
         """
         # First, check that the logged in user is a student
-        student = model.Student(utils.check_privilege(model.Role.student))
+        student = utils.check_privilege(model.Role.student)
         if not student:
             # Redirect home if not a student
             return self.redirect('/home')
@@ -170,6 +170,7 @@ class Rounds(webapp2.RequestHandler):
             template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
             template_values['rounds'] = section.current_round
+            template_values['num_total_rounds'] = section.rounds # FIXME attribute names are confusing
             template_values['show_name'] = not section.is_anonymous
             logout_url = users.create_logout_url(self.request.uri)
             template_values['logouturl'] = logout_url

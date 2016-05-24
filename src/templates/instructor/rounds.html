@@ -31,11 +31,7 @@
                 {% endfor %}
             </select>
         {% else %}
-            {% if courses %}
-                There are no sections in this Course
-            {% else %}
-                Please select a course to see sections
-            {% endif %}
+            {{'There are no sections in this Course' if courses else 'Please select a course to see sections'}}
         {% endif %}
     </div>
 </div>
@@ -55,29 +51,33 @@
             <tr>
                 <th>Feature</th>
                 <th>Enabled?</th>
-                <th></th>
+                {{'<th></th>' if activeRound == 0 }}
             </tr>
             <tr>
                 <td>Anonymity</td>
-                <td>{{ anon }}</td>
+                <td>{{'Yes (Student names will be hidden)' if anon else 'No (Students will see each others\' names)'}}</td>
+                {%- if activeRound == 0 -%}
                 <td>
                     <form id="toggleAnonymityForm" action="/rounds">
                         <input type="hidden" name="course" value="{{selectedCourse}}"/>
                         <input type="hidden" name="section" value="{{selectedSection}}"/>
-                        <button type="submit" class="btn btn-success btn-sm">Toggle</button>
+                        <button type="submit" class="btn btn-success btn-sm">{{'Disable' if anon else 'Enable'}}</button>
                     </form>
                 </td>
+                {%- endif -%}
             </tr>
             <tr>
                 <td>Rounds-based Structure</td>
-                <td>{{ round_structure }}</td>
+                <td>{{'Yes (One discussion post per round)' if round_structure else 'No (Posts displayed as they are submitted)'}}</td>
+                {%- if activeRound == 0 -%}
                 <td>
                     <form id="toggleRoundStructureForm" action="/rounds">
                         <input type="hidden" name="course" value="{{selectedCourse}}"/>
                         <input type="hidden" name="section" value="{{selectedSection}}"/>
-                        <button type="submit" class="btn btn-success btn-sm">Toggle</button>
+                        <button type="submit" class="btn btn-success btn-sm">{{'Disable' if round_structure else 'Enable'}}</button>
                     </form>
                 </td>
+                {%- endif -%}
             </tr>
             </thead>
         </table>
@@ -166,6 +166,7 @@
         <thead>
         <tr>
             <th>Round</th>
+            <th>Start Time (GMT)</th>
             <th>Deadline (GMT)</th>
             <th>Question</th>
             <th>Options</th>
@@ -174,6 +175,7 @@
         <tbody>
         <tr>
                 <td>{{summaryQuestion.number}}</td>
+                <td data-starttime="{{summaryQuestion.starttime}}">{{summaryQuestion.starttime}}</td>
                 <td data-deadline="{{summaryQuestion.deadline}}">{{summaryQuestion.deadline}}</td>
                 <td class="question md">{{summaryQuestion.quiz.question}}</td>
                 <td class="options">
