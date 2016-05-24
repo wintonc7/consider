@@ -14,6 +14,21 @@ All the entities derive from ``ndb`` class of Google App Engine.
 """
 from google.appengine.ext import ndb
 
+
+class StudentInfo(ndb.Model):
+    """
+    .. _StudentInfo:
+
+    An object to represent a student's information in the datastore.
+    """
+    email = ndb.StringProperty(required=True)
+    """ String. Must be non-empty and unique. """
+    alias = ndb.StringProperty(default='NA', indexed=False)
+    """ String. Identifies a student within a discussion round. Takes values S1, S2, etc. """
+    group = ndb.IntegerProperty(default=0)
+    """ Integer. The group this student is part of. """
+
+
 class Course(ndb.Model):
     """
     .. _Course:
@@ -29,19 +44,9 @@ class Course(ndb.Model):
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if the course is currently active or not. """
 
+    students = ndb.StructuredProperty(StudentInfo, repeated=True)
+    """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
 
-class StudentInfo(ndb.Model):
-    """
-    .. _StudentInfo:
-
-    An object to represent a student's information in the datastore.
-    """
-    email = ndb.StringProperty(required=True)
-    """ String. Must be non-empty and unique. """
-    alias = ndb.StringProperty(default='NA', indexed=False)
-    """ String. Identifies a student within a discussion round. Takes values S1, S2, etc. """
-    group = ndb.IntegerProperty(default=0)
-    """ Integer. The group this student is part of. """
 
 
 class Section(ndb.Model):

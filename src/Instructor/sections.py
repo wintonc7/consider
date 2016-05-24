@@ -42,11 +42,22 @@ class Sections(webapp2.RequestHandler):
             # And send an error if it does
             utils.error(section_name + ' already exists', handler=self)
         else:
+            sections = models.Section.query(ancestor=course.key).fetch()
             # Otherwise, create it, save it to the database, and log it
             section = models.Section(parent=course.key, id=section_name)
             section.name = section_name
             section.put()
             utils.log(section_name + ' added', type='Success!')
+            if sections:
+                for s in sections[0].students:
+                    section.students.append(s)
+                    print s.email
+                    student = models.Student.get_by_id(s.email)
+                    if section.key not in student.sections:
+                        student.sections.append(section.key)
+                        student.put()
+                    section.put()
+
         #end
     #end add_section
 
