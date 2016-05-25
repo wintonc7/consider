@@ -2,13 +2,9 @@
 student.py
 ~~~~~~~~~~~~~~~~~
 Implements the APIs for Student role in the app.
-
 - Author(s): Rohit Kapoor, Swaroop Joshi
 - Last Modified: Jan. 13, 2016
-
 --------------------
-
-
 """
 
 import datetime
@@ -26,7 +22,6 @@ class Rounds(webapp2.RequestHandler):
     """
     API to redirect a student based on what stage she is in in a particular section:
     lead-in question, discussion or summary round.
-
     If no round is active for this section, it redirects to an appropriate error page.
     """
 
