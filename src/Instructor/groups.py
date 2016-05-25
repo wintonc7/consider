@@ -80,6 +80,8 @@ class Groups(webapp2.RequestHandler):
                     student.group = int(groups[student.email])
                     # And then grab that group model from the database
                     group = models.Group.get_by_id(student.group, parent=section.key)
+
+                    #-------------------Fix group allocation bug
                     group_id=1
                     while (group_id<=section.groups):
                         pre_group=models.Group.get_by_id(group_id, parent=section.key)
@@ -89,20 +91,12 @@ class Groups(webapp2.RequestHandler):
                         if student.email in pre_group.members:
                             break
                         group_id+=1
-                    #print("--------------")
-                    #print(student.email)
-                    #print("current ID:"+str(group_id))
-                    #print("new ID:"+str(student.group))
-                    #print("--------------")
-
-                    #test_group=models.Group.get_by_id(2, parent=section.key)
-                    #test_group.members.remove("11@osu.edu")
-                    #test_group.put()
-
                     if group_id <= section.groups and group_id!=student.group:
                         pre_group.members.remove(student.email)
                         pre_group.size =len(pre_group.members)
                         pre_group.put()
+                    # -------------------Fix group allocation bug
+
                     # Double check that it actually exists
                     if not group:
                         # And create it if not, giving it the proper number
@@ -121,27 +115,6 @@ class Groups(webapp2.RequestHandler):
                         group.put()
                     #end
                 #end
-                else:
-                    group_id=1
-                    while group_id<=section.groups:
-                        pre_group=models.Group.get_by_id(group_id, parent=section.key)
-                        if not pre_group:
-                            group_id+=1
-                            continue
-                        if student.email in pre_group.members:
-                            break;
-                        group_id+=1
-
-                    if group_id>section.groups :
-                        random_group_id=random.randint(1,section.groups)
-                        random_group=models.Group.get_by_id(random_group_id, parent=section.key)
-                        while not random_group:
-                            random_group_id =(random_group+1)%section.groups+1
-                            random_group = models.Group.get_by_id(random_group_id, parent=section.key)
-                        random_group.members.append(student.email)
-                        random_group.size=len(random_group.members)
-                        student.alias = 'S' + str(random_group.size)
-                        random_group.put()
             #end
             # Commit the changes to the section and log it
             section.put()
@@ -180,29 +153,26 @@ class Groups(webapp2.RequestHandler):
                 # Grab the responses from the lead-in question
                 response = models.Response.query(
                         ancestor=models.Round.get_by_id(1, parent=current_section.key).key).fetch()
-                round_id=2;
-                while (round_id<=current_section.rounds):
-                    temp_response=models.Response.query(
-                        ancestor=models.Round.get_by_id(round_id, parent=current_section.key).key).fetch()
-                    for temp_res in temp_response:
-                        if temp_res not in response:
-                            response.append(temp_res)
-                    round_id+=1
 
-                # Loop over the responses
-                for res in response:
-                    # And loop over the students in this section
-                    for stu in current_section.students:
+                no_answer_students=[]
+                # And loop over the students in this section
+                for stu in current_section.students:
+                    flag=True
+                    # Loop over the responses
+                    for res in response:
                         # And check when the response matches the student
                         if res.student == stu.email:
                             # And set the group of the response to the
                             # group of the student who made that response
                             res.group = stu.group
-                            print stu.email
+                            flag=False
                         #end
                     #end
+                    if flag:
+                        no_answer_students.append(stu)
                 #end
                 # Add the responses and current group to the template values
+                template_values['no_answer_students']=no_answer_students
                 template_values['responses'] = response
                 template_values['group'] = current_section.groups
             #end
