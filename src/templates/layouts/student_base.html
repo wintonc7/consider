@@ -34,6 +34,8 @@
 
 {% block script %}
 {% if not expired -%}
+
+    <!-------------------------------Modified By Wuwei Lan
 <script src="/js/countdown.min.js"></script>
 
 <script>
@@ -45,5 +47,13 @@
         clock.innerHTML = countdown(targetDate).toString();
     }, 1000);
 </script>
+----------------------------------Modified By Wuwei Lan-->
+
+    <script src="/js/jquery.countdown.min.js"></script>
+    <script>
+    $('#clock').countdown("{{ deadline }}", function(event) {
+      $(this).html(event.strftime('%D days %H:%M:%S'));
+    });
+    </script>
 {% endif %}
 {% endblock script %}

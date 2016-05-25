@@ -146,7 +146,7 @@ class Rounds(webapp2.RequestHandler):
                 template_values['last_round'] = True
             #end
             # Now, just grab all the other generic values we need directly
-            template_values['deadline'] = requested_round.deadline
+            template_values['deadline'] = datetime.datetime.strptime(requested_round.deadline, '%Y-%m-%dT%H:%M')
             template_values['sectionKey'] = self.request.get('section')
             template_values['rounds'] = section.current_round
             template_values['show_name'] = not requested_round.is_anonymous
