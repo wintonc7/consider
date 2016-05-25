@@ -45,6 +45,7 @@ class Courses(webapp2.RequestHandler):
             # Otherwise, create it, store it in the database, and log it
             course = models.Course(parent=instructor.key, id=course_name)
             course.name = course_name
+            course.recent_section=""
             course.put()
             utils.log(course_name + ' added', type='Success!',handler=self)
         #end

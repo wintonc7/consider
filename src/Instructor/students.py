@@ -24,55 +24,53 @@ class Students(webapp2.RequestHandler):
     API to add a student to the given section and course.
     """
 
-    def add_students(self, course, emails):
+    def add_students(self, section, emails):
         """
         Adds one or more students to the given section in the datastore.
 
         Args:
-            course (object):
+            section (object):
                 Course to which the students are to be added.
             emails (str):
                 Emails (IDs) of students to be added.
 
         """
 
-        sections = models.Section.query(ancestor=course.key).fetch()
-        for section in sections:
-            # Start by looping over the list of emails supplied
-            for email in emails:
-                # Transform the supplied email to lowercase
-                email = email.lower()
-                # Then make a list of all the emails currently in the section
-                student_emails = [s.email for s in section.students]
-                # Check that the supplied email isn't already in the section
-                if email not in student_emails:
-                    # And add them to the list of students for the section
-                    info = models.StudentInfo()
-                    info.email = email
-                    section.students.append(info)
-                #end
-                # Now grab the student from the database
-                student = models.Student.get_by_id(email)
-                # And if they don't already have a db entry
-                if not student:
-                    # Create a new student and assign the email address
-                    student = models.Student(id=email)
-                    student.email = email
-                #end
-                # Now check if the current student is subscribed to this section
-                if section.key not in student.sections:
-                    # And add them if they weren't already
-                    student.sections.append(section.key)
-                #end
-                # Save the student data back to the database
-                student.put()
+        # Start by looping over the list of emails supplied
+        for email in emails:
+            # Transform the supplied email to lowercase
+            email = email.lower()
+            # Then make a list of all the emails currently in the section
+            student_emails = [s.email for s in section.students]
+            # Check that the supplied email isn't already in the section
+            if email not in student_emails:
+                # And add them to the list of students for the section
+                info = models.StudentInfo()
+                info.email = email
+                section.students.append(info)
             #end
-            # Now save all the section data back to the database and log it
-            section.put()
+            # Now grab the student from the database
+            student = models.Student.get_by_id(email)
+            # And if they don't already have a db entry
+            if not student:
+                # Create a new student and assign the email address
+                student = models.Student(id=email)
+                student.email = email
+            #end
+            # Now check if the current student is subscribed to this section
+            if section.key not in student.sections:
+                # And add them if they weren't already
+                student.sections.append(section.key)
+            #end
+            # Save the student data back to the database
+            student.put()
+        #end
+        # Now save all the section data back to the database and log it
+        section.put()
         utils.log('Students added to Section ' + str(section), type='Success!')
     #end add_students
 
-    def remove_student(self, course, email):
+    def remove_student(self, section, email):
         """
         Removes a specific students from the given section.
 
@@ -85,26 +83,24 @@ class Students(webapp2.RequestHandler):
         """
         # First, grab the student from the db by the email passed in
         student = models.Student.get_by_id(email)
-        sections = models.Section.query(ancestor=course.key).fetch()
         # Check that there is actually a record for that email
         if not student:
             # And error if not
             utils.error('Student does not exist!', handler=self)
         else:
-            for section in sections:
             # Create a new list for the section removing the student
-                section.students = [s for s in section.students if s.email != email]  # TODO better? use remove?
-                # Check if the student is enrolled in this section
-                if section.key in student.sections:
-                    # And remove them if so
-                    student.sections.remove(section.key)
-                #end
-                # And save both the student and section back to the db and log it
-                student.put()
-                section.put()
-                utils.log(
-                        'Student {0} has been removed from Section {1}'.format(str(student),
-                        str(section)), handler=self, type='Success!')
+            section.students = [s for s in section.students if s.email != email]  # TODO better? use remove?
+            # Check if the student is enrolled in this section
+            if section.key in student.sections:
+                # And remove them if so
+                student.sections.remove(section.key)
+            #end
+            # And save both the student and section back to the db and log it
+            student.put()
+            section.put()
+            utils.log(
+                    'Student {0} has been removed from Section {1}'.format(str(student),
+                    str(section)), handler=self, type='Success!')
         #end
     #end remove_student
 
@@ -133,12 +129,12 @@ class Students(webapp2.RequestHandler):
                 # Grab a list of the emails from the page
                 emails = json.loads(self.request.get('emails'))
                 # And create new students from that list
-                self.add_students(course, emails)
+                self.add_students(section, emails)
             elif action == 'remove':
                 # Grab the email from the page to remove
                 email = self.request.get('email').lower()
                 # And remove it
-                self.remove_student(course, email)
+                self.remove_student(section, email)
             else:
                 # Send an error if any other action is supplied
                 utils.error('Unexpected action: ' + action, handler=self)

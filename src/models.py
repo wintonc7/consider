@@ -41,6 +41,8 @@ class Course(ndb.Model):
     name = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique. """
 
+    recent_section = ndb.StringProperty()
+
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if the course is currently active or not. """
 

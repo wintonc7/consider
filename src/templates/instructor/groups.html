@@ -97,10 +97,8 @@
           No responses submitted yet.
         {% endfor %}
       </tbody>
-
-
-
     </table>
+
       {% if responses -%}
         <div class="form-group" style="text-align:center;">
             <button type="submit" class="btn btn-primary">Save Configuration</button>
@@ -119,7 +117,7 @@
 <div class="card-body">
 <div class="table-responsive">
   <form id="form_table2" method="post" action="/groups">
-    <table class="table table-striped" id="group_table">
+    <table class="table table-striped" id="group_table2">
 
       <thead>
         {%- if no_answer_students -%}
@@ -141,7 +139,7 @@
             <td>NA</td>
             <td>NA</td>
             <td>{%- if student.group|int != 0 -%} {{student.group}} {%- else -%} NA {%- endif -%}</td>
-            <td>{%- if group -%} <select class="form-control" name="select_{{loop.index}}" id="select_{{loop.index}}">
+            <td>{%- if group -%} <select class="form-control" name="select2_{{loop.index}}" id="select2_{{loop.index}}">
                                   {% for i in range(0, group) %}
                                   <option {% if student.group|int == i+1 -%} selected="selected" {%- endif -%} >{{i+1}}</option>
                                   {% endfor %}
@@ -152,10 +150,9 @@
           All the students have answered the lead-in question.
         {% endfor %}
       </tbody>
-
-
-
     </table>
+
+
       {% if no_answer_students -%}
         <div class="form-group" style="text-align:center;">
             <button type="submit" class="btn btn-primary">Save Configuration</button>
@@ -225,9 +222,9 @@
         var $form = $(this),
         url = $form.attr("action");
         var data = {};
-        $("#group_table > tbody tr").each(function () {
+        $("#group_table2 > tbody tr").each(function () {
           var stud = $(this).find("td").eq(1).html();
-          var group = $("#select_"+$(this).find("td").eq(0).html()).val();
+          var group = $("#select2_"+$(this).find("td").eq(0).html()).val();
           data[stud] = group;
         });
         data = JSON.stringify(data);

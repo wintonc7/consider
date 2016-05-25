@@ -149,6 +149,13 @@ class Rounds(webapp2.RequestHandler):
                 # Grab the subject of the email
                 subject = self.request.get('subject')
                 utils.send_mail(instructor.email, email_section, subject, message)
+
+                #-----------------update recent course   modified by Wuwei Lan
+                email_course.recent_section=email_section.name
+                print email_section.name+"******************"
+                email_course.put()
+                # -----------------update recent course   modified by Wuwei Lan
+
             else:
                 # Send an error if any other action is supplied
                 utils.error('Error! Unexpected action: ' + action, handler=self)
