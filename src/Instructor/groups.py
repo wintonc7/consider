@@ -75,6 +75,23 @@ class Groups(webapp2.RequestHandler):
                     student.group = int(groups[student.email])
                     # And then grab that group model from the database
                     group = models.Group.get_by_id(student.group, parent=section.key)
+
+                    #---------------Fix group allocation bug, modified by Wuwei Lan
+                    group_id=1
+                    while (group_id<=section.groups):
+                        pre_group=models.Group.get_by_id(group_id, parent=section.key)
+                        if not pre_group:
+                            group_id+=1
+                            continue
+                        if student.email in pre_group.members:
+                            break
+                        group_id+=1
+                    if group_id <= section.groups and group_id!=student.group:
+                        pre_group.members.remove(student.email)
+                        pre_group.size =len(pre_group.members)
+                        pre_group.put()
+                    #-----------------Fix group allocation bug, modified by Wuwei Lan
+
                     # Double check that it actually exists
                     if not group:
                         # And create it if not, giving it the proper number
