@@ -17,7 +17,7 @@ from json import JSONEncoder
 from google.appengine.api import mail
 from google.appengine.api import users
 
-from src import model
+import model
 
 
 def jinja_env():

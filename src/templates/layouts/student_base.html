@@ -10,7 +10,7 @@
 {{ super() }}
 {% for i in range(0,rounds) %}
 <li class={{"nav-active" if curr_page == i+1 else "nav-hover"}}>
-    <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}">{% if i==0 %}Initial Question {% elif i==num_total_rounds-1 %}Final Question {% else %} Round {{i}}{% endif %}</a>
+    <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}">{% if i==0 %}Initial Submission {% elif i==num_total_rounds-1 %}Final Submission {% else %}Round {{i}}{% endif %}</a>
 </li>
 {% endfor %}
 {% endblock topnavbar %}

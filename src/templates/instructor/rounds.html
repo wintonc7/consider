@@ -51,7 +51,7 @@
             <tr>
                 <th>Feature</th>
                 <th>Enabled?</th>
-                {{'<th></th>' if activeRound == 0 }}
+                {%- if activeRound == 0 -%}<th></th>{%- endif -%}
             </tr>
             <tr>
                 <td>Anonymity</td>
@@ -220,6 +220,7 @@
         <div class="row">
             <div class="col-sm-6 col-sm-offset-3">
                 <h1>Round {{activeRound}} is now active.</h1>
+                <!--TODO indicate all rounds are over when they are-->
             </div>
         </div>
         {% endif%}
