@@ -14,7 +14,7 @@ APIs for handling admin specific tasks of the app, like adding an instructor.
 import webapp2
 from google.appengine.api import users
 
-from src import model, utils
+from .. import model, utils
 
 
 class AdminPage(webapp2.RequestHandler):

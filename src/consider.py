@@ -11,13 +11,11 @@ Main module of the app. Implements the ``application`` object; handlers for erro
 import webapp2
 from google.appengine.api import users
 
-# Import all of the instructor controller modules
-# Modify __init__.py in the Instructor directory to add or remove modules
-import model, utils
-from src.controller import admin, student, Instructor
+import utils
 
 
 class ErrorPage(webapp2.RequestHandler):
+    # TODO Uniform error messaging; rethink exceptions, redirects, popups, etc.
     """
     Handles the ``/error`` page, a generic page to display errors based on app-specific, custom error code.
 
@@ -76,6 +74,7 @@ class MainPage(webapp2.RequestHandler):
         """
         role, user = utils.get_role_user()
         if user:
+            import model
             if role == model.Role.admin:
                 self.redirect('/admin')
             elif role == model.Role.instructor:
@@ -94,18 +93,20 @@ class MainPage(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
 
 
+from .controller import admin, instructor, student
+
 application = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/home', MainPage),
+    ('/home', MainPage),  # TODO can do away with /home?
     ('/error', ErrorPage),
     ('/admin', admin.AdminPage),
-    ('/courses', Instructor.courses.Courses),
-    ('/sections', Instructor.sections.Sections),
-    ('/students', Instructor.students.Students),
-    ('/rounds', Instructor.rounds.Rounds),
-    ('/responses', Instructor.responses.Responses),
-    ('/group_responses', Instructor.group_responses.GroupResponses),
-    ('/groups', Instructor.groups.Groups),
+    ('/courses', instructor.Courses),
+    ('/sections', instructor.Sections),
+    ('/students', instructor.Students),
+    ('/rounds', instructor.Rounds),
+    ('/responses', instructor.Responses),
+    ('/group_responses', instructor.GroupResponses),
+    ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
-], debug=True)
+], debug=True)  # TODO use a config variable to toggle the debug case; can also be used in some other places
