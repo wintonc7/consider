@@ -20,7 +20,7 @@
     <div class="row">
         <div id="count-container" class="alert alert-warning">
             <p>
-                {% if expired -%} Time is over {%- else -%} Time left to complete: <span id="countdown"> </span> {%-
+                {% if expired -%} Time is over {%- else -%} Time left to complete: <span id="clock"> </span> {%-
                 endif -%}
             </p>
         </div>
@@ -30,16 +30,11 @@
 
 {% block script %}
 {% if not expired -%}
-<script src="/js/countdown.min.js"></script>
-
+<script src="/js/jquery.countdown.min.js"></script>
 <script>
-    var clock = document.getElementById("countdown");
-    targetDate = new Date("{{deadline}}Z");
-    console.log("targetDate = " + targetDate);
-    clock.innerHTML = countdown(targetDate).toString();
-    setInterval(function () {
-        clock.innerHTML = countdown(targetDate).toString();
-    }, 1000);
+    $('#clock').countdown("{{ deadline }}", function (event) {
+        $(this).html(event.strftime('%D days %H:%M:%S'));
+    });
 </script>
 {% endif %}
 {% endblock script %}

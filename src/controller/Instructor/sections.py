@@ -45,6 +45,16 @@ class Sections(webapp2.RequestHandler):
             section.put()
             utils.log(section_name + ' added', type='Success!')
             # TODO copy students from one section to another
+            if course.recent_section:
+                recent_section = model.Section.get_by_id(course.recent_section, parent=course.key)
+                for s in recent_section.students:
+                    section.students.append(s)
+                    student = model.Student.get_by_id(s.email)
+
+                if section.key not in student.sections:
+                    student.sections.append(section.key)
+                    student.put()
+                    section.put()
 
     # end add_section
 

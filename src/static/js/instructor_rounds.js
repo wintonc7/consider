@@ -352,6 +352,31 @@ $(document).ready(function () {
         });
     });
 
+    $('#end-current-round').click(function (e) {
+
+        var section = $(this).data('section');
+        var course = $(this).data('course');
+        console.log('ajax: Trying to end the current round: sending POST');
+        //Remove the round on the server side
+        $.ajax({
+            url: '/rounds',
+            method: 'POST',
+            data: {
+                section: section,
+                course: course,
+                action: 'end-current-round'
+            },
+            success: function (res) {
+                console.log(res);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+
     $('#editEmailForm').submit(function (e) {
         e.preventDefault();
 

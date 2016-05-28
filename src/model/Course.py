@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
 
+from Section import StudentInfo
 
 class Course(ndb.Model):
     """
@@ -15,3 +16,9 @@ class Course(ndb.Model):
 
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if the course is currently active or not. """
+
+    recent_section = ndb.StringProperty(required=False)
+    """ String. ID of the most recent section of this course, to copy the students from. """
+
+    students = ndb.StructuredProperty(StudentInfo, repeated=True)
+    """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """

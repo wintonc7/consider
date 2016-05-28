@@ -43,10 +43,11 @@ class Courses(webapp2.RequestHandler):
             # Otherwise, create it, store it in the database, and log it
             course = model.Course(parent=instructor.key, id=course_name)
             course.name = course_name
+            course.recent_section = ""
             course.put()
             utils.log(course_name + ' added', type='Success!', handler=self)
-        #end
-    #end add_course
+
+    # end add_course
 
     def toggle_course(self, instructor, course_name):
         """
@@ -67,8 +68,9 @@ class Courses(webapp2.RequestHandler):
             utils.log('Status changed for ' + course_name, type='Success!', handler=self)
         else:
             utils.error('Course ' + course_name + ' not found', handler=self)
-        #end
-    #end toggle_course
+            # end
+
+    # end toggle_course
 
     def post(self):
         """
@@ -79,7 +81,7 @@ class Courses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, get the course name and action from the webpage
         course_name = self.request.get('name')
@@ -99,9 +101,10 @@ class Courses(webapp2.RequestHandler):
             else:
                 # If any other action, log it as an error
                 utils.error('Unexpected action: ' + action, handler=self)
-            #end
-        #end
-    #end post
+                # end
+                # end
+
+    # end post
 
     def get(self):
         """
@@ -112,7 +115,7 @@ class Courses(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, generate a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -128,13 +131,13 @@ class Courses(webapp2.RequestHandler):
             for course in courses:
                 # And grab all the sections attributed to that course
                 course.sections = model.Section.query(ancestor=course.key).fetch()
-            #end
+            # end
             # Add all the instructor's courses to the template values
             template_values['courses'] = courses
-        #end
+        # end
         # And set the template and render the page
         template = utils.jinja_env().get_template('instructor/courses.html')
         self.response.write(template.render(template_values))
-    #end get
+        # end get
 
-#end class Courses
+# end class Courses

@@ -153,6 +153,8 @@ class Rounds(webapp2.RequestHandler):
                 # Grab the subject of the email
                 subject = self.request.get('subject')
                 utils.send_mail(instructor.email, email_section, subject, message)
+                email_course.recent_section = email_section.name
+                email_course.put()
             elif action == 'toggle_anon':
                 self.toggle_anonymity(instructor)
             elif action == 'toggle_round_structure':
@@ -643,6 +645,27 @@ class Rounds(webapp2.RequestHandler):
 
         # Simply return the end time minus the start time
         return (end - start)
-        # end get_duration
+
+    # end get_duration
+
+    def end_current_round(self, instructor):
+        utils.log("trying to end the current round")
+        course, section = utils.get_course_and_section_objs(self.request, instructor)
+        current_round = utils.get_current_round_object(section)
+        next_round = utils.get_next_round_object(section)
+        if not current_round:
+            utils.log("current round is empty!")
+            return
+        utils.log("current round is number " + str(current_round.number))
+        # if/else is to support both legacy (string) and new (datetime) datatypes
+        current_round.deadline = datetime.datetime.now()
+        current_round.put()
+        if next_round:
+            next_round.starttime = datetime.datetime.now()
+            next_round.put()
+            section.current_round = next_round.number
+            section.put()
+
+    # end end_current_round
 
 # end class Rounds

@@ -14,10 +14,9 @@ import datetime
 import logging
 from json import JSONEncoder
 
+import model
 from google.appengine.api import mail
 from google.appengine.api import users
-
-import model
 
 
 def jinja_env():
@@ -159,7 +158,7 @@ def get_current_round(section):
                 # if the current time is inbetween the start and end time
                 # return that round
                 current_time = datetime.datetime.now()
-                if current_time > start_time and current_time < end_time:
+                if start_time < current_time < end_time:
                     if section.current_round != rounds[i].number:
                         section.current_round = rounds[i].number
                         section.put()
@@ -172,7 +171,6 @@ def get_current_round(section):
 
 
 # end get_current_round
-
 
 def get_template_all_courses_and_sections(instructor, course_name, selected_section):
     """
@@ -205,11 +203,11 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
             # Convert it to upper case and try and grab it from the db
             course_name = course_name.upper()
             course = model.Course.get_by_id(course_name, parent=instructor.key)
-        # end
+        #end
         # If it doesn't exist, just set the active course to the first
         if not course:
             course = courses[0]
-        # end
+        #end
         # And set the name in the template values
         template_values['selectedCourse'] = course.name
         # Now try and grab the sections from the db
@@ -218,7 +216,7 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
         if not sections and not course_name:
             # Grab all sections of the "default" course
             sections = model.Section.query(ancestor=courses[0].key).fetch()
-        # end
+        #end
         # And add them to the template values
         template_values['sections'] = sections
         # And if there are sections
@@ -229,19 +227,21 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
                 # Try and grab that section from the database
                 selected_section = selected_section.upper()
                 section = model.Section.get_by_id(selected_section, parent=course.key)
-            # end
+            #end
             # If it wasn't found, set a default section
             if not section:
                 section = sections[0]
-            # end
+            #end
             # And set the rest of the template values
             template_values['selectedSection'] = section.name
             template_values['selectedSectionObject'] = section
             template_values['students'] = section.students
-            # end
-    # end
+        #end
+    #end
     # And finally return the template values
     return template_values
+#end get_template_all_courses_and_sections
+
 
 
 # end get_template_all_courses_and_sections
@@ -395,6 +395,74 @@ def get_student_info(email,students):
 
 
 # end
+
+
+def get_current_round_object(section):
+    """
+    Fetches and returns the current round
+    """
+    # Check that the rounds for this section have actually started
+    if section.current_round != 0:
+        rounds = model.Round.query(ancestor=section.key).fetch()
+        if rounds:
+            for i in range(len(rounds)):
+                # get start time and end time of the round
+                start_time = rounds[i].starttime
+                end_time = rounds[i].deadline
+
+                # change time into a workable format
+                start_time = start_time
+                end_time = end_time
+
+                # if the current time is inbetween the start and end time
+                # return that round
+                current_time = datetime.datetime.now()
+                if current_time > start_time and current_time < end_time:
+                    if section.current_round != rounds[i].number:
+                        section.current_round = rounds[i].number
+                        section.put()
+                    return rounds[i]
+                    # end if
+                    # end for
+    else:
+        return None
+        # end if
+
+
+# end get_current_round_object
+
+def get_next_round_object(section):
+    """
+    Fetches and returns the current round
+    """
+    # Check that the rounds for this section have actually started
+    if section.current_round != 0:
+        rounds = model.Round.query(ancestor=section.key).fetch()
+        if rounds:
+            for i in range(len(rounds) - 1):
+                # get start time and end time of the round
+                start_time = rounds[i].starttime
+                end_time = rounds[i].deadline
+
+                start_time = start_time
+                end_time = end_time
+
+                # if the current time is inbetween the start and end time
+                # return that round
+                current_time = datetime.datetime.now()
+                if current_time > start_time and current_time < end_time:
+                    if section.current_round != rounds[i].number:
+                        section.current_round = rounds[i].number
+                        section.put()
+                    return rounds[i + 1]
+                    # end if
+                    # end for
+    else:
+        return None
+        # end if
+
+
+# end get_next_round_object
 
 
 # Simple class to serialize Round objects

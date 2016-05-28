@@ -1,7 +1,7 @@
-import courses
-import group_responses
-import groups
-import responses
-import rounds
-import sections
-import students
+from .courses import Courses
+from .group_responses import GroupResponses
+from .groups import Groups
+from .responses import Responses
+from .rounds import Rounds
+from .sections import Sections
+from .students import Students

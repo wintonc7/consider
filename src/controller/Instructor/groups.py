@@ -4,7 +4,7 @@ groups.py
 Implements the APIs for Instructor control over group formation within the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: May 21, 2016
+- Last Modified: March 07, 2016
 
 --------------------
 
@@ -15,7 +15,7 @@ import json
 import webapp2
 from google.appengine.api import users
 
-from src import model, utils
+from ... import model, utils
 
 
 class Groups(webapp2.RequestHandler):
@@ -44,10 +44,11 @@ class Groups(webapp2.RequestHandler):
                 # If the total number of groups are not as requested change them
                 section.groups = group_count
                 section.put()
-            #end
+            # end
             utils.log('Groups modified.', type='Success!', handler=self)
-        #end
-    #end modify_group_count
+            # end
+
+    # end modify_group_count
 
     def update_groups(self, section, groups):
         """
@@ -62,6 +63,10 @@ class Groups(webapp2.RequestHandler):
 
         """
         # Double check that the passed in groups is non-null
+        # for keys, values in groups.items():
+        #   print(keys)
+        #   print(values)
+        #   print("--------------")
         if not groups:
             # Error if so
             utils.error('Groups information not available.', handler=self)
@@ -74,30 +79,48 @@ class Groups(webapp2.RequestHandler):
                     student.group = int(groups[student.email])
                     # And then grab that group model from the database
                     group = model.Group.get_by_id(student.group, parent=section.key)
+
+                    # -------------------Fix group allocation bug
+                    group_id = 1
+                    while (group_id <= section.groups):
+                        pre_group = model.Group.get_by_id(group_id, parent=section.key)
+                        if not pre_group:
+                            group_id += 1
+                            continue
+                        if student.email in pre_group.members:
+                            break
+                        group_id += 1
+                    if group_id <= section.groups and group_id != student.group:
+                        pre_group.members.remove(student.email)
+                        pre_group.size = len(pre_group.members)
+                        pre_group.put()
+                    # -------------------Fix group allocation bug
+
                     # Double check that it actually exists
                     if not group:
                         # And create it if not, giving it the proper number
                         group = model.Group(parent=section.key, id=student.group)
                         group.number = student.group
-                    #end
+                    # end
                     # Now check if the student is listed in the correct group
                     if student.email not in group.members:
                         # If not, add that student in to the group
                         group.members.append(student.email)
                         # Update the size
-                        group.size += 1
+                        group.size = len(group.members)
                         # Set the student's alias for that group
                         student.alias = 'S' + str(group.size)
                         # And commit the changes to the group
                         group.put()
-                    #end
-                #end
-            #end
+                        # end
+                        # end
+            # end
             # Commit the changes to the section and log it
             section.put()
             utils.log('Groups updated.', handler=self)
-        #end
-    #end update_groups
+            # end
+
+    # end update_groups
 
     def get(self):
         """
@@ -109,7 +132,7 @@ class Groups(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # Otherwise, create a logout url
         logout_url = users.create_logout_url(self.request.uri)
@@ -118,7 +141,8 @@ class Groups(webapp2.RequestHandler):
         selected_section_name = self.request.get('section')
         # Grab all the courses and sections for the logged in instructor
         template_values = utils.get_template_all_courses_and_sections(instructor,
-                                                                      course_name.upper(), selected_section_name.upper())
+                                                                      course_name.upper(),
+                                                                      selected_section_name.upper())
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -126,31 +150,40 @@ class Groups(webapp2.RequestHandler):
             current_section = template_values['selectedSectionObject']
             # Check that the current section has at least one round
             if current_section.rounds > 0:
+
                 # Grab the responses from the lead-in question
                 response = model.Response.query(
-                        ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
-                # Loop over the responses
-                for res in response:
-                    # And loop over the students in this section
-                    for stu in current_section.students:
+                    ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
+
+                no_answer_students = []
+                # And loop over the students in this section
+                for stu in current_section.students:
+                    flag = True
+                    # Loop over the responses
+                    for res in response:
                         # And check when the response matches the student
                         if res.student == stu.email:
                             # And set the group of the response to the
                             # group of the student who made that response
                             res.group = stu.group
-                        #end
-                    #end
-                #end
+                            flag = False
+                            # end
+                    # end
+                    if flag:
+                        no_answer_students.append(stu)
+                # end
                 # Add the responses and current group to the template values
+                template_values['no_answer_students'] = no_answer_students
                 template_values['responses'] = response
                 template_values['group'] = current_section.groups
-            #end
-        #end
+                # end
+        # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
         template = utils.jinja_env().get_template('instructor/groups.html')
         self.response.write(template.render(template_values))
-    #end get
+
+    # end get
 
     def post(self):
         """
@@ -161,7 +194,7 @@ class Groups(webapp2.RequestHandler):
         if not instructor:
             # Send them home and short circuit all other logic
             return self.redirect('/')
-        #end
+        # end
 
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
@@ -187,8 +220,6 @@ class Groups(webapp2.RequestHandler):
             else:
                 # Send an error if a different action is supplied
                 utils.error('Unknown action' + action if action else 'None', handler=self)
-            #end
-        #end
-    #end post
+    # end post
 
-#end class Groups
+# end class Groups
