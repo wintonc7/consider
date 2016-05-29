@@ -29,8 +29,22 @@ def since_epoch(date):
     return (date - epoch).total_seconds() * 100.0
 
 
+"""
+Returns the input DateTime (assumed to be in UTC) as a DateTime
+object convered over to the local timezone.
+"""
+
+
+def local_time(dt=None):
+    if dt is None:
+        return ''
+    return utils.Local_TZ.from_utc(dt)
+
+
 jinja2.filters.FILTERS['str_to_date'] = str_to_date
 jinja2.filters.FILTERS['since_epoch'] = since_epoch
+jinja2.filters.FILTERS['local_time'] = local_time
+jinja2.filters.FILTERS['tzname'] = utils.tzname
 
 
 class Rounds(webapp2.RequestHandler):
@@ -53,6 +67,8 @@ class Rounds(webapp2.RequestHandler):
         # And get all the courses and sections for this instructor
         template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(),
                                                                       selected_section_name.upper())
+        # Add the name of the current/local timezone to the template.
+        template_values['tz'] = utils.tzname()
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -126,6 +142,8 @@ class Rounds(webapp2.RequestHandler):
             if action == 'add':
                 # Only the lead-in or summary are listed as an 'add' action
                 self.add_leadin_summary(instructor)
+            elif action == 'end-current-round':
+                self.end_current_round(instructor)
             elif action == 'add_disc':
                 # Now, let's grab the number of rounds and duration from page
                 num_of_rounds = int(self.request.get('total_discussions'))
@@ -197,7 +215,7 @@ class Rounds(webapp2.RequestHandler):
 
         # Before anything, we need to check that the deadline is in the future
         end_time = self.request.get('time')
-        if datetime.datetime.now() > utils.convert_time(end_time):
+        if datetime.datetime.now() > utils.to_utc(utils.convert_time(end_time)):
             # Send an error if so and exit
             utils.error('Error! Cannot create deadline in the past.', handler=self)
             return
@@ -232,13 +250,13 @@ class Rounds(webapp2.RequestHandler):
             # end
 
             # Let's check that the deadline doesn't conflict with the last round
-            if utils.convert_time(round_obj.deadline) <= utils.convert_time(last_time):
+            if round_obj.deadline <= last_time:
                 # Send an error if so and return
                 utils.error('Error! Cannot set end time of summary before end of last discussion.', handler=self)
                 return
             # end
             # Set start time of summary as the deadline of the last round
-            round_obj.starttime = last_time
+            round_obj.starttime = utils.str_to_datetime(last_time)
         # end
 
         # Now save the round to the database
@@ -256,8 +274,11 @@ class Rounds(webapp2.RequestHandler):
     # end add_leadin_summary
 
     def build_round_obj(self, section):
-        # Start by grabbing the end time and round number from the page
-        end_time = self.request.get('time')
+        # Start by grabbing the end time and round number from the page,
+        # and convert the end_time from a string to a datetime object.
+        end_time = utils.str_to_datetime(self.request.get('time'))
+        # Convert the time from the local timezone to UTC for proper storage.
+        end_time = utils.to_utc(end_time)
         round_num = int(self.request.get('round'))
         # Now create our new round object
         round_obj = model.Round(parent=section.key, id=round_num)
@@ -293,8 +314,7 @@ class Rounds(webapp2.RequestHandler):
 
     def add_lead_in(self, round_obj, rounds):
         # We'll simply use unix epoch as the start time for leadin questions
-        epoch = datetime.datetime(1970, 1, 1)
-        round_obj.starttime = utils.convert_time(epoch)
+        round_obj.starttime = datetime.datetime(1970, 1, 1)
         # Now we need to check if there are more rounds
         if rounds and len(rounds) > 1:
             # Discussion directly after the lead-in will always be index 1
@@ -308,12 +328,12 @@ class Rounds(webapp2.RequestHandler):
                     new_start = utils.convert_time(rounds[i - 1].deadline)
                     # Add the 24 hour padding for the first round
                     if i == 1:
-                        new_start = utils.convert_time(round_obj.deadline)
+                        new_start = utils.str_to_datetime(round_obj.deadline)
                         new_start += datetime.timedelta(hours=24)
                     # end
                     # And set our new start and end times and save
-                    rounds[i].starttime = utils.convert_time(new_start)
-                    rounds[i].deadline = utils.convert_time(new_start + duration)
+                    rounds[i].starttime = new_start
+                    rounds[i].deadline = (new_start + duration)
                     rounds[i].put()
                     # end
                     # end
@@ -397,7 +417,7 @@ class Rounds(webapp2.RequestHandler):
 
     def get_new_times(self, start, num, duration, delay, start_buffer):
         # First, we need to get the start time into something we can work with
-        start = utils.convert_time(start)
+        # start = utils.convert_time(start)
         # Grab the current time
         start += datetime.timedelta(hours=start_buffer)
 
@@ -407,11 +427,11 @@ class Rounds(webapp2.RequestHandler):
         # And loop the correct number of times
         for i in range(num):
             # Create start and end times with the given duration and delay
-            start_time = start + datetime.timedelta(hours=i * duration + i * delay)
-            end_time = start + datetime.timedelta(hours=(i + 1) * duration + (i + 1) * delay)
+            start_time = start + datetime.timedelta(hours=i * (duration + delay))
+            end_time = start + datetime.timedelta(hours=(i + 1) * (duration + delay))
             # And add to our arrays
-            start_times.append(utils.convert_time(start_time))
-            end_times.append(utils.convert_time(end_time))
+            start_times.append(start_time)
+            end_times.append(end_time)
         # end
         return start_times, end_times
 
@@ -546,8 +566,7 @@ class Rounds(webapp2.RequestHandler):
                             # deadline of the previous round
                             rounds[j].starttime = rounds[j - 1].deadline
                             # And calculate and set the new end time
-                            new_deadline = utils.convert_time(rounds[j].starttime) + duration
-                            rounds[j].deadline = utils.convert_time(new_deadline)
+                            rounds[j].deadline = rounds[j].starttime + duration
                             # And save it back to the database
                             rounds[j].put()
                             # end
@@ -615,8 +634,8 @@ class Rounds(webapp2.RequestHandler):
             # Now grab the new start time from the last round's deadline
             new_start = utils.convert_time(rounds[-1].deadline)
             # Set the summary start time to be the end of the last new round
-            summary.starttime = utils.convert_time(new_start)
-            summary.deadline = utils.convert_time(new_start + duration)
+            summary.starttime = rounds[-1].deadline
+            summary.deadline = rounds[-1].deadline + duration
             # And save it to the database and add to our list
             summary.put()
             rounds.append(summary)

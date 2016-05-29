@@ -24,8 +24,8 @@ class Round(ndb.Model):  # FIXME move under a Group?
 
     Child of `Section`_.
     """
-    deadline = ndb.StringProperty(required=True, indexed=False)
-    """ String. Represents the deadline in the format %Y-%m-%dT%H:%M """
+    deadline = ndb.DateTimeProperty(required=True, indexed=False)
+    """ DateTime representation of the round end time. """
     number = ndb.IntegerProperty(required=True)
     """ Integer. Index of the round."""
     description = ndb.StringProperty(indexed=False)
@@ -36,7 +36,7 @@ class Round(ndb.Model):  # FIXME move under a Group?
     """ A `Question`_ property. Contains the question if this is a quiz round."""
 
     # NEW ATTRIBUTES FOR DYNAMIC ROUNDS: PART 1
-    starttime = ndb.StringProperty(required=True, indexed=False)
-    """ String. Represents the start of the round in the format %Y-%m-%dT%H:%M """
+    starttime = ndb.DateTimeProperty(required=True)
+    """ DateTime representation of the round start time. """
     buffer_time = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Represents the buffer time between rounds."""

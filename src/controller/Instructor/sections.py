@@ -50,10 +50,9 @@ class Sections(webapp2.RequestHandler):
                 for s in recent_section.students:
                     section.students.append(s)
                     student = model.Student.get_by_id(s.email)
-
-                if section.key not in student.sections:
-                    student.sections.append(section.key)
-                    student.put()
+                    if section.key not in student.sections:
+                        student.sections.append(section.key)
+                        student.put()
                     section.put()
 
     # end add_section

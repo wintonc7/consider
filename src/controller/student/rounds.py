@@ -154,7 +154,7 @@ class Rounds(webapp2.RequestHandler):
             # Otherwise we need to set up our template values, create empty dict
             template_values = {}
             # Grab the deadline from the requested round
-            deadline = datetime.datetime.strptime(requested_round.deadline, '%Y-%m-%dT%H:%M')
+            deadline = requested_round.deadline
             # And the current time
             current_time = datetime.datetime.now()
             # And check if we're dealing with an expired round
@@ -167,10 +167,11 @@ class Rounds(webapp2.RequestHandler):
                 template_values['last_round'] = True
             # end
             # Now, just grab all the other generic values we need directly
-            template_values['deadline'] = datetime.datetime.strptime(requested_round.deadline, '%Y-%m-%dT%H:%M')
+            # template_values['deadline'] = datetime.datetime.strptime(requested_round.deadline, '%Y-%m-%dT%H:%M')
+            template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
             template_values['rounds'] = section.current_round
-            template_values['num_total_rounds'] = section.rounds # FIXME attribute names are confusing
+            template_values['num_total_rounds'] = section.rounds  # FIXME attribute names are confusing
             template_values['show_name'] = not section.is_anonymous
             logout_url = users.create_logout_url(self.request.uri)
             template_values['logouturl'] = logout_url
@@ -351,7 +352,7 @@ class Rounds(webapp2.RequestHandler):
                 # end
         # end
         # Grab the deadline and the current time
-        deadline = datetime.datetime.strptime(current_round.deadline, '%Y-%m-%dT%H:%M')
+        deadline = current_round.deadline
         current_time = datetime.datetime.now()
         # And double check that they've submitted before the deadline ended
         if deadline >= current_time:
@@ -371,6 +372,4 @@ class Rounds(webapp2.RequestHandler):
             # end
             # end save_submission
 
-
 # end class Rounds
-

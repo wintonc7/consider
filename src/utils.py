@@ -19,6 +19,67 @@ from google.appengine.api import mail
 from google.appengine.api import users
 
 
+class Local_TZ(object):
+    """
+    Handles conversions to and from UTC, allowing for support
+    for the times and dates to be displayed in the local timezone
+    for the application.
+    """
+
+    @staticmethod
+    def to_utc(dt):
+        return dt - Local_TZ.utcoffset(dt)
+        # end .to_utc()
+
+    @staticmethod
+    def from_utc(dt):
+        return dt + Local_TZ.utcoffset(dt)
+        # end .from_utc()
+
+    @staticmethod
+    def utcoffset(dt=None):
+        if dt is None:
+            dt = datetime.datetime.now()
+        return datetime.timedelta(hours=-5) + Local_TZ.dst(dt)
+        # end .utcoffset()
+
+    @staticmethod
+    def dst(dt=None):
+        if dt is None:
+            # Default to the current time.
+            dt = datetime.datetime.now()
+
+        # 2 am on the second Sunday in March
+        dst_start = Local_TZ.FirstSunday(datetime.datetime(dt.year, 3, 8, 2))
+        # 1 am on the first Sunday in November
+        dst_end = Local_TZ.FirstSunday(datetime.datetime(dt.year, 11, 1, 1))
+
+        if dst_start <= dt.replace(tzinfo=None) < dst_end:
+            return datetime.timedelta(hours=1)
+        else:
+            return datetime.timedelta(hours=0)
+            # end .dst()
+
+    @staticmethod
+    def FirstSunday(dt):
+        """First Sunday on or after dt."""
+        return dt + datetime.timedelta(days=(6 - dt.weekday()))
+        # end .FirstSunday()
+
+    @staticmethod
+    def tzname(dt=None):
+        if dt is None:
+            dt = datetime.datetime.now()
+        if Local_TZ.dst(dt) == datetime.timedelta(hours=0):
+            return "EST"
+        else:
+            return "EDT"
+            # end .tzname()
+
+
+# end Local_TZ() class definition.
+
+
 def jinja_env():
     """
     Returns the Jinja2 environment from which templates to render the web pages can be obtained.
@@ -152,8 +213,7 @@ def get_current_round(section):
                 end_time = rounds[i].deadline
 
                 # change time into a workable format
-                start_time = convert_time(start_time)
-                end_time = convert_time(end_time)
+                # start_time = conveget_current_round_object_time(end_time)
 
                 # if the current time is inbetween the start and end time
                 # return that round
@@ -203,11 +263,11 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
             # Convert it to upper case and try and grab it from the db
             course_name = course_name.upper()
             course = model.Course.get_by_id(course_name, parent=instructor.key)
-        #end
+        # end
         # If it doesn't exist, just set the active course to the first
         if not course:
             course = courses[0]
-        #end
+        # end
         # And set the name in the template values
         template_values['selectedCourse'] = course.name
         # Now try and grab the sections from the db
@@ -216,7 +276,7 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
         if not sections and not course_name:
             # Grab all sections of the "default" course
             sections = model.Section.query(ancestor=courses[0].key).fetch()
-        #end
+        # end
         # And add them to the template values
         template_values['sections'] = sections
         # And if there are sections
@@ -227,20 +287,22 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
                 # Try and grab that section from the database
                 selected_section = selected_section.upper()
                 section = model.Section.get_by_id(selected_section, parent=course.key)
-            #end
+            # end
             # If it wasn't found, set a default section
             if not section:
                 section = sections[0]
-            #end
+            # end
             # And set the rest of the template values
             template_values['selectedSection'] = section.name
             template_values['selectedSectionObject'] = section
             template_values['students'] = section.students
-        #end
-    #end
+            # end
+    # end
     # And finally return the template values
     return template_values
-#end get_template_all_courses_and_sections
+
+
+# end get_template_all_courses_and_sections
 
 
 
@@ -337,16 +399,22 @@ def convert_time(old_time):
     new_time = None
 
     # Check if the input time is a datetime object or string
-    if type(old_time) is datetime.datetime:
+    if type(old_time) == datetime.datetime:
         # If so, convert it to iso format the strip the last three characters
         # since we're not storing seconds in the database
         new_time = old_time.isoformat()[:-3]
     else:
         # Ohterwise, we were given a iso string from the database
         # So, use datetime to convert it to an object
-        new_time = datetime.datetime.strptime(old_time, "%Y-%m-%dT%H:%M")
+        if (len(old_time.split(":")) == 2):
+            new_time = datetime.datetime.strptime(old_time, "%Y-%m-%dT%H:%M")
+        else:
+            new_time = datetime.datetime.strptime(old_time, "%Y-%m-%dT%H:%M:%S.%f")
     # end
     return new_time
+
+
+# end convert_time
 
 
 # end
@@ -387,7 +455,7 @@ def send_mail(senders_email, section, subject, message):
                        body=email_message)
 
 
-def get_student_info(email,students):
+def get_student_info(email, students):
     for student_info in students:
         if student_info.email == email:
             return student_info
@@ -417,7 +485,7 @@ def get_current_round_object(section):
                 # if the current time is inbetween the start and end time
                 # return that round
                 current_time = datetime.datetime.now()
-                if current_time > start_time and current_time < end_time:
+                if start_time < current_time < end_time:
                     if section.current_round != rounds[i].number:
                         section.current_round = rounds[i].number
                         section.put()
@@ -464,6 +532,39 @@ def get_next_round_object(section):
 
 # end get_next_round_object
 
+def str_to_datetime(dt):
+    """
+    Converts the input string (in %Y-%m-%dT%H:%M format) to
+    an equivalent DateTime object. If object is already a
+    DateTime object, nothing is changed.
+    """
+    if type(dt) is datetime.datetime:
+        return dt
+    return datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M")
+
+
+# end str_to_datetime
+
+def to_utc(dt):
+    """ Converts the input local datetime to UTC. """
+    return Local_TZ.to_utc(dt)
+
+
+# end to_utc()
+
+def from_utc(dt):
+    """ Converts the input UTC datetime to local time. """
+    return Local_TZ.from_utc(dt)
+
+
+# end from_utc()
+
+def tzname(dt=None):
+    """ Returns the current timezone name. """
+    return Local_TZ.tzname(dt)
+
+
+# end tzname()
 
 # Simple class to serialize Round objects
 class RoundEncoder(JSONEncoder):
