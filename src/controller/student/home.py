@@ -14,7 +14,7 @@ Implements the APIs for Student homepage in the app.
 import webapp2
 from google.appengine.api import users
 
-from ... import model, utils
+from src import model, utils
 
 
 class HomePage(webapp2.RequestHandler):
@@ -32,7 +32,12 @@ class HomePage(webapp2.RequestHandler):
         # Create a url for the user to logout
         logout_url = users.create_logout_url(self.request.uri)
         # Set up the template
-        template_values = {'logouturl': logout_url, 'nickname': student.email}
+        from src import config
+        template_values = {
+            'documentation': config.DOCUMENTATION,
+            'logouturl': logout_url,
+            'nickname': student.email
+        }
         # Grab the sections the student is a part of
         sections = student.sections
         # Create a new list for holding the section objects from the db

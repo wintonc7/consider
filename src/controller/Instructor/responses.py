@@ -4,7 +4,7 @@ responses.py
 Implements the APIs for Instructor control over student responses within the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: May 21, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -72,6 +72,8 @@ class Responses(webapp2.RequestHandler):
         # end
         # And set the template and render the page
         template_values['logouturl'] = logout_url
+        from src import config
+        template_values['documentation'] = config.DOCUMENTATION
         template = utils.jinja_env().get_template('instructor/responses.html')
         self.response.write(template.render(template_values))
         # end get

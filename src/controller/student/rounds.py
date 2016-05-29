@@ -4,7 +4,7 @@ rounds.py
 Implements the APIs for Student role in the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: May 21, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -18,7 +18,7 @@ import webapp2
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-from ... import model, utils
+from src import model, utils
 
 
 class Rounds(webapp2.RequestHandler):
@@ -171,10 +171,12 @@ class Rounds(webapp2.RequestHandler):
             template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
             template_values['rounds'] = section.current_round
-            template_values['num_total_rounds'] = section.rounds  # FIXME attribute names are confusing
+            template_values['num_total_rounds'] = section.rounds
             template_values['show_name'] = not section.is_anonymous
             logout_url = users.create_logout_url(self.request.uri)
             template_values['logouturl'] = logout_url
+            from src import config
+            template_values['documentation'] = config.DOCUMENTATION
             template_values['curr_page'] = requested_round_number
 
             # Now we need to check if it's the lead-in or summary question

@@ -11,6 +11,5 @@ class Student(ndb.Model):
     """
     email = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique. Retrieved from Google automatically """
-    sections = ndb.KeyProperty(kind=Section, repeated=True,
-                               indexed=False)  # FIXME rename to indicate it's a list of keys
+    sections = ndb.KeyProperty(kind=Section, repeated=True, indexed=False)
     """ List of active `Section`_ s this student is enrolled in. """

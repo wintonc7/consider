@@ -4,7 +4,7 @@ courses.py
 Implements the APIs for Instructor Courses views.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: May 21, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -122,7 +122,12 @@ class Courses(webapp2.RequestHandler):
         # Log that the current instructor is logged in
         utils.log('Instructor logged in ' + str(instructor))
         # And start building the template values
-        template_values = {'logouturl': logout_url, 'expand': self.request.get('course')}
+        from src import config
+        template_values = {
+            'documentation': config.DOCUMENTATION,
+            'logouturl': logout_url,
+            'expand': self.request.get('course')
+        }
         # Grab the list of courses attributed to the logged in instructor
         courses = model.Course.query(ancestor=instructor.key).fetch()
         # Double check that they actually have courses

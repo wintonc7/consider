@@ -4,7 +4,7 @@ admin.py
 APIs for handling admin specific tasks of the app, like adding an instructor.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: May 21, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -14,7 +14,7 @@ APIs for handling admin specific tasks of the app, like adding an instructor.
 import webapp2
 from google.appengine.api import users
 
-from .. import model, utils
+from src import model, utils
 
 
 class AdminPage(webapp2.RequestHandler):
@@ -66,7 +66,9 @@ class AdminPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)
+            from src import config
             template_values = {
+                'documentation': config.DOCUMENTATION,
                 'logouturl': logout_url
             }
             instructors = model.Instructor.query().fetch()

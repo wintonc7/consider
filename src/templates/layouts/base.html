@@ -25,7 +25,6 @@
     Loading...
 </div>
 
-{% if not loginpage %}
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -43,12 +42,16 @@
                 {% block topnavbar %}{% endblock topnavbar %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="{{logouturl}}">Logout</a></li>
+                <li><a class="navbar-link" href="{{documentation}}"><span class="glyphicon glyphicon-book"></span> Documentation</a></li>
+            {% if loginpage %}
+                <li><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            {% else %}
+                <li><a href="{{logouturl}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            {% endif %}
             </ul>
         </div>
     </div>
 </nav>
-{% endif %} <!-- loginpage -->
 
 
 <div class="container-fluid">

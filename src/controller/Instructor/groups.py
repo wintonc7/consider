@@ -4,7 +4,7 @@ groups.py
 Implements the APIs for Instructor control over group formation within the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -15,7 +15,7 @@ import json
 import webapp2
 from google.appengine.api import users
 
-from ... import model, utils
+from src import model, utils
 
 
 class Groups(webapp2.RequestHandler):
@@ -180,6 +180,8 @@ class Groups(webapp2.RequestHandler):
         # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
+        from src import config
+        template_values['documentation'] = config.DOCUMENTATION
         template = utils.jinja_env().get_template('instructor/groups.html')
         self.response.write(template.render(template_values))
 
@@ -220,6 +222,6 @@ class Groups(webapp2.RequestHandler):
             else:
                 # Send an error if a different action is supplied
                 utils.error('Unknown action' + action if action else 'None', handler=self)
-    # end post
+                # end post
 
 # end class Groups

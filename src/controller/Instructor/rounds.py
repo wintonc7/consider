@@ -4,7 +4,7 @@ rounds.py
 Implements the APIs for Instructor control of adding discussion rounds.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor, Dustin Stanley
-- Last Modified: May 21, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -118,6 +118,8 @@ class Rounds(webapp2.RequestHandler):
         # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
+        from src import config
+        template_values['documentation'] = config.DOCUMENTATION
         template = utils.jinja_env().get_template('instructor/rounds.html')
         self.response.write(template.render(template_values))
 
@@ -685,6 +687,6 @@ class Rounds(webapp2.RequestHandler):
             section.current_round = next_round.number
             section.put()
 
-    # end end_current_round
+            # end end_current_round
 
 # end class Rounds

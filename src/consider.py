@@ -2,7 +2,7 @@
 consider.py
 ~~~~~~~~~~~
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: Jan. 13, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -11,7 +11,9 @@ Main module of the app. Implements the ``application`` object; handlers for erro
 import webapp2
 from google.appengine.api import users
 
+import config
 import utils
+from .controller import admin, instructor, student
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -41,6 +43,7 @@ class ErrorPage(webapp2.RequestHandler):
         if user:
             logout_url = users.create_logout_url(self.request.uri)
             template_values = {
+                'documentation': config.DOCUMENTATION,
                 'logouturl': logout_url
             }
             error = self.request.get('code')
@@ -87,17 +90,19 @@ class MainPage(webapp2.RequestHandler):
         else:
             login_url = users.create_login_url(self.request.uri)
             template_values = {
-                'loginurl': login_url
+                'loginurl': login_url,
+                'documentation': config.DOCUMENTATION,
+                'admin_guide': config.ADMIN_GUIDE,
+                'instr_guide': config.INSTRUCTOR_GUIDE,
+                'student_guide': config.STUDENT_GUIDE
             }
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
 
 
-from .controller import admin, instructor, student
-
 application = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/home', MainPage),  # TODO can do away with /home?
+    ('/home', MainPage),  # TODO can we do away with /home?
     ('/error', ErrorPage),
     ('/admin', admin.AdminPage),
     ('/courses', instructor.Courses),
@@ -109,4 +114,4 @@ application = webapp2.WSGIApplication([
     ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
-], debug=True)  # TODO use a config variable to toggle the debug case; can also be used in some other places
+], debug=config.DEBUG)

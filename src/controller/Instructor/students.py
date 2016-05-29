@@ -4,7 +4,7 @@ students.py
 Implements the APIs for Instructor control of adding/removing students.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: March 07, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -163,6 +163,8 @@ class Students(webapp2.RequestHandler):
         template_values = utils.get_template_all_courses_and_sections(instructor, course_name.upper(),
                                                                       selected_section_name.upper())
         template_values['logouturl'] = logout_url
+        from src import config
+        template_values['documentation'] = config.DOCUMENTATION
         # Set the template and render the page
         template = utils.jinja_env().get_template('instructor/list_students.html')
         self.response.write(template.render(template_values))

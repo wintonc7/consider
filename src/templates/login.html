@@ -9,11 +9,47 @@
 
 {% block content %}
 <div class="container">
-    <div class="jumbotron well">
-        <h1>Welcome to CONSIDER</h1>
-        <h2 class="form-signin-heading">Please sign in to continue</h2>
-        <a class="btn btn-lg btn-primary sign-btn" href="{{loginurl}}">
-            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Sign in</a>
+    <div class="jumbotron">
+        <div class="row">
+            <h1 role="heading">CONSIDER</h1>
+            <h2>A novel approach to collaborative-learning</h2>
+        </div>
+        <div class="notification"></div>
+        <div class="row" style="padding-top: 50px">
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <h3>Local Environment Setup</h3>
+                    <p style="font-size: 100%">Educators can download the app and set it up on their own instance of
+                        the Google App Engine server, and then give access to their instructors.
+                        That way, the student information will stay with their organization alone.</p>
+                    <p><a href="{{admin_guide}}" target="_blank"
+                          class="btn btn-primary" role="button">Read more</a></p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <h3>Instructor Guide</h3>
+                    <p style="font-size: 100%">Instructors can create courses and sections, add
+                        students, organize them into groups, set up questions and discussion rounds,
+                        toggle features such as anonymity and discussion structure,
+                        and download the transcripts of their class' discussion.</p>
+                    <p><a href="{{instr_guide}}" target="_blank"
+                          class="btn btn-primary" role="button">Read more</a></p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <h3>Student Guide</h3>
+                    <p style="font-size: 100%">Students can answer the questions, comment on their peers' answers
+                        and discussion posts, and download the transcripts of their own group's discussion.</p>
+                    <p><a href="{{student_guide}}" target="_blank"
+                          class="btn btn-primary" role="button">Read more</a></p>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
+
+
 {% endblock content %}

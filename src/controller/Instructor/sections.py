@@ -4,7 +4,7 @@ section.py
 Implements the APIs for Instructor control of adding/removing sections.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: May 21, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 
@@ -44,7 +44,7 @@ class Sections(webapp2.RequestHandler):
             section.name = section_name
             section.put()
             utils.log(section_name + ' added', type='Success!')
-            # TODO copy students from one section to another
+            # TODO Include `Students from {{recent_section}} added to the {{current_section}}` - when it shows the 'Success' box after adding a section?
             if course.recent_section:
                 recent_section = model.Section.get_by_id(course.recent_section, parent=course.key)
                 for s in recent_section.students:
@@ -126,6 +126,6 @@ class Sections(webapp2.RequestHandler):
     def get(self):
         self.redirect('/courses')
 
-    # end get
+        # end get
 
 # end class Section

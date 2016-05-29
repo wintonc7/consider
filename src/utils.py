@@ -4,7 +4,7 @@ utils.py
 Defines the functions and constants which are accessed by different modules of this application.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi, Dustin Stanley
-- Last Modified: Jan. 13, 2016
+- Last Modified: May 30, 2016
 
 --------------------
 

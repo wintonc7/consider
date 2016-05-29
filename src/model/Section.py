@@ -11,7 +11,7 @@ class StudentInfo(ndb.Model):
     """ String. Must be non-empty and unique. """
     alias = ndb.StringProperty(default='NA', indexed=False)
     """ String. Identifies a student within a discussion round. Takes values S1, S2, etc. """
-    group = ndb.IntegerProperty(default=0)  # FIXME rename to indicate it's an integer
+    group = ndb.IntegerProperty(default=0)
     """ Integer. The group this student is part of. """
 
 
@@ -25,13 +25,13 @@ class Section(ndb.Model):
     """
     name = ndb.StringProperty(required=True)
     """ String. Must be non-empty and unique within a course. """
-    groups = ndb.IntegerProperty(default=0, indexed=False)  # FIXME rename to indicate it's an integer
+    groups = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Number of groups in this section. (default: 0) """
-    current_round = ndb.IntegerProperty(default=0, indexed=False)  # FIXME rename to indicate it's an integer
+    current_round = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Index of the current round. (default: 0) """
-    rounds = ndb.IntegerProperty(default=0, indexed=False)  # FIXME rename to indicate it's an integer
+    rounds = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Number of rounds for this section. (default: 0)"""
-    students = ndb.StructuredProperty(StudentInfo, repeated=True)  # FIXME rename to indicate it's student_info
+    students = ndb.StructuredProperty(StudentInfo, repeated=True)
     """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if this section is active or not. """
