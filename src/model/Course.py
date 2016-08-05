@@ -22,3 +22,5 @@ class Course(ndb.Model):
 
     students = ndb.StructuredProperty(StudentInfo, repeated=True)
     """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
+
+    export_section = ndb.StringProperty(required=False)

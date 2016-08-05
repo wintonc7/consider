@@ -30,9 +30,20 @@ input, textarea, select {
 }
 
 .btn:hover {
-  background: #59A766 !important;
   text-decoration: none !important;
   border-radius: 0px !important;
+}
+
+.btn-success:hover {
+  background: #59A766 !important;
+}
+
+.btn-danger:hover {
+  background: #c9302c !important;
+}
+
+.btn-info:hover {
+  background: #31b0d5 !important;
 }
 
 /* INTRUCTOR NAVIGATION SIDE BAR */
@@ -143,3 +154,33 @@ a:hover {
 	border-radius: 3px !important;
 }
 
+.jumbotron p,
+.well,
+.well li {
+	font-size: 13px;
+}
+
+
+.well h1,
+.well h2,
+.well h3 {
+	margin-top: 0.5em;
+}
+
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.card-header button {
+	margin: 0 5px;
+}
+
+.round-viewing {
+	border: 1px solid #bb0000;
+}

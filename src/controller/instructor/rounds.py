@@ -525,9 +525,12 @@ class Rounds(webapp2.RequestHandler):
 
         # Now grab the inputs from the page
         description = self.request.get('description')
-        # And convert the start and end times to datetime objects
+        # and get the start and end times for the round
         start_time = utils.convert_time(self.request.get('start_time'))
+        start_time = utils.to_utc(start_time)
         deadline = utils.convert_time(self.request.get('deadline'))
+        deadline = utils.to_utc(deadline)
+
 
         # Loop over the rounds to find the one we're trying to edit
         for i in range(len(rounds)):
@@ -537,8 +540,6 @@ class Rounds(webapp2.RequestHandler):
 
                 # Now, let's grab the deadline of the previous round
                 previous_end = rounds[i - 1].deadline
-                # And convert it to datetime object
-                previous_end = utils.convert_time(previous_end)
                 # Check if the new start time is BEFORE the previous round's
                 # end time
                 if start_time < previous_end:
@@ -549,9 +550,9 @@ class Rounds(webapp2.RequestHandler):
                     break
                 # end
                 # Otherwise, the new start time doesn't overlap; we can set it
-                rounds[i].starttime = utils.convert_time(start_time)
+                rounds[i].starttime = start_time
                 # And now set the new deadline for this round
-                rounds[i].deadline = utils.convert_time(deadline)
+                rounds[i].deadline = deadline
 
                 # Now, check to see if there's a rounds we need to propogate to
                 if i != len(rounds) - 1:

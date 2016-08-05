@@ -363,7 +363,7 @@ class Rounds(webapp2.RequestHandler):
             response.student = student.email
             response.put()
             utils.log(
-                'Your response has been saved. You can edit it any time before the deadline.',
+                'Your response has been saved. You can edit it any time before the deadline. ',
                 type='Success!', handler=self)
         else:
             # Otherwise alert them that time has passed to submit for this round

@@ -39,3 +39,4 @@ class Section(ndb.Model):
     """ Boolean. If ``True``, discussions in this `Section`_ are anonymous; if ``False``, identities are revealed."""
     has_rounds = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. If ``True``, asynchronous, rounds-based discussion, else sequential """
+    export_info = ndb.StringProperty(required=False)

@@ -65,3 +65,9 @@ target/
 temp/
 bower_components/
 index.yaml
+
+# Junk from Mac/OS X
+*.DS_Store
+.AppleDouble
+.LSOverride
+Icon?

@@ -2,63 +2,22 @@
 
 {% block title %}| Rounds{% endblock %}
 
-
 {% block head %}
 {{ super() }}
+<script src="/ckeditor/ckeditor.js"></script>
 <link href="/css/discussion.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
-    <div class="container">
-        <div class="jumbotron">
-            <p> {{question}} </p>
-        </div>
-        <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
-            <div class="list-group">
-                {% for option in options %}
-                <input type="radio" name="optionsRadios" id="option{{loop.index}}" value="option{{loop.index}}" {% if expired -%} disabled="true" {%- endif -%}>
-                <label class="radio list-group-item" for="option{{loop.index}}">
-                    {{option}}
-                </label>
-                {% endfor %}
-            </div>
-            <textarea class="form-control" rows="3" id="comment" placeholder="Please enter why you support this option..." required {% if expired -%} disabled="true" {%- endif -%}>
-            {%- if comment -%}{{comment}}{%- endif -%}
-            </textarea>
-            <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}>
-                <span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
-            </button>
-        </form>
-    </div>
-    {%- if last_round -%}
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <h4 class="modal-title" id="myModalLabel">Please provide a brief summary... </h4>
-          </div>
-          <div class="modal-body">
-            <form class="form-horizontal" id="modalForm" method="post" style="text-align: center;" action="/student_rounds">
-                <div class="form-group">
-                  <div class="col-sm-12">
-                    <textarea class="form-control" rows="10" id="inputSummary" name="summary" placeholder="Your summary..." required>{{summary}}</textarea>
-                  </div>
-                </div>
-                <button type="submit" class="hide"></button>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" onclick="submitSummary()">Submit</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endif %}
+
+{% if last_round %}
+    {% include "students/last_round.html" %}
+{% else %}
+    {% include "students/first_round.html" %}
+{% endif %}
+
+
 {% endblock content %}
 
 
@@ -71,58 +30,46 @@
     {%- endif -%}
 
     {% if not expired -%}
+        var radio, comment, summary;
 
-        var radio, comment;
-
-    {% if last_round %}
-        function submitSummary() {
-            $("#modalForm").find('[type="submit"]').trigger('click');
-        }
-
-        $("#modalForm").submit(function (event){
+        function formSubmit(event){
             //Prevent the default behaviour
             event.preventDefault();
 
+            // Update content of textarea(s) handled by CKEditor
+            for (instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+                
             //collect form elements
             var $form = $(this);
-            var summary = $form.find("textarea").val();
-            var url = $form.attr("action");
-            console.log("option = " + radio + ", comment = " + comment + ", url = " + url);
-            $.post(url, {option:radio, comm:comment, summary:summary, section:'{{sectionKey}}'}, function (data) {
-                bootbox.alert(data,function(){
-                    ocomment = comment;
-                    location.reload();
-                });
-            });
-        });
-    {% endif %} // last_round
 
-	    $("#form").submit(function (event){
-	    	//Prevent the default behaviour
-	        event.preventDefault();
-
-	        //collect form elements
-	        var $form = $(this);
-
-	        if (document.getElementsByClassName('optionsRadios').length > 0
+            if (document.getElementsByClassName('optionsRadios').length > 0
                     && $form.find("input:radio[name='optionsRadios']:checked").val() === undefined) {
-	        	bootbox.alert("Please select one of the options");
-	        } else {
-	        	radio = $form.find("input:radio[name='optionsRadios']:checked").val();
-	        	comment = $form.find("textarea").val();
-	        	var url = $form.attr("action");
+                bootbox.alert("Please select one of the options");
+            } else {
+                radio = $form.find("input:radio[name='optionsRadios']:checked").val();
+
+                comment = $form.find("#comment").val();
+                var url = $form.attr("action");
                 console.log("option = " + radio + ", comment = " + comment + ", url = " + url);
-                {% if last_round %}
-                    $('#myModal').modal('show');
-                {% else %} //last_round
-	        	$.post(url,{option:radio, comm:comment, section:'{{sectionKey}}'},function (data) {
-		        	bootbox.alert(data,function(){
+
+                {%- if last_round -%}
+                    summary = $form.find("#summary").val();
+                {%- else -%} 
+                    summary = '';
+                {%- endif -%}
+
+
+                $.post(url,{option:radio, comm:comment, summary:summary, section:'{{sectionKey}}'},function (data) {
+                    bootbox.alert(data,function(){
                         ocomment = comment;
                     });
-		        });
-                {% endif %} // last_round
-	        }
-	    });
+                });
+            }
+        }
+
+	    $("#form").submit(formSubmit);
 
         var ocomment = $("#comment").val();
 
@@ -133,4 +80,5 @@
         });
 	   {%- endif -%} // not expired
 </script>
+
 {% endblock script %}}

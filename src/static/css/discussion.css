@@ -17,8 +17,8 @@ form {
 }
 
 .row {
-    text-align: center;
-}
+/*    text-align: center;
+*/}
 
 .alert {
     margin-left: 15px;
@@ -57,4 +57,53 @@ form {
 
 .sub-btn {
     margin: 10px auto;
+}
+
+.discussion-container {
+    margin-bottom: 260px;
+}
+
+.lastRound .discussion-container {
+    margin-bottom: 10px;
+}
+
+#discussion-response {
+    border-top: 1px #101010 solid;
+    background: #333;
+    padding: 5px;
+    display: block;
+    box-shadow: 1px 5px 5px 0px rgba(119,119,119,0.54);
+    height: 230px;
+}
+
+#text-editor {
+    display: block;
+    float: left;
+    height: 220px;
+}
+
+#submit {
+    margin: 0;
+    display: block;
+    float: right;
+    height: 220px;
+    width: 80px;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    #text-editor {
+        width: 630px;
+    }
+
+}
+@media (min-width: 992px) {
+    #text-editor {
+        width: 850px;
+    }
+}
+@media (min-width: 1200px) {
+    #text-editor {
+        width: 1050px;
+    }
 }

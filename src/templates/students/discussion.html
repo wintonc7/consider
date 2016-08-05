@@ -4,51 +4,71 @@
 
 {% block head %}
 {{ super() }}
+<script src="/ckeditor/ckeditor.js"></script>
 <link href="/css/discussion.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
-<div class="container">
+{%- if response -%}
+    {% set opinions = response.split(',') %}
+{%- else -%}
+    {% set opinions = [] %}
+{%- endif -%}
+<div class="container discussion-container" id='pageContent'>
     <div class="card">
     <div class="card-title">
-    <h2>Welcome {{alias}}</h2>
+        <h2>{% if curr_page==0 %}Initial Submission {% elif
+        curr_page==num_total_rounds %}Final Submission {% else %}Round {{curr_page - 1}}{% endif %} &gt; Welcome {{alias}}</h2>
     </div>
     <div class="card-body">
     {% if description %}
-    <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
+        <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description}}</h1>
     {% endif %}
     {% for comment in comments %}
-    <div class="jumbotron" id="jum_{{loop.index}}">
-        <h2>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%}</h2>
-        {% if comment.option %}
-        <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
-        {% endif %}
-        {% for opinion in comment.opinion %}
-        <span class="badge"
-              style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}:
-            <span
-                class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}"
-                aria-hidden="true"></span>
-        </span>
-        {% endfor %}
-        <div class="well"
-             style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; white-space: pre-wrap; margin-bottom: 10px">
-            {{comment.response}}
+        <div class="jumbotron{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}" id="jum_{{loop.index}}">
+            <div class="row card-header">
+                <div class="col-md-6">
+                    <h2>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h2>
+                </div>
+
+                {%- if not expired -%}
+                <div class="col-md-6">
+                    <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-danger" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree
+                    </button> 
+
+                    <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-info" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral
+                    </button> 
+
+                    <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-success" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support
+                    </button>
+                </div>
+                {%- endif -%}
+            </div>
+            {% if comment.option %}
+            <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
+            {% endif %}
+            {% for opinion in comment.opinion %}
+            <span class="badge"
+                  style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}:
+                <span
+                    class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}"
+                    aria-hidden="true"></span>
+            </span>
+            {% endfor %}
+            <div class="row">
+                <div class="well col-md-12"
+                     style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px">
+                    {{comment.response|safe}}
+                </div>
+            </div>
         </div>
-        <button type="button" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-success" {% if
-                expired -%} disabled="true" {%- endif -%}>
-            <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support
-        </button>
-        <button type="button" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-info" {% if
-                expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-hand-right"
-                                                                aria-hidden="true"></span> Neutral
-        </button>
-        <button type="button" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="btn btn-sm btn-danger" {% if
-                expired -%} disabled="true" {%- endif -%}><span class="glyphicon glyphicon-thumbs-down"
-                                                                aria-hidden="true"></span> Disagree
-        </button>
-    </div>
     {% endfor %}
     {% if not expired -%}
     <div id="alert_comment" class="alert alert-info fade in" role="alert" style="display: none;">
@@ -61,27 +81,50 @@
         {% endfor %}
     </div>
     {% endif %}
-    <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
-        <textarea class="form-control" rows="5" id="comment"
-                  placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%}
-                  disabled="true" {%- endif -%}>
-        {%- if comment -%}
-            {{comment}}
-        {%- endif -%}
-        </textarea>
-        <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
-                -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
-        </button>
-    </form>
-</div>
+</div> 
 </div>
 </div>
 
+<!-- end #pageContent -->
+</div>
+
+{%- if not expired -%}
+<!-- fixed position discussion response text editor -->
+<div class="container-fluid navbar-fixed-bottom" id="discussion-response">
+    <div class="container">
+        <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
+            <div id="text-editor">
+
+                <textarea class="form-control" rows="5" id="comment"
+                          placeholder="Please enter why you support or disagree with the comments..." required {% if expired -%}
+                          disabled="true" {%- endif -%}>
+                {%- if comment -%}
+                    {{comment}}
+                {%- endif -%}
+                </textarea>
+            </div>
+            <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
+                    -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                    <br />
+                    Submit
+            </button>
+            <!-- replace plain textarea with CKEditor WYSIWYG -->
+            <script>
+                CKEDITOR.replace('comment',
+                {
+                    height: 180
+                });
+            </script>
+        </form>
+    </div>
+</div>
+{%- endif -%}
 {% endblock content %}
 
 {% block script %}
 {{ super() }}
-<!--<script src="/js/countdown.min.js"></script>-->
+
+
 <script>
     var l = {{comments | length}}
     var resp = [];
@@ -89,22 +132,7 @@
 
     {% if response %}
     resp = resp.concat('{{response}}'.split(','));
-    window.onload = initComments;
     {% endif %}
-
-    function initComments() {
-        for (var i = 1; i <= l; i++) {
-            if (resp[i] == "support") {
-                $("#jum_" + i).removeClass().addClass('jumbotron').addClass('support');
-            }
-            else if (resp[i] == "neutral") {
-                $("#jum_" + i).removeClass().addClass('jumbotron').addClass('neutral');
-            }
-            else {
-                $("#jum_" + i).removeClass().addClass('jumbotron').addClass('disagree');
-            }
-        }
-    }
 
     {%- if not expired -%}
 
@@ -116,9 +144,18 @@
         //Prevent the default behaviour
         event.preventDefault();
 
+        // Update content of textarea(s) handled by CKEditor
+        for ( instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+                
         //collect form elements
         if (!selAll()) {
+            // Missing some opinions; force reload current page dynamically
+            // and pop up the alert box.
+            loadRound(curr_round);
             bootbox.alert('Please choose your opinion for all the comments.');
+
         }
         else {
             var $form = $(this);
@@ -132,6 +169,9 @@
         }
     });
 
+    // Checks if the user has selected their opinion for all the comments;
+    // returns true if they have, false if there are any comments they have
+    // not picked an opinion on.
     function selAll() {
         for (var i = 1; i <= l; i++) {
             if (!resp[i]) return false;
@@ -150,7 +190,7 @@
         }
         else if (type == "neu") {
             $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
-            $("#alert_" + index).html("You are neutral with S" + index + "...");
+            $("#alert_" + index).html("Why you are neutral with S" + index + "...");
             resp[index] = 'neutral';
             $("#alert_comment").show();
         }

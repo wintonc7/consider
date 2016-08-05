@@ -18,7 +18,6 @@ import model
 from google.appengine.api import mail
 from google.appengine.api import users
 
-
 class Local_TZ(object):
     """
     Handles conversions to and from UTC, allowing for support
@@ -295,7 +294,8 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
             # And set the rest of the template values
             template_values['selectedSection'] = section.name
             template_values['selectedSectionObject'] = section
-            template_values['students'] = section.students
+            if section.students:
+                template_values['students'] = section.students
             # end
     # end
     # And finally return the template values
@@ -448,6 +448,7 @@ def send_mail(senders_email, section, subject, message):
     if message:
         email_message = message
     # Send the email to the list of email addresses
+    # senders_email='kaichen547@gmail.com'
     for email in recipient_emails:
         mail.send_mail(sender=senders_email,
                        to=email,

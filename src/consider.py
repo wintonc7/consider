@@ -8,13 +8,19 @@ consider.py
 
 Main module of the app. Implements the ``application`` object; handlers for error, home and root pages; and redirects URL to appropriate handler classes.
 """
+import StringIO
+
 import webapp2
 from google.appengine.api import users
 
 import config
 import utils
+import datetime
 from .controller import admin, instructor, student
+from src import model
+from google.appengine.api import mail
 
+import csv
 
 class ErrorPage(webapp2.RequestHandler):
     # TODO Uniform error messaging; rethink exceptions, redirects, popups, etc.
@@ -99,6 +105,51 @@ class MainPage(webapp2.RequestHandler):
             template = utils.jinja_env().get_template('login.html')
             self.response.write(template.render(template_values))
 
+class CronTask(webapp2.RequestHandler):
+
+    def get(self):
+        #print 'Hello World!'
+        #self.redirect('/home')
+        #message = mail.EmailMessage(sender='lwwscc@gmail.com', to='lan.105@osu.edu', subject='Consider Test', body='How are you?')
+        #message.send()
+        ''''''
+        time_notification = 120 # Email notification when time left is no more than 2 hours
+        current_time = datetime.datetime.now()
+        sections = model.Section.query().fetch()
+        for section in sections:
+            print section.name
+            num = utils.get_current_round(section)
+            #num=1
+            if num:
+                rounds = model.Round.query(ancestor=section.key).fetch()
+                for rnd in rounds:
+                    if rnd.number==num:
+                        round = rnd
+                        break
+                #print "current_time:  "+str(current_time)
+                #print "round.deadline:  "+str(round.deadline)
+                delta_time = round.deadline-current_time
+                time_remaining = 24*60*delta_time.days+delta_time.seconds//60
+                if 0 < time_remaining < time_notification:
+                    sec_emails = [s.email for s in section.students]
+                    response = model.Response.query(ancestor=round.key).fetch()
+                    res_emails = [res.student for res in response]
+                    to_emails = [email for email in sec_emails if email not in res_emails]
+                    #from_email = 'lwwscc@gmail.com' # Admin's email
+                    from_email = 'no-reply@consider-1.appspotmail.com'
+                    email_subject = 'Deadline Approaching for Submission'
+                    email_message = 'Dear Students: \n' \
+                                    'No more than 30 minutes left to submit your answer.' \
+                                    'Please finish it as soon as possible! \n' \
+                                    'Best,\n' \
+                                    'Consider Team\n'
+                    for to_email in to_emails:
+                        mail.send_mail(sender=from_email,
+                                    to=to_email,
+                                    subject=email_subject,
+                                    body=email_message)
+        self.redirect('/home')
+        ''''''
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -114,4 +165,8 @@ application = webapp2.WSGIApplication([
     ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
     ('/student_rounds', student.Rounds),
+    ('/crontask',CronTask),
+    ('/show_responses',instructor.ShowResponses),
+    ('/data_file_export',instructor.DataExport),
+    ('/data_html_export',instructor.HtmlExport),
 ], debug=config.DEBUG)

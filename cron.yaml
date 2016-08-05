@@ -1,0 +1,6 @@
+cron:
+- description: email notification
+  url: /crontask
+  schedule: every 60 mins
+
+

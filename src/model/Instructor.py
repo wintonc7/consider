@@ -11,3 +11,4 @@ class Instructor(ndb.Model):
     """ String. Must be non-empty and unique. Retrieved from Gmail automatically """
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if this instructor is active or not. """
+    export_course = ndb.StringProperty(required=False)
