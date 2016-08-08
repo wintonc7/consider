@@ -381,19 +381,19 @@ def startRounds(course,section,):
 
 def getDeadline(round_id):
     script = "from src import model\n"
-    script += "rounds = model.Round.query(model.Round.number == 6).fetch()[0]\n"
+    script += "rounds = model.Round.query(model.Round.number == "+str(round_id)+").fetch()[0]\n"
     script += "print(rounds.deadline)\n"
     return console(script)
 
 def getDescription(round_id):
     script = "from src import model\n"
-    script += "rounds = model.Round.query(model.Round.number == 6).fetch()[0]\n"
+    script += "rounds = model.Round.query(model.Round.number == "+str(round_id)+").fetch()[0]\n"
     script += "print(rounds.description)\n"
     return console(script)
 
 def getStarttime(round_id):
     script = "from src import model\n"
-    script += "rounds = model.Round.query(model.Round.number == 6).fetch()[0]\n"
+    script += "rounds = model.Round.query(model.Round.number == "+str(round_id)+").fetch()[0]\n"
     script += "print(rounds.starttime)\n"
     return console(script)
 
@@ -926,11 +926,14 @@ try:
     #deadline = deadline.strftime("%Y-%m-%dT%H:%M")
     deadline = getDeadline(6).replace(" ","T")
     starttime = getStarttime(6).replace(" ","T")
-    description = getDescription(6) + "changed!"
-    changeDiscussionRound(6,"TEST-COURSE","TEST-SECTION",description,deadline,starttime)
+    description = "changed!"
+    responseFromPost = changeDiscussionRound(6,"TEST-COURSE","TEST-SECTION",description,deadline,starttime)
     if(description == getDescription(6)):
         print_passed(test_number)
     else:
+        #uncomment the following two lines to see why it failed
+        #print(responseFromPost.text)
+        #exit()
         print_failed(test_number,"instructor could not edit a discussion round's description")
     logout()
     test_number += 1
