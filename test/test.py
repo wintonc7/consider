@@ -255,7 +255,7 @@ xsrf_token = get_xsrf_token()
 def console(script):
     data = {"code":script,"module_name":"default","xsrf_token":xsrf_token}
     ans = requests.post("http://localhost:8000/console",data=data)
-    return ans.text
+    return ans.text.strip()
 
 #goes to the student home page and gets a list of keys for displayed sections
 def get_section_key_list():
@@ -437,6 +437,7 @@ def canToggleSection(coursename,sectionname):
     toggleSection(coursename,sectionname)
     afterToggle2 = isSectionActive(coursename,sectionname)
     return (afterToggle != afterToggle2)
+
 
 inst_directories = ["/courses","/group_responses","/groups","/responses","/rounds","/sections","/students"]
 std_directories = ["/student_home","/student_rounds"]
@@ -911,10 +912,11 @@ try:
     startcount = get_total_round_count()
     deleteDiscussionRound(4,"TEST-COURSE","TEST-SECTION")
     aftercount = get_total_round_count()
-    if(aftercount - startcount == 1):
+
+    if (startcount - aftercount == 1):
         print_passed(test_number)
     else:
-        print_failed(test_number,"instructor could not delete a discussion round: steven's note: has something to do with the anonymous feature interfering with the round shift method in delete_round")
+        print_failed(test_number, "instructor could not delete a discussion round")
 
     logout()
     test_number += 1
@@ -922,18 +924,17 @@ try:
 
     #TEST: see if instructor can change a round
     login("test-instructor@gmail.com",False)
-    #deadline = datetime.datetime.now()+datetime.timedelta(hours=24)
-    #deadline = deadline.strftime("%Y-%m-%dT%H:%M")
-    deadline = getDeadline(6).replace(" ","T")
-    starttime = getStarttime(6).replace(" ","T")
+    # Note: Need to exclude the last 3 characters (:00) that correspond to seconds.
+    deadline = getDeadline(6).strip().replace(" ", "T")[:-3]
+    starttime = getStarttime(6).strip().replace(" ","T")[:-3]
     description = "changed!"
     responseFromPost = changeDiscussionRound(6,"TEST-COURSE","TEST-SECTION",description,deadline,starttime)
-    if(description == getDescription(6)):
+    if str(description) == str(getDescription(6)):
         print_passed(test_number)
     else:
         #uncomment the following two lines to see why it failed
-        #print(responseFromPost.text)
-        #exit()
+        # print(responseFromPost.text)
+        # exit()
         print_failed(test_number,"instructor could not edit a discussion round's description")
     logout()
     test_number += 1

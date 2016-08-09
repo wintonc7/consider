@@ -548,6 +548,8 @@ def str_to_datetime(dt):
 
 def to_utc(dt):
     """ Converts the input local datetime to UTC. """
+    if type(dt) in [str, unicode]:
+        dt = str_to_datetime(dt)
     return Local_TZ.to_utc(dt)
 
 
@@ -555,6 +557,8 @@ def to_utc(dt):
 
 def from_utc(dt):
     """ Converts the input UTC datetime to local time. """
+    if type(dt) in [str, unicode]:
+        dt = str_to_datetime(dt)    
     return Local_TZ.from_utc(dt)
 
 
