@@ -31,7 +31,7 @@ class Round(ndb.Model):  # FIXME move under a Group?
     description = ndb.StringProperty(indexed=False)
     """ String. Description or brief instructions for the round."""
     is_quiz = ndb.BooleanProperty(default=False, indexed=False)
-    """ Boolean. If ``True``, this is a quiz round (e.g., lead-in question); if ``False``, a discussion round."""
+    """ Boolean. If ``True``, this is a quiz round (e.g., initial question); if ``False``, a discussion round."""
     quiz = ndb.StructuredProperty(Question, indexed=False)
     """ A `Question`_ property. Contains the question if this is a quiz round."""
 

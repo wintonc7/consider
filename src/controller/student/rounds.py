@@ -24,7 +24,7 @@ from src import model, utils
 class Rounds(webapp2.RequestHandler):
     """
     API to redirect a student based on what stage she is in in a particular section:
-    lead-in question, discussion or summary round.
+    initial question, discussion or summary round.
 
     If no round is active for this section, it redirects to an appropriate error page.
     """
@@ -179,7 +179,7 @@ class Rounds(webapp2.RequestHandler):
             template_values['documentation'] = config.DOCUMENTATION
             template_values['curr_page'] = requested_round_number
 
-            # Now we need to check if it's the lead-in or summary question
+            # Now we need to check if it's the initial or summary question
             if requested_round.is_quiz:
                 # And set template values for quiz round
                 self.quiz_view_template(student, requested_round, template_values)
@@ -216,9 +216,9 @@ class Rounds(webapp2.RequestHandler):
                 # 3. Send all the posts to the template
                 template_values['posts'] = posts
 
-                # 4. Grab all posts from the previous round (leadin)
-                leadin = model.Round.get_by_id(1, parent=section.key)
-                initial_answers = self.group_comments(group, section, leadin)
+                # 4. Grab all posts from the previous round (initial)
+                initial = model.Round.get_by_id(1, parent=section.key)
+                initial_answers = self.group_comments(group, section, initial)
                 template_values['initial_answers'] = initial_answers
 
     # end seq_discussion_view_template
@@ -323,7 +323,7 @@ class Rounds(webapp2.RequestHandler):
         comment = self.request.get('comm')
         summary = self.request.get('summary')
         res = self.request.get('response')
-        # Now check whether we're on a lead-in or summary or discussion round
+        # Now check whether we're on a initial or summary or discussion round
         if current_round.is_quiz:
             # If it is, double check that they selected an answer and commented
             if current_round.quiz.options_total > 0 and not (option and comment):

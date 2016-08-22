@@ -3,8 +3,8 @@
  */
 var lastQuestion = false;
 $(document).ready(function () {
-    $('#inputLeadInQuestion').on('keyup', function () {
-        showPreviewLeadIn();
+    $('#inputInitialQuestion').on('keyup', function () {
+        showPreviewInitial();
     });
 
     $('#inputSummaryQuestion').on('keyup', function () {
@@ -15,8 +15,8 @@ $(document).ready(function () {
         $(this).datetimepicker();
     });
 
-    $('#addLeadIn').click(function () {
-        $('#leadInModal').modal('show');
+    $('#addInitial').click(function () {
+        $('#initialModal').modal('show');
     });
 
     $('#addSummary').click(function () {
@@ -94,11 +94,11 @@ $(document).ready(function () {
         });
     });
 
-    $('#submitLeadInQuestion').click(function () {
-        $("#leadInModalForm").find('[type="submit"]').trigger('click');
+    $('#submitInitialQuestion').click(function () {
+        $("#initialModalForm").find('[type="submit"]').trigger('click');
     });
 
-    $('#leadInModalForm').submit(function (event) {
+    $('#initialModalForm').submit(function (event) {
         event.preventDefault();
         // First we need to check that a date has been selected
         var $form = $(this),
@@ -109,7 +109,7 @@ $(document).ready(function () {
 
         var optionVals = [];
         for (var i = 1; i <= options; i++) {
-            var val = $form.find("#inputLeadInOptions" + i).val();
+            var val = $form.find("#inputInitialOptions" + i).val();
             console.log(val);
             optionVals.push(val);
         }
@@ -125,7 +125,7 @@ $(document).ready(function () {
             course: $form.find('[name="course"]').val(),
             section: $form.find('[name="section"]').val(),
             round: 1,
-            roundType: 'leadin',
+            roundType: 'initial',
             action: 'add',
             startBuffer: startBuffer
         }, function (data) {
@@ -164,16 +164,16 @@ $(document).ready(function () {
         showPreviewSummary();
     });
 
-    $("#inputLeadInOptions").change(function () {
-        var $form = $('#leadInModalForm');
-        var select = parseInt($('#inputLeadInOptions').val(), 10);
+    $("#inputInitialOptions").change(function () {
+        var $form = $('#initialModalForm');
+        var select = parseInt($('#inputInitialOptions').val(), 10);
         var current_num = $form.find('.theOptions').find('input').length;
         var $container = $form.find('.theOptions');
 
         //Add to end
         if (current_num < select) {
             for (var i = current_num; i < select; i++) {
-                var input = $('<input type="text" onkeyup="showPreviewLeadIn()" class="form-control" id="inputLeadInOptions' + (i + 1) + '" name="Options' + (i + 1) + '" placeholder="Option ' + (i + 1) + '" style="margin-bottom: 10px" required="true">');
+                var input = $('<input type="text" onkeyup="showPreviewInitial()" class="form-control" id="inputInitialOptions' + (i + 1) + '" name="Options' + (i + 1) + '" placeholder="Option ' + (i + 1) + '" style="margin-bottom: 10px" required="true">');
                 $container.append(input).find('input:last-child').hide().fadeIn('slow');
             }
         }
@@ -186,7 +186,7 @@ $(document).ready(function () {
             }
         }
 
-        showPreviewLeadIn();
+        showPreviewInitial();
     });
 
     $('#addRoundsForm').submit(function (e) {
@@ -288,20 +288,20 @@ $(document).ready(function () {
         modal.modal('show');
     });
 
-    $('#edit-leadin').click(function () {
-        var modal = $('#leadInModal');
-        var table = $('#leadin-question-table');
+    $('#edit-initial').click(function () {
+        var modal = $('#initialModal');
+        var table = $('#initial-question-table');
         var tr = $(this).find('tbody > tr');
         var deadline = table.find('td:nth-child(2)').data('deadline');
         var question = table.find('.question').text();
         var options_ul = table.find('.options ul');
-        var inputOptions = modal.find('#inputLeadInOptions');
+        var inputOptions = modal.find('#inputInitialOptions');
         inputOptions.val(options_ul.find('li').length);
 
         modal.find('#endTime').val(moment(deadline).format("MM/DD/YYYY hh:mm A"));
         modal.find('textarea').val(question);
 
-        showPreviewLeadIn();
+        showPreviewInitial();
 
         modal.modal('show');
     });
@@ -553,9 +553,9 @@ function showPreviewSummary() {
     $('#summaryModal').find('#previewPlaceholder').html(preview);
 }
 
-function showPreviewLeadIn() {
-    var text = $('#inputLeadInQuestion').val();
-    var $form = $('#leadInModalForm');
+function showPreviewInitial() {
+    var text = $('#inputInitialQuestion').val();
+    var $form = $('#initialModalForm');
     var questionOptions = $form.find('.theOptions').find('input');
 
     console.log('questionOptions.length = ' + questionOptions.length);
@@ -566,6 +566,6 @@ function showPreviewLeadIn() {
 
     console.log('text = ' + text);
     preview = mdToHtml(text);
-    $('#leadInModal').find('#previewPlaceholder').html(preview);
+    $('#initialModal').find('#previewPlaceholder').html(preview);
 }
 

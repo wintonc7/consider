@@ -203,10 +203,10 @@ def modifyNumberOfGroups(num,course_name,section_name):
     data={"groups":num,"course":course_name,"section":section_name,"action":"add"}
     return groups_post(data)
 
-def addLeadInQuestion(duetime,question,numberQuestions,course,section):
+def addInitialQuestion(duetime,question,numberQuestions,course,section):
     options = ["test question"]*numberQuestions
     options = str(options).replace("'",'"')
-    data={"course":course.upper(),"section":section.upper(),"time":duetime,"question":question,"number":numberQuestions,"round":"1","roundType":"leadin","startBuffer":"0","options":options,"action":"add"}
+    data={"course":course.upper(),"section":section.upper(),"time":duetime,"question":question,"number":numberQuestions,"round":"1","roundType":"initial","startBuffer":"0","options":options,"action":"add"}
     return rounds_post(data)
 
 def addDiscussionRounds(num,duration,course,section):
@@ -826,7 +826,7 @@ try:
     numberQuestions = 4
     course = "TEST-COURSE"
     section = "TEST-SECTION"
-    addLeadInQuestion(duetime,question,numberQuestions,course,section)
+    addInitialQuestion(duetime,question,numberQuestions,course,section)
     aftercount = get_total_round_count()
     if(aftercount - startcount == 1):
         print_passed(test_number)
@@ -835,7 +835,7 @@ try:
     logout()
     test_number += 1
 
-    #TEST: see if instructor can add another, duplicate leadin question
+    #TEST: see if instructor can add another, duplicate initial question
     login("test-instructor@gmail.com",False)
     startcount = get_total_round_count()
     #make due tomorrow
@@ -845,7 +845,7 @@ try:
     numberQuestions = 4
     course = "TEST-COURSE"
     section = "TEST-SECTION"
-    addLeadInQuestion(duetime,question,numberQuestions,course,section)
+    addInitialQuestion(duetime,question,numberQuestions,course,section)
     aftercount = get_total_round_count()
     if(aftercount - startcount == 0):
         print_passed(test_number)
@@ -854,7 +854,7 @@ try:
     logout()
     test_number += 1
 
-    #TEST: see if student can add leadin question
+    #TEST: see if student can add initial question
     login("test-student@gmail.com",False)
     startcount = get_total_round_count()
     #make due tomorrow
@@ -864,7 +864,7 @@ try:
     numberQuestions = 4
     course = "TEST-COURSE"
     section = "TEST-SECTIONXYZ"
-    addLeadInQuestion(duetime,question,numberQuestions,course,section)
+    addInitialQuestion(duetime,question,numberQuestions,course,section)
     aftercount = get_total_round_count()
     if(aftercount - startcount == 0):
         print_passed(test_number)
@@ -984,7 +984,7 @@ try:
     course = "S-TEST-COURSE"
     section = "S-TEST-SECTION"
     #add lead in question a discussion rounds
-    addLeadInQuestion(duetime,question,numberQuestions,course,section)
+    addInitialQuestion(duetime,question,numberQuestions,course,section)
     addDiscussionRounds(10,1,"S-TEST-COURSE","S-TEST-SECTION")
     #start the rounds
     startRounds("S-TEST-COURSE","S-TEST-SECTION")
@@ -1065,7 +1065,7 @@ try:
     course = getCourse
     section = getSection
     #add lead in question and discussion rounds
-    addLeadInQuestion(duetime,question,numberQuestions,course,section)
+    addInitialQuestion(duetime,question,numberQuestions,course,section)
     testGET(getAdmin,getInst,getStd,getCourse,getSection,"lead in question added but no discussion rounds")
     login(getInst,False)
     addDiscussionRounds(10,1,getCourse,getSection)

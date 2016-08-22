@@ -88,19 +88,19 @@
 
 <div class="card">
 <div class="card-title">
-    <h4>Lead-in Question</h4>
+    <h4>Initial Question</h4>
 </div>
 <div class="card-body"> 
 {% if selectedSection %}
-    {% if leadInQuestion %}
-        {% if leadInQuestion.deadline|since_epoch > now|since_epoch %}
-            <button type="button" class="btn btn-default" id="edit-leadin" aria-label="Edit Question">
+    {% if initialQuestion %}
+        {% if initialQuestion.deadline|since_epoch > now|since_epoch %}
+            <button type="button" class="btn btn-default" id="edit-initial" aria-label="Edit Question">
                 <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> 
                 Edit Question
             </button>
         {% endif %}
         <div class="table-responsive">
-            <table class="table table-striped" id="leadin-question-table">
+            <table class="table table-striped" id="initial-question-table">
                 <thead>
                     <tr>
                         <th>Round</th>
@@ -111,12 +111,12 @@
                 </thead>
                 <tbody>
                     <tr {% if selectedSectionObject.current_round == 1 %} class="row-highlight" {% endif %} >
-                        <td>{{leadInQuestion.number}}</td>
-                        <td data-deadline="{{leadInQuestion.deadline|local_time}}">{{leadInQuestion.deadline|local_time}}</td>
-                        <td class="question md">{{leadInQuestion.quiz.question}}</td>
+                        <td>{{initialQuestion.number}}</td>
+                        <td data-deadline="{{initialQuestion.deadline|local_time}}">{{initialQuestion.deadline|local_time}}</td>
+                        <td class="question md">{{initialQuestion.quiz.question}}</td>
                         <td class="options">
                             <ul class="list-group">
-                                {% for option in leadInQuestion.quiz.options %}
+                                {% for option in initialQuestion.quiz.options %}
                                 <li class="md list-group-item">{{option}}</li>
                                 {% endfor %}
                             </ul>
@@ -126,7 +126,7 @@
             </table>
         </div>
     {% else %}
-        <button type="button" class="btn btn-default" id="addLeadIn" aria-label="Add Question">
+        <button type="button" class="btn btn-default" id="addInitial" aria-label="Add Question">
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Question
         </button>
     {% endif %}
@@ -200,7 +200,7 @@
 </div>
 
 
-{% if leadInQuestion %}
+{% if initialQuestion %}
 {% if selectedSectionObject.current_round == 0 %}
 <div class="card">
     <div class="card-body">
@@ -239,16 +239,16 @@
 #}
 
 {# Lead In Modal #}
-<div class="modal fade" id="leadInModal" tabindex="-1" role="dialog" aria-labelledby="leadInModalLabel" aria-hidden="true">
+<div class="modal fade" id="initialModal" tabindex="-1" role="dialog" aria-labelledby="initialModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="leadInModalLabel">Please add the question</h4>
+                <h4 class="modal-title" id="initialModalLabel">Please add the question</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" id="leadInModalForm" method="post" style="text-align: center;"
+                <form class="form-horizontal" id="initialModalForm" method="post" style="text-align: center;"
                       action="/rounds">
                     <input type="hidden" name="course" value="{{selectedCourse}}" />
                     <input type="hidden" name="section" value="{{selectedSection}}" />
@@ -262,20 +262,20 @@
                     <div id="buffer_entry" class="form-group">
                         <label for="startBuffer" class="col-sm-2 control-label">Buffer</label>
                         <div class="col-sm-10">
-                            <input id="startBuffer" type="tel" class="form-control" value="{% if leadInQuestion %} {{leadInQuestion.buffer_time}}{% else %}0{% endif %}" name="startBuffer" required="true" />
+                            <input id="startBuffer" type="tel" class="form-control" value="{% if initialQuestion %} {{initialQuestion.buffer_time}}{% else %}0{% endif %}" name="startBuffer" required="true" />
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputLeadInQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
+                        <label for="inputInitialQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" rows="3" id="inputLeadInQuestion" name="question"
+                            <textarea class="form-control" rows="3" id="inputInitialQuestion" name="question"
                                       placeholder="Please enter the question..." required></textarea>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputLeadInOptions" class="col-sm-2 control-label">Number of options</label>
+                        <label for="inputInitialOptions" class="col-sm-2 control-label">Number of options</label>
                         <div class="col-sm-10">
-                            <select class="form-control" id="inputLeadInOptions" name="options">
+                            <select class="form-control" id="inputInitialOptions" name="options">
                                 <option value="0" selected="selected">0</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -287,13 +287,13 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputLeadInOptions1" class="col-sm-2 control-label">Options: </label>
+                        <label for="inputInitialOptions1" class="col-sm-2 control-label">Options: </label>
                         <div class="col-sm-10">
                             <div class="theOptions">
-                                {% if leadInQuestion %}
-                                    {% for option in leadInQuestion.quiz.options %}
-                                        <input type="text" class="form-control" id="inputLeadInOptions{{loop.index}}" name="Options{{loop.index}}"
-                                               style="margin-bottom: 10px" value="{{option}}" required="true" onkeyup="showPreviewLeadIn()">
+                                {% if initialQuestion %}
+                                    {% for option in initialQuestion.quiz.options %}
+                                        <input type="text" class="form-control" id="inputInitialOptions{{loop.index}}" name="Options{{loop.index}}"
+                                               style="margin-bottom: 10px" value="{{option}}" required="true" onkeyup="showPreviewInitial()">
                                     {% endfor %}
                                 {% endif %}
                             </div>
@@ -307,7 +307,7 @@
             </div>
             <div style="text-align: right; padding: 15px">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="submitLeadInQuestion">Submit Question</button>
+                <button type="button" class="btn btn-primary" id="submitInitialQuestion">Submit Question</button>
             </div>
         </div>
     </div>
@@ -413,7 +413,7 @@
                         <div class="col-sm-10">
                             <textarea class="form-control" rows="3" id="inputEditEmailMessage"
                                       name="message"
-                                      required>The lead-in round for CONSIDER has begun. Please visit the following link to submit your answer: http://go.osu.edu/consider</textarea>
+                                      required>The initial submission for CONSIDER has begun. Please visit the following link to submit your answer: http://go.osu.edu/consider</textarea>
                         </div>
                     </div>
                     <button type="submit" class="hide"></button>

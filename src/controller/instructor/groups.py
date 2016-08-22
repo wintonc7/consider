@@ -151,7 +151,7 @@ class Groups(webapp2.RequestHandler):
             # Check that the current section has at least one round
             if current_section.rounds > 0:
 
-                # Grab the responses from the lead-in question
+                # Grab the responses from the initial question
                 response = model.Response.query(
                     ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch()
 

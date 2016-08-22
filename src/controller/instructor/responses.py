@@ -50,7 +50,7 @@ class Responses(webapp2.RequestHandler):
             template_values['round'] = current_section.rounds
             # Create a new dict for the responses
             resp = {}
-            # And loop over the number of rounds (indexed at 1 for lead-in)
+            # And loop over the number of rounds (indexed at 1 for initial)
             for i in range(1, current_section.rounds + 1):
                 # if seq. discussion and round==2, grab all the groups
                 if not current_section.has_rounds and i == 2:

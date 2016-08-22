@@ -83,9 +83,9 @@ class Rounds(webapp2.RequestHandler):
                 discussion_rounds = []
                 # And loop over all of the rounds for this section
                 for r in rounds:
-                    # Set the lead-in question
+                    # Set the initial question
                     if r.number == 1:
-                        template_values['leadInQuestion'] = r
+                        template_values['initialQuestion'] = r
                     elif r.is_quiz:
                         # And if not the lead-in question, but still a quiz
                         # it must be the summary round
@@ -223,7 +223,7 @@ class Rounds(webapp2.RequestHandler):
         # Now grab all of the rounds
         rounds = model.Round.query(ancestor=section.key).fetch()
         # And switch on the type to create our start time
-        if round_obj.description == 'leadin':
+        if round_obj.description == 'initial':
             self.add_lead_in(round_obj, rounds)
         else:
             # If not a lead-in question, we know it's a summary
@@ -248,7 +248,7 @@ class Rounds(webapp2.RequestHandler):
             # Let's check that the deadline doesn't conflict with the last round
             if round_obj.deadline <= last_time:
                 # Send an error if so and return
-                utils.error('Error! Cannot set end time of summary before end of last discussion.', handler=self)
+                utils.error('Error! Cannot set end time of final before end of last discussion.', handler=self)
                 return
             # end
             # Set start time of summary as the deadline of the last round
@@ -283,7 +283,7 @@ class Rounds(webapp2.RequestHandler):
         round_obj.is_quiz = True
         # Try and grab the buffer time from the page
         start_buffer = self.request.get('startBuffer')
-        # Check if it exists (i.e. only on the lead-in round)
+        # Check if it exists (i.e. only on the initial round)
         if start_buffer:
             # And set the property on the object if so
             round_obj.buffer_time = int(start_buffer)
@@ -297,7 +297,7 @@ class Rounds(webapp2.RequestHandler):
         round_obj.quiz = model.Question(options_total=num_options,
                                         question=question, options=options)
 
-        # Now grab the round type (lead-in or summary)
+        # Now grab the round type (initial or final)
         round_type = self.request.get('roundType')
         # And set the description
         round_obj.description = round_type
@@ -307,12 +307,12 @@ class Rounds(webapp2.RequestHandler):
     # end build_round_obj
 
     def add_lead_in(self, round_obj, rounds):
-        # We'll simply use unix epoch as the start time for leadin questions
+        # We'll simply use unix epoch as the start time for initial questions
         round_obj.starttime = datetime.datetime(1970, 1, 1)
         # Now we need to check if there are more rounds
         if rounds and len(rounds) > 1:
-            # Discussion directly after the lead-in will always be index 1
-            # If new lead-in deadline conflicts, shift rounds
+            # Discussion directly after the initial will always be index 1
+            # If new initial deadline conflicts, shift rounds
             if round_obj.deadline >= rounds[1].starttime:
                 # Now we need to shift all of the rounds, so loop over them
                 for i in range(1, len(rounds)):
@@ -339,10 +339,10 @@ class Rounds(webapp2.RequestHandler):
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
         rounds = model.Round.query(ancestor=section.key).fetch()
-        # The view requires at least a lead-in question to add rounds, but check
+        # The view requires at least a initial question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('Error! No lead-in question exists; cannot add new rounds yet.', handler=self)
+            utils.error('Error! No initial question exists; cannot add new rounds yet.', handler=self)
             # And redirect
             return self.redirect('/')
         # end
@@ -434,10 +434,10 @@ class Rounds(webapp2.RequestHandler):
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
         rounds = model.Round.query(ancestor=section.key).fetch()
-        # The view requires at least a lead-in question to add rounds, but check
+        # The view requires at least a initial question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('Error! No lead-in question exists; cannot add new rounds yet.', handler=self)
+            utils.error('Error! No initial question exists; cannot add new rounds yet.', handler=self)
             # And redirect
             return self.redirect('/')
         # end
@@ -480,7 +480,7 @@ class Rounds(webapp2.RequestHandler):
                     # and we can just shift the values directly
                     rounds[j].description = rounds[j + 1].description
                     # No need to move anything quiz related since it isn't
-                    # a lead-in or summary question
+                    # a initial or summary question
                     # Lastly, we need to compute the duration to move over
                     duration = self.get_duration(rounds[j + 1].starttime, rounds[j + 1].deadline)
                     # Keep the old start time of rounds[j] and calculate
@@ -501,10 +501,10 @@ class Rounds(webapp2.RequestHandler):
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
         rounds = model.Round.query(ancestor=section.key).fetch()
-        # The view requires at least a lead-in question to add rounds, but check
+        # The view requires at least a initial question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('Error! No lead-in question exists; cannot add new rounds yet.', handler=self)
+            utils.error('Error! No initial question exists; cannot add new rounds yet.', handler=self)
             # And redirect
             return self.redirect('/')
         # end
@@ -576,10 +576,10 @@ class Rounds(webapp2.RequestHandler):
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
         rounds = model.Round.query(ancestor=section.key).fetch()
-        # The view requires at least a lead-in question to add rounds, but check
+        # The view requires at least a initial question to add rounds, but check
         if not rounds:
             # Send an error if no rounds exist for this section
-            utils.error('Error! No lead-in question exists; cannot start yet.', handler=self)
+            utils.error('Error! No initial question exists; cannot start yet.', handler=self)
             # And redirect
             return self.redirect('/')
         # end
