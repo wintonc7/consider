@@ -14,9 +14,11 @@ import datetime
 import logging
 from json import JSONEncoder
 
-import model
 from google.appengine.api import mail
 from google.appengine.api import users
+
+import model
+
 
 class Local_TZ(object):
     """
@@ -296,7 +298,7 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
             template_values['selectedSectionObject'] = section
             if section.students:
                 template_values['students'] = section.students
-            # end
+                # end
     # end
     # And finally return the template values
     return template_values
@@ -558,7 +560,7 @@ def to_utc(dt):
 def from_utc(dt):
     """ Converts the input UTC datetime to local time. """
     if type(dt) in [str, unicode]:
-        dt = str_to_datetime(dt)    
+        dt = str_to_datetime(dt)
     return Local_TZ.from_utc(dt)
 
 
@@ -571,6 +573,38 @@ def tzname(dt=None):
 
 # end tzname()
 
+def send_mails(recipients, subject, message):
+    '''
+    Send emails using mailjet
+    Args:
+        recipients: List of strings. Email addresses of recipients.
+        subject: String. Subject line of each email.
+        message: String. Plain text message for each email.
+
+    '''
+    import mailjet_rest
+    import requests_toolbelt.adapters.appengine
+    requests_toolbelt.adapters.appengine.monkeypatch()
+
+    from src import config
+    client = mailjet_rest.Client(
+        auth=(config.MAILJET_API_KEY, config.MAILJET_API_SECRET))
+
+    for recipient in recipients:
+        data = {
+            'FromEmail': config.MAILJET_SENDER,
+            'FromName': 'CONSIDER Admin',
+            'Subject': subject,
+            'Text-part': message,
+            'Html-part': message,
+            'Recipients': [{'Email': recipient}]
+        }
+        result = client.send.create(data=data)
+        log("Email sent:" + str(result.json()))
+
+
+# end send_mails
+
 # Simple class to serialize Round objects
 class RoundEncoder(JSONEncoder):
     def default(self, obj):
@@ -582,5 +616,5 @@ class RoundEncoder(JSONEncoder):
         json_round['is_quiz'] = obj.is_quiz
         json_round['starttime'] = obj.starttime
         return json_round
-        # end
-        # end
+
+# end class RoundEncoder

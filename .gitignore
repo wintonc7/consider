@@ -71,3 +71,9 @@ index.yaml
 .AppleDouble
 .LSOverride
 Icon?
+
+
+lib
+
+### IMPORTANT: Config file contains sensitive information, hence not included in VCS
+src/config.py

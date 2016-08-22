@@ -1,4 +1,4 @@
-application: consider-1
+application: consider-osu
 version: 2
 runtime: python27
 api_version: 1

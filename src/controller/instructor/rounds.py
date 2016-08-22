@@ -167,7 +167,9 @@ class Rounds(webapp2.RequestHandler):
                 message = self.request.get('message')
                 # Grab the subject of the email
                 subject = self.request.get('subject')
-                utils.send_mail(instructor.email, email_section, subject, message)
+                # utils.send_mail(instructor.email, email_section, subject, message)
+                to_emails = [s.email for s in email_section.students]
+                utils.send_mails(to_emails, subject, message)
                 email_course.recent_section = email_section.name
                 email_course.put()
             elif action == 'toggle_anon':
