@@ -113,11 +113,11 @@
                     <tr {% if selectedSectionObject.current_round == 1 %} class="row-highlight" {% endif %} >
                         <td>{{initialQuestion.number}}</td>
                         <td data-deadline="{{initialQuestion.deadline|local_time}}">{{initialQuestion.deadline|local_time}}</td>
-                        <td class="question md">{{initialQuestion.quiz.question}}</td>
+                        <td class="question md">{{initialQuestion.quiz.question|safe}}</td>
                         <td class="options">
                             <ul class="list-group">
                                 {% for option in initialQuestion.quiz.options %}
-                                <li class="md list-group-item">{{option}}</li>
+                                <li class="md list-group-item">{{option|safe}}</li>
                                 {% endfor %}
                             </ul>
                         </td>
@@ -177,11 +177,11 @@
                 <td>{{summaryQuestion.number}}</td>
                 <td data-starttime="{{summaryQuestion.starttime}}">{{summaryQuestion.starttime|local_time}}</td>
                 <td data-deadline="{{summaryQuestion.deadline}}">{{summaryQuestion.deadline|local_time}}</td>
-                <td class="question md">{{summaryQuestion.quiz.question}}</td>
+                <td class="question md">{{summaryQuestion.quiz.question|safe}}</td>
                 <td class="options">
                     <ul class="list-group">
                         {% for option in summaryQuestion.quiz.options %}
-                        <li class="list-group-item">{{option}}</li>
+                        <li class="list-group-item">{{option|safe}}</li>
                         {% endfor %}
                     </ul>
                 </td>
@@ -238,7 +238,7 @@
 # Modals 
 #}
 
-{# Lead In Modal #}
+{# Initial Modal #}
 <div class="modal fade" id="initialModal" tabindex="-1" role="dialog" aria-labelledby="initialModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -266,7 +266,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputInitialQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
+                        <label for="inputInitialQuestion" class="col-sm-2 control-label">Question (HTML supported)</label>
                         <div class="col-sm-10">
                             <textarea class="form-control" rows="3" id="inputInitialQuestion" name="question"
                                       placeholder="Please enter the question..." required></textarea>
@@ -335,7 +335,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputSummaryQuestion" class="col-sm-2 control-label">Question (<a href="http://showdownjs.github.io/demo/">Markdown</a> supported)</label>
+                        <label for="inputSummaryQuestion" class="col-sm-2 control-label">Question (HTML supported)</label>
                         <div class="col-sm-10">
                             <textarea class="form-control" rows="3" id="inputSummaryQuestion" name="question"
                                       placeholder="Please enter the question..." required></textarea>
@@ -368,6 +368,7 @@
                         </div>
                     </div>
                     <button type="submit" class="hide"></button>
+
                 </form>
                  <label for="previewPlaceholder" class="col-sm-2 control-label">Preview:</label> 
                 <div class="col-sm-10 previewPlaceholder" id="previewPlaceholder"></div> 
@@ -431,7 +432,6 @@
 {% block script %}
 <script src="/js/moment.js"></script>
 <script src="/js/bootstrap-datetimepicker.js"></script>
-<script src="/js/showdown.min.js"></script>
 <script src="/js/instructor_rounds.js"></script>
 <link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <!-- NEW LOGICS -->

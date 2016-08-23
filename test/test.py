@@ -831,7 +831,7 @@ try:
     if(aftercount - startcount == 1):
         print_passed(test_number)
     else:
-        print_failed(test_number,"instructor could not add a lead in question")
+        print_failed(test_number,"instructor could not add a initial question")
     logout()
     test_number += 1
 
@@ -850,7 +850,7 @@ try:
     if(aftercount - startcount == 0):
         print_passed(test_number)
     else:
-        print_failed(test_number,"instructor could add duplicate lead in questions")
+        print_failed(test_number,"instructor could add duplicate initial questions")
     logout()
     test_number += 1
 
@@ -869,7 +869,7 @@ try:
     if(aftercount - startcount == 0):
         print_passed(test_number)
     else:
-        print_failed(test_number,"instructor could add duplicate lead in questions")
+        print_failed(test_number,"instructor could add duplicate initial questions")
     logout()
     test_number += 1
     #add_disc
@@ -983,7 +983,7 @@ try:
     numberQuestions = 4
     course = "S-TEST-COURSE"
     section = "S-TEST-SECTION"
-    #add lead in question a discussion rounds
+    #add initial question a discussion rounds
     addInitialQuestion(duetime,question,numberQuestions,course,section)
     addDiscussionRounds(10,1,"S-TEST-COURSE","S-TEST-SECTION")
     #start the rounds
@@ -1064,25 +1064,25 @@ try:
     numberQuestions = 4
     course = getCourse
     section = getSection
-    #add lead in question and discussion rounds
+    #add initial question and discussion rounds
     addInitialQuestion(duetime,question,numberQuestions,course,section)
-    testGET(getAdmin,getInst,getStd,getCourse,getSection,"lead in question added but no discussion rounds")
+    testGET(getAdmin,getInst,getStd,getCourse,getSection,"initial question added but no discussion rounds")
     login(getInst,False)
     addDiscussionRounds(10,1,getCourse,getSection)
-    testGET(getAdmin,getInst,getStd,getCourse,getSection,"lead in question and discussion rounds added but not started")
+    testGET(getAdmin,getInst,getStd,getCourse,getSection,"initial question and discussion rounds added but not started")
     login(getInst,False)
     #start the rounds
     startRounds(getCourse,getSection)
-    testGET(getAdmin,getInst,getStd,getCourse,getSection,"lead in question and discussion rounds added and started")
+    testGET(getAdmin,getInst,getStd,getCourse,getSection,"initial question and discussion rounds added and started")
     logout()
     login(getStd,False)
     keys = get_section_key_list()
     studentRespond("test response",keys[0])
-    testGET(getAdmin,getInst,getStd,getCourse,getSection,"lead in question and discussion rounds added and student responded to lead in question")
+    testGET(getAdmin,getInst,getStd,getCourse,getSection,"initial question and discussion rounds added and student responded to initial question")
     logout()
     login(getInst,False)
     endCurrentRound(getCourse,getSection)
-    testGET(getAdmin,getInst,getStd,getCourse,getSection,"student responded to lead in question, and the round ended and students were not added to groups yet")
+    testGET(getAdmin,getInst,getStd,getCourse,getSection,"student responded to initial question, and the round ended and students were not added to groups yet")
     #==================[END: GET TESTING]==================
 
 except:

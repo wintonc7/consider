@@ -12,11 +12,11 @@
         </div>
         <div class="card-body">
             {% if description %}
-            <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description}}</h1>
+            <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description|safe}}</h1>
             {% endif %}
     
             <div class="jumbotron">
-                <p> {{question}} </p>
+                <p> {{question|safe}} </p>
             </div>
             {%- if not expired -%}
             <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
@@ -24,7 +24,7 @@
                 {% for option in options %}
                 <input type="radio" name="optionsRadios" id="option{{loop.index}}" value="option{{loop.index}}" {% if expired -%} disabled="true" {%- endif -%}>
                 <label class="radio list-group-item" for="option{{loop.index}}">
-                    {{option}}
+                    {{option|safe}}
                 </label>
                 {% endfor %}
             </div>

@@ -167,7 +167,6 @@ class Rounds(webapp2.RequestHandler):
                 message = self.request.get('message')
                 # Grab the subject of the email
                 subject = self.request.get('subject')
-                # utils.send_mail(instructor.email, email_section, subject, message)
                 to_emails = [s.email for s in email_section.students]
                 utils.send_mails(to_emails, subject, message)
                 email_course.recent_section = email_section.name
@@ -179,8 +178,6 @@ class Rounds(webapp2.RequestHandler):
             else:
                 # Send an error if any other action is supplied
                 utils.error('Error! Unexpected action: ' + action, handler=self)
-                # end
-                # end
 
     # end post
 

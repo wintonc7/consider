@@ -62,6 +62,7 @@ $(document).ready(function () {
             options = $form.find("select").val(),
             url = $form.attr("action");
 
+        console.log('Question = ' + question);
         var optionVals = [];
         for (var i = 1; i <= options; i++) {
             var val = $form.find("#inputSummaryOptions" + i).val();
@@ -293,7 +294,7 @@ $(document).ready(function () {
         var table = $('#initial-question-table');
         var tr = $(this).find('tbody > tr');
         var deadline = table.find('td:nth-child(2)').data('deadline');
-        var question = table.find('.question').text();
+        var question = table.find('.question').html();
         var options_ul = table.find('.options ul');
         var inputOptions = modal.find('#inputInitialOptions');
         inputOptions.val(options_ul.find('li').length);
@@ -311,7 +312,7 @@ $(document).ready(function () {
         var table = $('#summary-question-table');
         var tr = $(this).find('tbody > tr');
         var deadline = table.find('td:nth-child(2)').data('deadline');
-        var question = table.find('.question').text();
+        var question = table.find('.question').html();
         var options_ul = table.find('.options ul');
         var inputOptions = modal.find('#inputSummaryOptions');
 
@@ -396,7 +397,7 @@ $(document).ready(function () {
             if (data.charAt(0) == 'E') {
                 bootbox.alert(data.substring(1));
             } else {
-                bootbox.alert(data.substring(1), function () {
+                bootbox.alert(data.substring(0), function () {
                     location.reload();
                 });
             }
@@ -518,54 +519,36 @@ $(document).ready(function () {
     });
 });
 
-(function () {
-    mds = document.getElementsByClassName('md');
-    console.log('mds = ' + mds.length);
-    for (var i = 0; i < mds.length; i++) {
-        text = mds[i].innerHTML;
-        mds[i].innerHTML = mdToHtml(text);
-    }
-})();
-
 //Utility methods
 function validateNumberInput(val) {
     return parseInt(val);
-}
-
-function mdToHtml(text) {
-    var converter = new showdown.Converter();
-    return converter.makeHtml(text);
 }
 
 function showPreviewSummary() {
     var text = $('#inputSummaryQuestion').val();
     var $form = $('#summaryModalForm');
     var questionOptions = $form.find('.theOptions').find('input');
-
-    console.log('questionOptions.length = ' + questionOptions.length);
-
+    text = text + '\r\n<ol>\r\n';
     questionOptions.each(function (i, el) {
-        text = text + '<br>\r\n' + (i + 1) + '. ' + $(el).val();
+        text = text + '<li>' + $(el).val(); + '</li>\r\n';
     });
+    text = text + '</ol>\r\n';
 
     console.log('text = ' + text);
-    preview = mdToHtml(text);
-    $('#summaryModal').find('#previewPlaceholder').html(preview);
+    $('#summaryModal').find('#previewPlaceholder').html(text);
 }
 
 function showPreviewInitial() {
     var text = $('#inputInitialQuestion').val();
     var $form = $('#initialModalForm');
     var questionOptions = $form.find('.theOptions').find('input');
-
-    console.log('questionOptions.length = ' + questionOptions.length);
-
+    text = text + '\r\n<ol>\r\n';
     questionOptions.each(function (i, el) {
-        text = text + '<br>\r\n' + (i + 1) + '. ' + $(el).val();
+        text = text + '<li>' + $(el).val(); + '</li>\r\n';
     });
+    text = text + '</ol>\r\n';
 
     console.log('text = ' + text);
-    preview = mdToHtml(text);
-    $('#initialModal').find('#previewPlaceholder').html(preview);
+    $('#initialModal').find('#previewPlaceholder').html(text);
 }
 
