@@ -60,3 +60,20 @@ docs/build/*
 
 # PyBuilder
 target/
+
+# Temporary, generated files
+temp/
+bower_components/
+index.yaml
+
+# Junk from Mac/OS X
+*.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+
+lib/
+
+### IMPORTANT: This file contains sensitive information, hence not included in VCS
+src/secrets.py

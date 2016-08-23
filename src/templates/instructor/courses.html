@@ -33,19 +33,12 @@
             <td>{{loop.index}}</td>
             <td>{{course.name}}</td>
             <td>{{course.sections | length}}</td>
-            <td>{%- if course.is_active -%}
-                <span class="label label-success">Active</span>
-                {%- else -%}
-                <span class="label label-warning">Inactive</span>
-                {%- endif -%}
+            <td>
+                {{'Active' if course.is_active else 'Inactive'}}
             </td>
-            <td>{% if course.is_active %}
-                <button class="btn btn-danger btn-sm" onclick="toggleCourseStatus('{{course.name}}')">Inactivate
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="toggleCourseStatus('{{course.name}}')">{{'Inactivate' if course.is_active else 'Activate'}}
                 </button>
-                {% else %}
-                <button class="btn btn-success btn-sm" onclick="toggleCourseStatus('{{course.name}}')">Activate
-                </button>
-                {% endif %}
             </td>
             <td>
                 <button type="button" class="btn btn-default btn-sm" aria-label="Sections" data-toggle="collapse"

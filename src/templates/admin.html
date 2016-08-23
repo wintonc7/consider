@@ -1,10 +1,5 @@
 {% extends "layouts/base.html" %}
 
-{% block head %}
-{{ super() }}
-<link href="/css/admin.css" rel="stylesheet">
-{% endblock head %}
-
 {% block content %}
 <div class="container">
     <div class="jumbotron well">
@@ -17,7 +12,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Email" id="textEmail">
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="submitEmail" onclick="addInstructor()">Add
+                        <button class="btn btn-default" type="submit" id="submitEmail" onclick="addInstructor()">Add
                         </button>
                     </span>
                 </div><!-- /input-group -->

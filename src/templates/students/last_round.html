@@ -1,0 +1,67 @@
+<div class="lastRound">
+    <div class="container discussion-container" id="pageContent">
+        <!-- Placeholder for previous rounds' discussions -->
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="card">
+        <div class="card-title">
+            <h2>Final Submission</h2>
+        </div>
+        <div class="card-body">
+            {% if description %}
+            <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description|safe}}</h1>
+            {% endif %}
+    
+            <div class="jumbotron">
+                <p> {{question|safe}} </p>
+            </div>
+            {%- if not expired -%}
+            <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
+            <div class="list-group">
+                {% for option in options %}
+                <input type="radio" name="optionsRadios" id="option{{loop.index}}" value="option{{loop.index}}" {% if expired -%} disabled="true" {%- endif -%}>
+                <label class="radio list-group-item" for="option{{loop.index}}">
+                    {{option|safe}}
+                </label>
+                {% endfor %}
+            </div>
+
+            <h3>Final Response</h3>
+            <textarea class="form-control" rows="3" id="comment" placeholder="
+            {%- if last_round -%}
+            Please enter your final answer.
+            {%- else -%}
+            Please enter why your support this option ...
+            {%- endif -%}" required {% if expired -%} disabled="true" {%- endif -%}>
+            {%- if comment -%}{{comment}}{%- endif -%}
+            </textarea>
+
+            <h3>Activity Summary</h3>
+            <textarea class="form-control" rows="10" id="summary" name="summary" placeholder="Please enter your summary for this activity ..." required {% if expired -%} disabled="true" {%- endif %}>
+            {%- if summary -%}{{summary}}{%- endif -%}
+            </textarea>
+            
+            <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}>
+                <span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
+            </button>
+            <!-- replace plain textarea with CKEditor WYSIWYG -->
+            <script>
+                CKEDITOR.replace("comment", 
+                    {
+                        height: 200
+                    });
+                CKEDITOR.replace("summary", 
+                    {
+                        height: 200
+                    });
+             </script> 
+
+            </form>
+            {%- endif -%}
+        </div>
+    </div>
+</div>
+

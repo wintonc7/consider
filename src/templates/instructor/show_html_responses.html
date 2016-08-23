@@ -1,0 +1,72 @@
+{% extends "layouts/instructor_base.html" %}
+{% block title %} | Responses {% endblock %}
+{% block content %}
+    {% for student in students %}
+        <table border="1 solid black" style="width:50%">
+            <tr>
+                <td>S#</td>
+                <td width="180px" style="text-align:center">Email</td>
+                <td style="text-align:center">Alias</td>
+                <td style="text-align:center">Group</td>
+            </tr>
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td width="180px" style="text-align:center">{{ student.email }}</td>
+                <td style="text-align:center">{{ student.alias }}</td>
+                <td style="text-align:center">{{ student.group }}</td>
+            </tr>
+        </table>
+        <table border="1 solid black" style="width:100%">
+            <tr>
+                <th style="text-align:center">Rounds</th>
+                {% for r in seq_rounds[student.email] %}
+                    <th style="text-align:center">Round-{{ r }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td width="80" style="text-align:center">Option</td>
+                {% for opt in option[student.email] %}
+                    {% if opt %}
+                        <td width="80" style="text-align:center">{{ opt }}</td>
+                    {% else %}
+                        <td width="80" style="text-align:center">NA</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            <tr>
+                <td width="80" style="text-align:center">Comment</td>
+                {% for comment in comments[student.email] %}
+                    {% if comment %}
+                        <td width="80" style="text-align:center">{{ comment|safe }}</td>
+                    {% else %}
+                        <td width="80" style="text-align:center">NA</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            <tr>
+                <td width="80" style="text-align:center">Response</td>
+                {% for response in responses[student.email] %}
+                    {% if response %}
+                        <td width="80" style="text-align:center">{{ response }}</td>
+                    {% else %}
+                        <td width="80" style="text-align:center">NA</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            <tr>
+                <td width="80" style="text-align:center">Summary</td>
+                {% for smy in summary[student.email] %}
+                    {% if smy %}
+                        <td width="80" style="text-align:center">{{ smy }}</td>
+                    {% else %}
+                        <td width="80" style="text-align:center">NA</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </table>
+        <br/>
+    {% endfor %}
+{% endblock %}
+
+{#TODO Make this responsive#}
+{#TODO Better styling#}

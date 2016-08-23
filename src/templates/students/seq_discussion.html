@@ -1,0 +1,123 @@
+{% extends "layouts/student_base.html" %}
+
+{% block title %}| Discussion{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script src="/ckeditor/ckeditor.js"></script>
+{% endblock head %}
+
+{% block content %}
+{{ super() }}
+<div class="container discussion-container">
+    <div class="card">
+        <div class="card-title">
+            <h1 class="lead">Welcome {{alias}}</h1>
+        </div>
+        <div class="card-body">
+            {% if description %}
+            <h1 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h1>
+            {% endif %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Initial Answers</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="initial_answers_table">
+                            <tbody>
+                            {% for answer in initial_answers %}
+                            <tr>
+                                <th style="text-align: left">{{answer.email if show_name else answer.alias}}</th>
+                                <td style="text-align: left">{{answer.response|safe}}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {%- for post in posts -%}
+            <div class="card">
+                <div class="card-title">
+                    <h4 style="text-align: left">#{{post.index}} &mdash; {{post.author if show_name else post.author_alias}}</h4>
+                </div>
+                <div class="card-body" style="text-align: left">
+                    {{post.text|safe}}
+                </div>
+            </div>
+            {%- endfor -%}
+        </div><!-- ./card-body -->
+    </div><!-- ./card -->
+    <!--
+    <form id="seqDiscussionForm" method="post" action="/student_rounds">
+        <textarea class="form-control" rows="5" id="seqDiscussionPost"
+                  placeholder="Enter your response here" required {% if expired -%}
+                  disabled="true" {%- endif -%}></textarea>
+
+        <button type="submit" id="seqDiscussionButton" class="btn btn-lg btn-success" style="margin-top: 15px"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit</button>
+    </form>
+-->
+</div><!-- ./container -->
+{%- if not expired -%}
+<!-- fixed position discussion response text editor -->
+<div class="container-fluid navbar-fixed-bottom" id="discussion-response">
+    <div class="container">
+        <form id="seqDiscussionForm" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
+            <div id="text-editor">
+
+                <textarea class="form-control" rows="5" id="seqDiscussionPost"
+                          placeholder="Enter your response here" required {% if expired -%}
+                          disabled="true" {%- endif -%}>
+                {%- if comment -%}
+                    {{comment}}
+                {%- endif -%}
+                </textarea>
+            </div>
+            <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
+                    -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                    <br />
+                    Submit
+            </button>
+            <!-- replace plain textarea with CKEditor WYSIWYG -->
+            <script>
+                CKEDITOR.replace('seqDiscussionPost',
+                {
+                    height: 180
+                });
+            </script>
+        </form>
+    </div>
+</div>
+{%- endif -%}
+{% endblock content %}
+
+{% block script %}
+{{ super() }}
+<script>
+    $('#seqDiscussionForm').submit(function (event) {
+        event.preventDefault();
+
+        // Update content of textarea(s) handled by CKEditor
+        for ( instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+
+        var $form = $(this),
+            url = $form.attr('action');
+        $.post(url,
+                {
+                    section: '{{sectionKey}}',
+                    text: $form.find('#seqDiscussionPost').val()
+                },
+                function (data) {
+                    if (data.charAt(0) == 'E') {
+                        bootbox.alert(data);
+                    } else {
+                        location.reload();
+                    }
+                }
+        );
+    });
+</script>
+{% endblock script %}

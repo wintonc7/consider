@@ -83,7 +83,7 @@
             <td>{{loop.index}}</td>
             <td>{{response.student}}</td>
             <td>{{response.option}}</td>
-            <td>{{response.comment}}</td>
+            <td>{{response.comment|safe}}</td>
             <td>{%- if response.group|int != 0 -%} {{response.group}} {%- else -%} NA {%- endif -%}</td>
             <td>{%- if group -%} <select class="form-control" name="select_{{loop.index}}" id="select_{{loop.index}}">
                                   {% for i in range(0, group) %}
@@ -104,9 +104,61 @@
       {%- endif -%}
   </form>
 </div>
+</div>
+</div>
+<div class="card">
+<div class="card-title">
+<h4>Following are the students without initial answers for {{selectedSection}}:</h4>
+</div>
+<div class="card-body">
+<div class="table-responsive">
+  <form id="form_table2" method="post" action="/groups">
+    <table class="table table-striped" id="group_table2">
+
+      <thead>
+        {%- if no_answer_students -%}
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Option</th>
+          <th>Comment</th>
+          <th>Group</th>
+          <th>Modify Group</th>
+        </tr>
+        {%- endif -%}
+      </thead>
+      <tbody>
+        {% for student in no_answer_students %}
+          <tr>
+            <td>{{loop.index}}</td>
+            <td>{{student.email}}</td>
+            <td>NA</td>
+            <td>NA</td>
+            <td>{%- if student.group|int != 0 -%} {{student.group}} {%- else -%} NA {%- endif -%}</td>
+            <td>{%- if group -%} <select class="form-control" name="select2_{{loop.index}}" id="select2_{{loop.index}}">
+                                  {% for i in range(0, group) %}
+                                  <option {% if student.group|int == i+1 -%} selected="selected" {%- endif -%} >{{i+1}}</option>
+                                  {% endfor %}
+                                 </select>
+            {%- else -%}No Groups{%- endif -%}</td>
+          </tr>
+        {% else %}
+          All the students have answered the initial question.
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+      {% if no_answer_students -%}
+        <div class="form-group" style="text-align:center;">
+            <button type="submit" class="btn btn-primary">Save Configuration</button>
+        </div>
+      {%- endif -%}
+  </form>
+</div>
+</div>
+</div>
 {% endblock %}
-</div>
-</div>
 
 
 {% block script %}
@@ -117,15 +169,20 @@
     $('#sectionSelector').on('change', function () {
         location.href = "/groups?course={{selectedCourse}}&section=" + this.value;
     });
-  $("#form").submit(function (event) {
+    $("#form").submit(function (event) {
         //Prevent the default behaviour
         event.preventDefault();
         //collect form elements
         var $form = $(this),
-        groups = $form.find("input[name='groups']").val(),
-        url = $form.attr("action");
+                groups = $form.find("input[name='groups']").val(),
+                url = $form.attr("action");
         // do the POST and get the callback
-        $.post("/groups",{groups:groups, course:'{{selectedCourse}}', section:'{{selectedSection}}', action:'add'},function (data) {
+        $.post("/groups", {
+            groups: groups,
+            course: '{{selectedCourse}}',
+            section: '{{selectedSection}}',
+            action: 'add'
+        }, function (data) {
             if (data.charAt(0) == 'E') {
                 bootbox.alert(data.substring(1));
             }
@@ -133,24 +190,29 @@
                 location.reload();
             }
         });
-      });
-  $("#form_table").submit(function (event) {
+    });
+    $("#form_table").submit(function (event) {
         //Prevent the default behaviour
         event.preventDefault();
         //collect form elements
         var $form = $(this),
-        url = $form.attr("action");
+                url = $form.attr("action");
         var data = {};
         $("#group_table > tbody tr").each(function () {
-          var stud = $(this).find("td").eq(1).html();
-          var group = $("#select_"+$(this).find("td").eq(0).html()).val();
-          data[stud] = group;
+            var stud = $(this).find("td").eq(1).html();
+            var group = $("#select_" + $(this).find("td").eq(0).html()).val();
+            data[stud] = group;
         });
         data = JSON.stringify(data);
         console.log(data);
-        console.log("url = "+url);
+        console.log("url = " + url);
         // do the POST and get the callback
-        $.post(url,{groups:data, course:'{{selectedCourse}}', section:'{{selectedSection}}', action:'update'},function (data) {
+        $.post(url, {
+            groups: data,
+            course: '{{selectedCourse}}',
+            section: '{{selectedSection}}',
+            action: 'update'
+        }, function (data) {
             if (data.charAt(0) == 'E') {
                 bootbox.alert(data.substring(1));
             }
@@ -158,6 +220,37 @@
                 location.reload();
             }
         });
-      });
+    });
+
+    $("#form_table2").submit(function (event) {
+        //Prevent the default behaviour
+        event.preventDefault();
+        //collect form elements
+        var $form = $(this),
+                url = $form.attr("action");
+        var data = {};
+        $("#group_table2 > tbody tr").each(function () {
+            var stud = $(this).find("td").eq(1).html();
+            var group = $("#select2_" + $(this).find("td").eq(0).html()).val();
+            data[stud] = group;
+        });
+        data = JSON.stringify(data);
+        console.log(data);
+        console.log("url = " + url);
+        // do the POST and get the callback
+        $.post(url, {
+            groups: data,
+            course: '{{selectedCourse}}',
+            section: '{{selectedSection}}',
+            action: 'update'
+        }, function (data) {
+            if (data.charAt(0) == 'E') {
+                bootbox.alert(data.substring(1));
+            }
+            else {
+                location.reload();
+            }
+        });
+    });
 </script>
 {% endblock %}
