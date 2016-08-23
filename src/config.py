@@ -2,12 +2,14 @@
 config.py
 ~~~~~~~~~~~
 - Author(s): Swaroop Joshi
-- Last Modified: May 30, 2016
+- Last Modified: Aug 22, 2016
 
 --------------------
 
 Some system level configurations.
 """
+
+# TODO: Move this file to the root directory
 
 import os
 

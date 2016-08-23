@@ -586,13 +586,13 @@ def send_mails(recipients, subject, message):
     import requests_toolbelt.adapters.appengine
     requests_toolbelt.adapters.appengine.monkeypatch()
 
-    from src import config
+    from src import secrets
     client = mailjet_rest.Client(
-        auth=(config.MAILJET_API_KEY, config.MAILJET_API_SECRET))
+        auth=(secrets.MAILJET_API_KEY, secrets.MAILJET_API_SECRET))
 
     for recipient in recipients:
         data = {
-            'FromEmail': config.MAILJET_SENDER,
+            'FromEmail': secrets.MAILJET_SENDER,
             'FromName': 'CONSIDER Admin',
             'Subject': subject,
             'Text-part': message,

@@ -73,7 +73,7 @@ index.yaml
 Icon?
 
 
-lib
+lib/
 
-### IMPORTANT: Config file contains sensitive information, hence not included in VCS
-src/config.py
+### IMPORTANT: This file contains sensitive information, hence not included in VCS
+src/secrets.py

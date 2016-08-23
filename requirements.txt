@@ -1,0 +1,15 @@
+Jinja2==2.8
+setuptools==19.2
+simplejson==3.8.1
+sphinx_rtd_theme==0.1.9
+pyOpenSSL==16.0.0
+backports.functools_lru_cache==1.2.1
+betamax==0.8.0
+certifi==2016.8.8
+clint==0.5.1
+protobuf==3.0.0
+mock==2.0.0
+ndg_httpsclient==0.4.2
+pyasn1==0.1.9
+pytest==3.0.0
+webapp2==2.5.2
