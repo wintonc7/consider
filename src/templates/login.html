@@ -1,54 +1,57 @@
 {% extends 'layouts/base.html' %}
 
-{% block head %}
-{{ super() }}
-<link href="/css/login.css" rel="stylesheet">
-{% endblock head %}
-
 {% set loginpage = True %}
 
 {% block content %}
-<div class="container">
-    <div class="jumbotron">
-        <div class="row">
-            <h1 role="heading">CONSIDER</h1>
-            <h2>A novel approach to collaborative-learning</h2>
+    <div class="container">
+        <div class="jumbotron">
+            <div class="page-header" style="text-align: center">
+                <h1 role="heading">CONSIDER<br>
+                    <small>A novel approach to Collaborative Learning</small>
+                </h1>
+            </div>
         </div>
         <div class="notification"></div>
-        <div class="row" style="padding-top: 50px">
+        <div class="row" role="grid">
             <div class="col-sm-6 col-md-4">
-                <div class="thumbnail">
-                    <h3>Local Environment Setup</h3>
-                    <p style="font-size: 100%">Educators can download the app and set it up on their own instance of
-                        the Google App Engine server, and then give access to their instructors.
-                        That way, the student information will stay with their organization alone.</p>
-                    <p><a href="{{admin_guide}}" target="_blank"
-                          class="btn btn-primary" role="button">Read more</a></p>
-                </div>
-            </div>
+                <div class="thumbnail" role="gridcell">
+                    <h2 role="heading">Are you a Teacher?</h2>
+                    <p>
+                        Instructors can create courses and sections, add students, organize them into groups, set up
+                        questions and discussion rounds, toggle features such as anonymity and discussion structure,
+                        and download the transcripts of their class' discussion.
+                    </p>
+                    <p><a href="{{ instr_guide }}" target="_blank" role="link">Read More</a></p>
+                </div> <!-- /thumbnail -->
+            </div> <!-- /col-sm-6 .. -->
+
             <div class="col-sm-6 col-md-4">
-                <div class="thumbnail">
-                    <h3>Instructor Guide</h3>
-                    <p style="font-size: 100%">Instructors can create courses and sections, add
-                        students, organize them into groups, set up questions and discussion rounds,
-                        toggle features such as anonymity and discussion structure,
-                        and download the transcripts of their class' discussion.</p>
-                    <p><a href="{{instr_guide}}" target="_blank"
-                          class="btn btn-primary" role="button">Read more</a></p>
-                </div>
-            </div>
+                <div class="thumbnail" role="gridcell">
+                    <h2 role="heading">Are you a Student?</h2>
+                    <p>
+                        Students can answer the questions, comment on their peers' answers
+                        and discussion posts, and download the transcripts of their own group's discussion.
+                        Click below for a step-by-step tutorial about how to use this app.
+                    </p>
+                    <p><a href="{{ student_guide }}" target="_blank" role="link">Read More</a></p>
+                </div> <!-- /thumbnail -->
+            </div> <!-- /col-sm-6 -->
+
+
             <div class="col-sm-6 col-md-4">
-                <div class="thumbnail">
-                    <h3>Student Guide</h3>
-                    <p style="font-size: 100%">Students can answer the questions, comment on their peers' answers
-                        and discussion posts, and download the transcripts of their own group's discussion.</p>
-                    <p><a href="{{student_guide}}" target="_blank"
-                          class="btn btn-primary" role="button">Read more</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="thumbnail" role="gridcell">
+                    <h2 role="heading">Download</h2>
+                    <p>
+                        Educators can download the code and launch their own instance of CONSIDER on
+                        the Google App Engine server, and then use it in their own courses.
+                        That way, the student information will stay with their organization alone.
+                    </p>
+                    <p><a href="{{ admin_guide }}" target="_blank" role="link">Read More</a></p>
+                </div> <!-- /thumbnail -->
+            </div> <!-- /col-sm-6 -->
+        </div> <!-- /row -->
+        {#            TODO: Fix READ MORE Links#}
+    </div> <!-- /container -->
 
 
 {% endblock content %}
