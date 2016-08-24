@@ -96,7 +96,7 @@ class MainPage(webapp2.RequestHandler):
             template_values = {
                 'loginurl': login_url,
                 'documentation': config.DOCUMENTATION,
-                'admin_guide': config.ADMIN_GUIDE,
+                'setup': config.SETUP_GUIDE,
                 'instr_guide': config.INSTRUCTOR_GUIDE,
                 'student_guide': config.STUDENT_GUIDE
             }

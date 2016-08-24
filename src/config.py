@@ -23,7 +23,7 @@ DEBUG = DEVELOPMENT = not PRODUCTION
 # DEBUG = DEVELOPMENT = socket.gethostname().endswith(".local") # Only on Mac. Change .endswith condition on other platforms
 # PRODUCTION = not DEBUG
 
-DOCUMENTATION = "http://swaroopjcse.github.io/consider/"
-ADMIN_GUIDE = DOCUMENTATION + "userguides/adminguide.html"  # FIXME not working
-INSTRUCTOR_GUIDE = DOCUMENTATION + "userguides/instructorguide.html"
-STUDENT_GUIDE = DOCUMENTATION + "userguides/studentguide.html"
+DOCUMENTATION = 'https://github.com/consider-app/consider/wiki'
+SETUP_GUIDE = DOCUMENTATION + '/Getting-Started'
+INSTRUCTOR_GUIDE = DOCUMENTATION + '/Using-CONSIDER-as-an-Instructor'
+STUDENT_GUIDE = DOCUMENTATION + '/Using-CONSIDER-as-a-Student'
