@@ -217,7 +217,9 @@ a:hover {
 }
 
 /* From discussion.css */
-
+.support {
+    background-color: rgb(203, 255, 186);
+}
 .neutral {
     background-color: rgb(186, 237, 255);
 }

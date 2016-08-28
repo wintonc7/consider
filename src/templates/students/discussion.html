@@ -20,7 +20,9 @@
         <h2>{% if curr_page==0 %}Initial Submission
             {% elif curr_page==num_total_rounds %}Final Submission
             {% elif curr_page==num_total_rounds-1 %}Latest Posts
-            {% else %}Round {{curr_page - 1}}{% endif %} &gt; Welcome {{alias}}</h2>
+            {% else %}Round {{curr_page - 1}}{% endif %}
+            &gt; Welcome {{alias}}
+        </h2>
     </div>
     <div class="card-body">
     {% if description %}
@@ -87,7 +89,7 @@
 </div>
 
 <!-- end #pageContent -->
-</div>
+{#</div>#}
 
 {%- if not expired -%}
 <!-- fixed position discussion response text editor -->
