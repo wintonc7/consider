@@ -306,11 +306,6 @@ def get_template_all_courses_and_sections(instructor, course_name, selected_sect
 
 # end get_template_all_courses_and_sections
 
-
-
-# end get_template_all_courses_and_sections
-
-
 def get_course_and_section_objs(page_handler, instructor):
     """
     Given the page handler and the currently logged in instructor, returns the
@@ -418,8 +413,6 @@ def convert_time(old_time):
 
 # end convert_time
 
-
-# end
 
 def send_mail(senders_email, section, subject, message):
     """

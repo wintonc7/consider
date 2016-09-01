@@ -40,3 +40,8 @@ class Round(ndb.Model):  # FIXME move under a Group?
     """ DateTime representation of the round start time. """
     buffer_time = ndb.IntegerProperty(default=0, indexed=False)
     """ Integer. Represents the buffer time between rounds."""
+
+    @staticmethod
+    def get_by_number(section_key, number):
+        req_round = Round.query(ancestor=section_key).filter(Round.number == number).fetch(1)[0]
+        return req_round if req_round else None

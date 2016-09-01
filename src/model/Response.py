@@ -17,5 +17,15 @@ class Response(ndb.Model):
     """ List of Strings. Can take values ``support``, ``disagree`` or ``neutral``."""
     summary = ndb.StringProperty(indexed=False)
     """ String. The summary post in the last round."""
-    student = ndb.StringProperty(required=True)
+    student = ndb.StringProperty(required=True, indexed=True)
     """ String. Email of the `Student`_ who is the author of this response."""
+    thumbs = ndb.JsonProperty(default={})
+
+    def add_to_thumbs(self, in_key, in_value):
+        if not self.thumbs:
+            self.thumbs = {}
+        self.thumbs[in_key] = in_value
+
+    def get_response_by_student(round_key, student_email):
+        req_response = Response.query(ancestor=round_key).filter(Response.student == student_email).fetch(1)
+        return req_response if req_response else None

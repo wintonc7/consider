@@ -37,16 +37,16 @@
 
                 {%- if not expired and comment.type!='' -%}
                 <div class="col-md-12">
-                <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-info" {% if
+                <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="pull-right btn btn-sm btn-info" {% if
                             expired -%} disabled="true" {%- endif -%}>
                             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
                     </button>
-                    <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-danger" {% if
+                    <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="pull-right btn btn-sm btn-danger" {% if
                             expired -%} disabled="true" {%- endif -%}>
                             <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree with at least one key point
                     </button>
 
-                    <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-success" {% if
+                    <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="pull-right btn btn-sm btn-success" {% if
                             expired -%} disabled="true" {%- endif -%}>
                         <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
                     </button>
@@ -120,6 +120,7 @@
 <script>
     var l = {{comments | length}}
     var resp = [];
+    var thumbs={};
     resp[0] = null;
 
     {% if response %}
@@ -148,12 +149,12 @@
             loadRound(curr_round);
             bootbox.alert('Please choose your opinion for all the comments.');
 
-        }
-        else {
+        } else {
             var $form = $(this);
             var comment = $form.find("textarea").val();
             var url = $form.attr("action");
-            $.post(url, {comm: comment, response: JSON.stringify(resp), section: '{{sectionKey}}'}, function (data) {
+            console.log('Thumbs = '+JSON.stringify(thumbs));
+            $.post(url, {comm: comment, response: JSON.stringify(resp), section: '{{sectionKey}}', thumbs:JSON.stringify(thumbs)}, function (data) {
                 bootbox.alert(data, function () {
                     ocomment = comment;
                 });
@@ -165,29 +166,35 @@
     // returns true if they have, false if there are any comments they have
     // not picked an opinion on.
     function selAll() {
-        for (var i = 1; i <= l; i++) {
-            if (!resp[i]) return false;
-        }
+        //for (var i = 1; i <= l; i++) {
+        //    if (!resp[i]) return false;
+        //}
+        // TODO: Enable this again
         return true;
     }
 
 
-    function updateAlert(obj) {
-        var type = obj.id.substring(0, 3);
-        var index = obj.id.substring(4);
-        if (type == "sup") {
-            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
-            resp[index] = 'support';
+        function updateAlert(obj, email, type) {
+            var index = obj.id.substring(4);
+            var message = 'Current student ';
+
+            if (type == 1) {
+                $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
+                resp[index] = 'support';
+                message += 'supports ';
+            } else if (type == 0) {
+                $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
+                resp[index] = 'neutral';
+                message += 'seeks clarification from ';
+            } else {
+                $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
+                resp[index] = 'disagree';
+                message += 'disagrees with ';
+            }
+            message += email + '\'s Round ' +{{ curr_page-2 }};
+            console.log(message);
+            thumbs[email] = type;
         }
-        else if (type == "neu") {
-            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
-            resp[index] = 'neutral';
-        }
-        else {
-            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
-            resp[index] = 'disagree';
-        }
-    }
 
     var ocomment = $('#comment').val();
 
