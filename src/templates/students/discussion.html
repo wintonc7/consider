@@ -57,18 +57,17 @@
             <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
             {% endif %}
 
+            {% for (key, value) in comment.thumbs %}
+                <span class="badge">{{ key }}: <span
+                        class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
+                        aria-hidden="true"></span></span>
+            {% endfor %}
             <div class="row">
                 <div class="well col-md-12"
                      style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px; margin-top: 10px;">
-                    {% for opinion in comment.opinion %}
-            <span class="badge"
-                  style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}:
-                <span
-                    class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
-                    aria-hidden="true"></span>
-            </span>
-            {% endfor %}
-                    {{comment.response|safe}}
+
+
+                    {{ comment.response|safe }}
                 </div>
             </div>
         </div>
@@ -118,9 +117,9 @@
 
 
 <script>
-    var l = {{comments | length}}
+    var l = {{comments | length}};
     var resp = [];
-    var thumbs={};
+    var thumbs = {};
     resp[0] = null;
 
     {% if response %}
@@ -141,7 +140,7 @@
         for ( instance in CKEDITOR.instances ) {
             CKEDITOR.instances[instance].updateElement();
         }
-                
+
         //collect form elements
         if (!selAll()) {
             // Missing some opinions; force reload current page dynamically
@@ -174,27 +173,27 @@
     }
 
 
-        function updateAlert(obj, email, type) {
-            var index = obj.id.substring(4);
-            var message = 'Current student ';
+    function updateAlert(obj, email, type) {
+        var index = obj.id.substring(4);
+        var message = 'Current student ';
 
-            if (type == 1) {
-                $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
-                resp[index] = 'support';
-                message += 'supports ';
-            } else if (type == 0) {
-                $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
-                resp[index] = 'neutral';
-                message += 'seeks clarification from ';
-            } else {
-                $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
-                resp[index] = 'disagree';
-                message += 'disagrees with ';
-            }
-            message += email + '\'s Round ' +{{ curr_page-2 }};
-            console.log(message);
-            thumbs[email] = type;
+        if (type == 1) {
+            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
+            resp[index] = 'support';
+            message += 'supports ';
+        } else if (type == 0) {
+            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
+            resp[index] = 'neutral';
+            message += 'seeks clarification from ';
+        } else {
+            $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
+            resp[index] = 'disagree';
+            message += 'disagrees with ';
         }
+        message += email + '\'s Round ' +{{ curr_page-2 }};
+        console.log(message);
+        thumbs[email] = type;
+    }
 
     var ocomment = $('#comment').val();
 
@@ -204,5 +203,7 @@
         }
     });
     {% endif %}
+
 </script>
+
 {% endblock script %}

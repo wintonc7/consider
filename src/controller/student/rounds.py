@@ -289,6 +289,18 @@ class Rounds(webapp2.RequestHandler):
                                'opinion': response.response if response else '',
                                'type': 'Text' if response else ''}
 
+                    # Get thumbs if they exist
+                    if response:
+                        if response.comment:
+                            if response.thumbs:
+                                utils.log('Thumbs for {0} = {1}'.format(response.comment, str(response.thumbs)))
+                                _thumbs = []
+                                for _key, _value in response.thumbs.iteritems():
+                                    name = section.find_alias(_key) if section.is_anonymous else _key
+                                    _thumbs.append((name, _value))
+                                comment['thumbs'] = _thumbs
+                                utils.log('Thumbs data for {0} = {1}'.format(response.comment, json.dumps(comment['thumbs'])))
+
                     # If the response has an associated option
                     if response and response.option and response.option != 'NA':
                         # Grab the option
@@ -361,12 +373,15 @@ class Rounds(webapp2.RequestHandler):
             in_thumbs = json.loads(self.request.get('thumbs'))
 
             if in_thumbs:
+                utils.log('in_thumbs = {0}'.format(str(in_thumbs)))
                 for prev_resp in prev_responses:
                     if in_thumbs.has_key(prev_resp.student):
-                        prev_resp.add_to_thumbs(prev_resp.student, in_thumbs[prev_resp.student])
-                    utils.log('In prev_resp by ' + prev_resp.student
-                              + '(' + prev_resp.comment + '), putting thumbs = '
-                              + str(prev_resp.thumbs))
+                        _thumbs = prev_resp.thumbs.copy()
+                        prev_resp.add_to_thumbs(student.email, in_thumbs[prev_resp.student])
+                        # _thumbs[prev_resp.student] = in_thumbs[prev_resp.student]
+                    utils.log('For' + prev_resp.comment + ', old thumbs = '
+                              + (str(_thumbs) if _thumbs else 'Empty')
+                              + ', new thumbs = ' + str(prev_resp.thumbs))
                     prev_resp.put()
 
             response.put()

@@ -40,3 +40,10 @@ class Section(ndb.Model):
     has_rounds = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. If ``True``, asynchronous, rounds-based discussion, else sequential """
     export_info = ndb.StringProperty(required=False)
+
+    def find_alias(self, email):
+        if self.students:
+            for student_info in self.students:
+                if student_info.email == email:
+                    return student_info.alias
+        return None
