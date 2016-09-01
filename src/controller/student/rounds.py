@@ -61,9 +61,6 @@ class Rounds(webapp2.RequestHandler):
                 else:
                     # Otherwise, we need to set our template values
                     self.render_template(student, section)
-                    # end
-                    # end
-                    # end
 
     # end get
 
@@ -269,11 +266,8 @@ class Rounds(webapp2.RequestHandler):
                 if stu_response:
                     # And set template values to show their previous response
                     template_values['comment'] = stu_response.comment
-                    utils.log("{0}".format(str(stu_response.comment)))
+                    utils.log('Comment = {0}'.format(str(stu_response.comment)))
                     template_values['response'] = ','.join(str(item) for item in stu_response.response)
-                    # end
-                    # end
-                    # end
 
     # end discussion_view_template
 
@@ -285,93 +279,90 @@ class Rounds(webapp2.RequestHandler):
             # Grab each response from the previous round
             response = model.Response.get_by_id(_student, parent=previous_round.key)
             # Check that that student actually answered the previous
-            if response:
-                # Loop over the students in the section
-                for s in section.students:
-                    # And look for the current group member
-                    if s.email == _student:
-                        # Grab their alias, email, comment, and response
-                        comment = {'alias': s.alias,
-                                   'email': s.email,  # TODO: Change to student's name
-                                   'response': response.comment,
-                                   'opinion': response.response
-                                   }
-                        # If the response has an associated option
-                        if not response.option:
-                            comment['option'] = ''  # if there are no options for this question, default comment is ''
-                        elif response.option != 'NA':
-                            # Grab the option
-                            opt = int(response.option[-1]) - 1
-                            comment['option'] = previous_round.quiz.options[opt]
-                        # end
-                        # And finally add the comment to the list
-                        comments.append(comment)
-                        break
-                        # end
-                        # end
-                        # end
-        # end
+            # Loop over the students in the section
+            for s in section.students:
+                # And look for the current group member
+                if s.email == _student:
+                    # Grab their alias, email, comment, and response
+                    comment = {'alias': s.alias, 'email': s.email,
+                               'response': response.comment if response else 'Did not participate in the last round',
+                               'opinion': response.response if response else '',
+                               'type': 'Text' if response else ''}
+
+                    # If the response has an associated option
+                    if response and response.option and response.option != 'NA':
+                        # Grab the option
+                        utils.log('response.option = ' + str(response.option))
+                        opt = int(response.option[-1]) - 1
+                        comment['option'] = previous_round.quiz.options[opt]
+                    else:
+                        comment['option'] = ''  # default
+                    # And finally add the comment to the list
+                    comments.append(comment)
+                    # break
+
+        utils.log('Comments = ' + str(comments))
         return comments
 
-    # end group_comments
+        # end group_comments
 
-    def save_submission(self, student, current_round):
-        # Create a new response object
-        response = model.Response(parent=current_round.key, id=student.email)
-        # Start by grabbing data from the page
-        option = self.request.get('option').lower()
-        comment = self.request.get('comm')
-        summary = self.request.get('summary')
-        res = self.request.get('response')
-        # Now check whether we're on a initial or summary or discussion round
-        if current_round.is_quiz:
-            # If it is, double check that they selected an answer and commented
-            if current_round.quiz.options_total > 0 and not (option and comment):
-                # if the question had 0 options, it's not an error
-                # Error if not
-                utils.error('Invalid Parameters: option or comment is null', handler=self)
-                return
-            # end
-            # if current_round.number != 1 and not summary:
-            #     utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
-            #     return
-            # And set the values in the response object
-            response.option = option
-            response.summary = summary if summary else ''
-        else:
-            # If a discussion question, grab the array of agree/disagree/neutral
-            res = json.loads(res)
-            # And double check that we have a comment and valid response
-            if not (res and comment) or not utils.is_valid_response(res):
-                # Error if not
-                utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
-                return
-            # end
-            # Now loop over the agree, etc. responses
-            for i in range(1, len(res)):
-                # And save them in our response object for the db
-                response.response.append(res[i])
-                # end
+
+def save_submission(self, student, current_round):
+    # Create a new response object
+    response = model.Response(parent=current_round.key, id=student.email)
+    # Start by grabbing data from the page
+    option = self.request.get('option').lower()
+    comment = self.request.get('comm')
+    summary = self.request.get('summary')
+    res = self.request.get('response')
+    # Now check whether we're on a initial or summary or discussion round
+    if current_round.is_quiz:
+        # If it is, double check that they selected an answer and commented
+        if current_round.quiz.options_total > 0 and not (option and comment):
+            # if the question had 0 options, it's not an error
+            # Error if not
+            utils.error('Invalid Parameters: option or comment is null', handler=self)
+            return
         # end
-        # Grab the deadline and the current time
-        deadline = current_round.deadline
-        current_time = datetime.datetime.now()
-        # And double check that they've submitted before the deadline ended
-        if deadline >= current_time:
-            # Set the comment and email, and save in the database
-            response.comment = comment
-            response.student = student.email
-            response.put()
-            utils.log(
-                'Your response has been saved. You can edit it any time before the deadline. ',
-                type='Success!', handler=self)
-        else:
-            # Otherwise alert them that time has passed to submit for this round
-            utils.error(
-                'Sorry, the time for submission for this round has expired \
-                   and your response was not saved, please wait for the next round.',
-                handler=self)
+        # if current_round.number != 1 and not summary:
+        #     utils.error('Invalid Parameters: round is 1 or summary is null', handler=self)
+        #     return
+        # And set the values in the response object
+        response.option = option
+        response.summary = summary if summary else ''
+    else:
+        # If a discussion question, grab the array of agree/disagree/neutral
+        res = json.loads(res)
+        # And double check that we have a comment and valid response
+        if not (res and comment) or not utils.is_valid_response(res):
+            # Error if not
+            utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
+            return
+        # end
+        # Now loop over the agree, etc. responses
+        for i in range(1, len(res)):
+            # And save them in our response object for the db
+            response.response.append(res[i])
             # end
-            # end save_submission
-
-# end class Rounds
+    # end
+    # Grab the deadline and the current time
+    deadline = current_round.deadline
+    current_time = datetime.datetime.now()
+    # And double check that they've submitted before the deadline ended
+    if deadline >= current_time:
+        # Set the comment and email, and save in the database
+        response.comment = comment
+        response.student = student.email
+        utils.log('comment = {0}, response = {1}'.format(comment, response.response))
+        response.put()
+        utils.log(
+            'Your response has been saved. You can edit it any time before the deadline. ',
+            type='Success!', handler=self)
+    else:
+        # Otherwise alert them that time has passed to submit for this round
+        utils.error(
+            'Sorry, the time for submission for this round has expired \
+               and your response was not saved, please wait for the next round.',
+            handler=self)
+        # end
+        # end save_submission  # end class Rounds

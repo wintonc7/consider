@@ -35,21 +35,20 @@
                     <h2>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h2>
                 </div>
 
-                {%- if not expired -%}
-                <div class="col-md-6">
+                {%- if not expired and comment.type!='' -%}
+                <div class="col-md-12">
+                <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-info" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
+                    </button>
                     <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-danger" {% if
                             expired -%} disabled="true" {%- endif -%}>
-                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree
-                    </button> 
-
-                    <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-info" {% if
-                            expired -%} disabled="true" {%- endif -%}>
-                            <span class="glyphicon glyphicon-hand-right" aria-hidden="true"></span> Neutral
-                    </button> 
+                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree with at least one key point
+                    </button>
 
                     <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this)" class="pull-right btn btn-sm btn-success" {% if
                             expired -%} disabled="true" {%- endif -%}>
-                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Support
+                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
                     </button>
                 </div>
                 {%- endif -%}
@@ -57,34 +56,24 @@
             {% if comment.option %}
             <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
             {% endif %}
-            {% for opinion in comment.opinion %}
+
+            <div class="row">
+                <div class="well col-md-12"
+                     style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px; margin-top: 10px;">
+                    {% for opinion in comment.opinion %}
             <span class="badge"
                   style="font-weight: 100; background-color: #110F80; margin-bottom: 10px">S{{loop.index}}:
                 <span
-                    class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}hand-right{%- else -%}thumbs-down{%- endif -%}"
+                    class="glyphicon glyphicon-{%- if opinion == 'support' -%}thumbs-up{%- elif opinion == 'neutral' -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
                     aria-hidden="true"></span>
             </span>
             {% endfor %}
-            <div class="row">
-                <div class="well col-md-12"
-                     style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px">
                     {{comment.response|safe}}
                 </div>
             </div>
         </div>
     {% endfor %}
-    {% if not expired -%}
-    <div id="alert_comment" class="alert alert-info fade in" role="alert" style="display: none;">
-        <button type="button" class="close" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <h4>Be sure to explain, in the box below...</h4>
-        {% for comment in comments %}
-        <p id="alert_{{loop.index}}"></p>
-        {% endfor %}
-    </div>
-    {% endif %}
-</div> 
+</div>
 </div>
 </div>
 
@@ -182,26 +171,21 @@
         return true;
     }
 
+
     function updateAlert(obj) {
         var type = obj.id.substring(0, 3);
         var index = obj.id.substring(4);
         if (type == "sup") {
             $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
-            $("#alert_" + index).html("Why you Support S" + index + "?");
             resp[index] = 'support';
-            $("#alert_comment").show();
         }
         else if (type == "neu") {
             $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
-            $("#alert_" + index).html("Why you are neutral with S" + index + "...");
             resp[index] = 'neutral';
-            $("#alert_comment").show();
         }
         else {
             $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
-            $("#alert_" + index).html("Why you Disagree with S" + index + "?");
             resp[index] = 'disagree';
-            $("#alert_comment").show();
         }
     }
 
