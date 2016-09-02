@@ -20,6 +20,7 @@ class Response(ndb.Model):
     student = ndb.StringProperty(required=True, indexed=True)
     """ String. Email of the `Student`_ who is the author of this response."""
     thumbs = ndb.JsonProperty(default={})
+    """ JSON. Indicates how others responded to this post in the followup round. """
 
     def add_to_thumbs(self, in_key, in_value):
         if not self.thumbs:

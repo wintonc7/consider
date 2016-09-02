@@ -41,9 +41,8 @@ class Section(ndb.Model):
     """ Boolean. If ``True``, asynchronous, rounds-based discussion, else sequential """
     export_info = ndb.StringProperty(required=False)
 
-    def find_alias(self, email):
+    def find_student_info(self, email):
         if self.students:
-            for student_info in self.students:
-                if student_info.email == email:
-                    return student_info.alias
-        return None
+            return next(s for s in self.students if s.email == email)
+        else:
+            return None

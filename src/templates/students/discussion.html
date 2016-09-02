@@ -35,7 +35,7 @@
                     <h2>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h2>
                 </div>
 
-                {%- if not expired and comment.type!='' -%}
+                {%- if not expired and comment.response -%}
                 <div class="col-md-12">
                 <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="pull-right btn btn-sm btn-info" {% if
                             expired -%} disabled="true" {%- endif -%}>
@@ -54,24 +54,32 @@
                 {%- endif -%}
             </div>
             {% if comment.option %}
-            <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span>
+            <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
             {% endif %}
 
             {% for (key, value) in comment.thumbs %}
+                {%  if expired %}
                 <span class="badge">{{ key }}: <span
                         class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
                         aria-hidden="true"></span></span>
+                {% endif %}
             {% endfor %}
             <div class="row">
                 <div class="well col-md-12"
                      style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px; margin-top: 10px;">
-
-
                     {{ comment.response|safe }}
                 </div>
             </div>
         </div>
     {% endfor %}
+    {% if did_not_participate %}
+    <div class="jumbotron">
+        <strong>These students did not participate in the last round</strong>
+        {% for name in did_not_participate %}
+            <p>{{ name }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 </div>
 </div>
@@ -165,10 +173,9 @@
     // returns true if they have, false if there are any comments they have
     // not picked an opinion on.
     function selAll() {
-        //for (var i = 1; i <= l; i++) {
-        //    if (!resp[i]) return false;
-        //}
-        // TODO: Enable this again
+        for (var i = 1; i <= l; i++) {
+            if (!resp[i]) return false;
+        }
         return true;
     }
 
