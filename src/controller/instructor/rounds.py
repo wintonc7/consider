@@ -80,7 +80,6 @@ def copy_summary(section, rounds, num_of_rounds):
         summary.is_quiz = True
         summary.quiz = rounds[-1].quiz
         summary.description = rounds[-1].description
-        summary.is_anonymous = rounds[-1].is_anonymous
         # Now remove the summary from the current rounds
         rounds[-1].put().delete()
     # end
@@ -139,7 +138,7 @@ def add_lead_in(round_obj, rounds):
 
 # end add_lead_in
 
-def create_new_rounds(section, rounds, num_of_rounds, duration, buffer_bw_rounds):
+def create_new_rounds(section, rounds, num_of_rounds, duration, buffer_bw_rounds, type):
     # Now grab the current last round number
     current_last_round = rounds[-1].number
     # We need the end time of the last round currently in this section
@@ -161,6 +160,8 @@ def create_new_rounds(section, rounds, num_of_rounds, duration, buffer_bw_rounds
         new_round.deadline = end_times[i]
         # And the round number
         new_round.number = current_last_round
+        # Save type
+        new_round.type = type
         # And save our object
         new_round.put()
         # And add it to our list
@@ -205,6 +206,8 @@ def update_summary(summary, rounds):
         # Set the summary start time to be the end of the last new round
         summary.starttime = rounds[-1].deadline
         summary.deadline = rounds[-1].deadline + duration
+        # Assign proper type
+        summary.type = model.Round.get_round_type('final')
         # And save it to the database and add to our list
         summary.put()
         rounds.append(summary)
@@ -245,7 +248,8 @@ class Rounds(webapp2.RequestHandler):
             # Send the current time stamp back to the view to do comparisons with
             template_values['now'] = datetime.datetime.now()
             # And grab all the rounds for this section
-            rounds = model.Round.query(ancestor=current_section.key).fetch()
+            # rounds = model.Round.query(ancestor=current_section.key).filter(model.Round.type != 4).fetch()
+            rounds = model.Round.fetch_real_rounds(current_section.key)
             # Double check that there are actually rounds already created
             if rounds:
                 # And set the template values
@@ -318,8 +322,15 @@ class Rounds(webapp2.RequestHandler):
                 duration_of_round = int(self.request.get('duration'))
                 # And grab the buffer time between rounds
                 buffer_bw_rounds = 0  # int(self.request.get('buffer_time'))
+
+                # Get the type based on whether it's a rounds based discussion or sequential
+                course, section = utils.get_course_and_section_objs(self.request, instructor)
+                # round_type = model.Round.get_round_type(
+                #     'discussion') if section.has_rounds else model.Round.get_round_type('sequential')
+                round_type = 2 if section.has_rounds else 3
                 # Send the number and duration to the add rounds function
-                self.add_rounds(num_of_rounds, duration_of_round, instructor, buffer_bw_rounds)
+                self.add_rounds(num_of_rounds=num_of_rounds, duration=duration_of_round, instructor=instructor,
+                                type=round_type, buffer_bw_rounds=buffer_bw_rounds)
             elif action == 'delete':
                 # Send the id of the round to be deleted
                 round_id = int(self.request.get('round_id'))
@@ -394,6 +405,7 @@ class Rounds(webapp2.RequestHandler):
         rounds = model.Round.query(ancestor=section.key).fetch()
         # And switch on the type to create our start time
         if round_obj.description == 'initial':
+            round_obj.type = model.Round.get_round_type('initial')
             add_lead_in(round_obj, rounds)
         else:
             # If not a lead-in question, we know it's a summary
@@ -415,6 +427,9 @@ class Rounds(webapp2.RequestHandler):
                 last_time = rounds[-1].deadline
             # end
 
+            # Assign the proper type
+            round_obj.type = model.Round.get_round_type('final')
+
             # Let's check that the deadline doesn't conflict with the last round
             if round_obj.deadline <= last_time:
                 # Send an error if so and return
@@ -423,6 +438,7 @@ class Rounds(webapp2.RequestHandler):
             # end
             # Set start time of summary as the deadline of the last round
             round_obj.starttime = utils.str_to_datetime(last_time)
+
         # end
 
         # Now save the round to the database
@@ -433,9 +449,7 @@ class Rounds(webapp2.RequestHandler):
         update_section_rounds(rounds[-1].number, section)
         # And send our success message
         # utils.log('Success, round added.', type='Success!', handler=self)
-        utils.log(
-            'Success! Round added.',
-            type='S', handler=self)
+        utils.log('Success! Round added.', type='S', handler=self)
 
     # end add_leadin_summary
 
@@ -447,7 +461,7 @@ class Rounds(webapp2.RequestHandler):
         round_num = int(self.request.get('round'))
         # Now create our new round object
         round_obj = model.Round(parent=section.key, id=round_num)
-        # And set the deadling and round number and quiz type
+        # And set the deadline and round number and quiz type
         round_obj.deadline = end_time
         round_obj.number = round_num
         round_obj.is_quiz = True
@@ -476,7 +490,7 @@ class Rounds(webapp2.RequestHandler):
 
     # end build_round_obj
 
-    def add_rounds(self, num_of_rounds, duration, instructor, buffer_bw_rounds):
+    def add_rounds(self, num_of_rounds, duration, instructor, buffer_bw_rounds, type=2, quiet=False):
         # So first we need to get at the course and section
         course, section = utils.get_course_and_section_objs(self.request, instructor)
         # And grab all of the rounds for this section
@@ -505,7 +519,7 @@ class Rounds(webapp2.RequestHandler):
         # end
 
         # Now create all the new rounds
-        new_rounds = create_new_rounds(section, rounds, num_of_rounds, duration, buffer_bw_rounds)
+        new_rounds = create_new_rounds(section, rounds, num_of_rounds, duration, buffer_bw_rounds, type)
 
         # And update the summary round
         update_summary(summary, new_rounds)
@@ -513,7 +527,9 @@ class Rounds(webapp2.RequestHandler):
         update_section_rounds(new_rounds[-1].number, section)
 
         # Now send a success message
-        utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='Success!', handler=self)
+        if not quiet:
+            utils.log('Successfully added {0} new rounds.'.format(num_of_rounds), type='Success!', handler=self)
+        utils.log('Added Rounds = ' + str(new_rounds))
 
     # end add_rounds
 
@@ -600,7 +616,7 @@ class Rounds(webapp2.RequestHandler):
                 # And now set the new deadline for this round
                 rounds[i].deadline = deadline
 
-                # Now, check to see if there's a rounds we need to propogate to
+                # Now, check to see if there's a rounds we need to propagate to
                 if i != len(rounds) - 1:
                     # Grab the start time of the next round
                     next_start = rounds[i + 1].starttime
@@ -647,6 +663,13 @@ class Rounds(webapp2.RequestHandler):
         # Now simply turn on the first round
         section.current_round = 1
         section.put()
+
+        # Add the dummy read only round if it's a rounds based discussion
+        if section.has_rounds:
+            self.add_rounds(num_of_rounds=1, duration=0, instructor=instructor,
+                            type=model.Round.get_round_type('readonly'),
+                            buffer_bw_rounds=0, quiet=True)
+
         # And send a success message
         utils.log('Successfully started the first round.', type='Success!', handler=self)
 
