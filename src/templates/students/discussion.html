@@ -17,10 +17,7 @@
 <div class="container discussion-container" id='pageContent'>
     <div class="card">
     <div class="card-title">
-        <h2>{% if curr_page==0 %}Initial Submission
-            {% elif curr_page==num_total_rounds %}Final Submission
-            {% elif curr_page==num_total_rounds-1 %}Latest Posts
-            {% else %}Round {{curr_page - 1}}{% endif %}
+        <h2>{{ round_names[curr_page-1] }}
             &gt; Welcome {{alias}}
         </h2>
     </div>

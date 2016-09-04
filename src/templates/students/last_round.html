@@ -29,7 +29,7 @@
                 {% endfor %}
             </div>
 
-            <h3>Final Response</h3>
+            <h3>Final Answer</h3>
             <textarea class="form-control" rows="3" id="comment" placeholder="
             {%- if last_round -%}
             Please enter your final answer.
@@ -39,7 +39,7 @@
             {%- if comment -%}{{comment}}{%- endif -%}
             </textarea>
 
-            <h3>Activity Summary</h3>
+            <h3>Discussion Summary</h3>
             <textarea class="form-control" rows="10" id="summary" name="summary" placeholder="Please enter your summary for this activity ..." required {% if expired -%} disabled="true" {%- endif %}>
             {%- if summary -%}{{summary}}{%- endif -%}
             </textarea>

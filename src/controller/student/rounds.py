@@ -240,6 +240,15 @@ class Rounds(webapp2.RequestHandler):
             template_values['rounds'] = section.current_round
             template_values['num_total_rounds'] = section.rounds
             template_values['show_name'] = not section.is_anonymous
+
+            # Send round names
+            if section.has_rounds:
+                disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+            else:
+                disc_round_names = ['Discussion']
+            round_names = ['Initial Submission'] + disc_round_names + ['Final Submission']
+            template_values['round_names'] = round_names
+
             logout_url = users.create_logout_url(self.request.uri)
             template_values['logouturl'] = logout_url
             from src import config
@@ -285,7 +294,7 @@ class Rounds(webapp2.RequestHandler):
 
                 # 4. Grab all posts from the previous round (initial)
                 initial = model.Round.get_by_id(1, parent=section.key)
-                initial_answers = group_comments(group, section, initial)
+                initial_answers, did_not_participate = group_comments(group, section, initial)
                 template_values['initial_answers'] = initial_answers
 
     # end seq_discussion_view_template
