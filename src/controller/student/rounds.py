@@ -4,7 +4,7 @@ rounds.py
 Implements the APIs for Student role in the app.
 
 - Author(s): Rohit Kapoor, Swaroop Joshi
-- Last Modified: May 30, 2016
+- Last Modified: Sep 2, 2016
 
 --------------------
 
@@ -19,6 +19,76 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 from src import model, utils
+
+
+def find_prev_round_responses(current_round):
+    prev_round_number = current_round.number - 1
+    section = current_round.key.parent().get()
+    req_round = model.Round.get_by_number(section_key=section.key, number=prev_round_number)
+    utils.log('req_round = Round#' + str(req_round.number))
+    return model.Response.query(ancestor=req_round.key).fetch() if req_round else None
+
+
+def quiz_view_template(student, rround, template_values):
+    # Grab the response for this round by this student
+    response = model.Response.get_by_id(student.email, parent=rround.key)
+    # And if the question has been previously answered
+    if response:
+        # Set template values for what the student previously said
+        template_values['option'] = response.option
+        template_values['comment'] = response.comment
+        template_values['summary'] = response.summary
+    # end
+    # Now set the remaining template values directly
+    template_values['question'] = rround.quiz.question
+    template_values['options'] = rround.quiz.options
+    template_values['number'] = rround.quiz.options_total
+
+
+def group_comments(group, section, previous_round):
+    # Init an empty list for holding the comments
+    comments = []
+    did_not_participate = []
+    # Now loop over the members in the group
+    for student_email in group.members:
+        # Grab each response from the previous round
+        response = model.Response.get_by_id(student_email, parent=previous_round.key)
+
+        # Get the student's info
+        s = section.find_student_info(student_email)
+
+        if response:
+            comment = {
+                'alias': s.alias, 'email': s.email,
+                'response': response.comment, 'opinion': response.response
+            }
+            # Get thumbs if they exist
+            if response.thumbs:
+                _thumbs = []
+                for _email, _value in response.thumbs.iteritems():
+                    s_info = section.find_student_info(_email)
+                    name = s_info.alias if s_info and section.is_anonymous else _email
+                    _thumbs.append((name, _value))  # Add as a tuple
+                comment['thumbs'] = sorted(_thumbs)  # Send as sorted tuples
+
+            # If the response has an associated option
+            if response.option and response.option != 'NA':
+                # Grab the option
+                utils.log('response.option = ' + str(response.option))
+                opt = int(response.option[-1]) - 1
+                comment['option'] = previous_round.quiz.options[opt]
+            else:
+                comment['option'] = ''  # default
+
+            # And finally add the comment to the list
+            comments.append(comment)
+        else:
+            # Else note down who did not participate
+            name = s.alias if section.is_anonymous else s.email
+            did_not_participate.append(name)
+
+    utils.log('Comments = ' + str(comments))
+    return comments, sorted(did_not_participate)
 
 
 class Rounds(webapp2.RequestHandler):
@@ -61,9 +131,6 @@ class Rounds(webapp2.RequestHandler):
                 else:
                     # Otherwise, we need to set our template values
                     self.render_template(student, section)
-                    # end
-                    # end
-                    # end
 
     # end get
 
@@ -173,6 +240,15 @@ class Rounds(webapp2.RequestHandler):
             template_values['rounds'] = section.current_round
             template_values['num_total_rounds'] = section.rounds
             template_values['show_name'] = not section.is_anonymous
+
+            # Send round names
+            if section.has_rounds:
+                disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+            else:
+                disc_round_names = ['Discussion']
+            round_names = ['Initial Submission'] + disc_round_names + ['Final Submission']
+            template_values['round_names'] = round_names
+
             logout_url = users.create_logout_url(self.request.uri)
             template_values['logouturl'] = logout_url
             from src import config
@@ -182,7 +258,7 @@ class Rounds(webapp2.RequestHandler):
             # Now we need to check if it's the initial or summary question
             if requested_round.is_quiz:
                 # And set template values for quiz round
-                self.quiz_view_template(student, requested_round, template_values)
+                quiz_view_template(student, requested_round, template_values)
                 # And set the right template
                 template = utils.jinja_env().get_template('students/round.html')
             else:
@@ -218,28 +294,11 @@ class Rounds(webapp2.RequestHandler):
 
                 # 4. Grab all posts from the previous round (initial)
                 initial = model.Round.get_by_id(1, parent=section.key)
-                initial_answers = self.group_comments(group, section, initial)
+                initial_answers, did_not_participate = group_comments(group, section, initial)
                 template_values['initial_answers'] = initial_answers
+                template_values['did_not_participate'] = did_not_participate
 
     # end seq_discussion_view_template
-
-
-    def quiz_view_template(self, student, rround, template_values):
-        # Grab the response for this round by this student
-        response = model.Response.get_by_id(student.email, parent=rround.key)
-        # And if the question has been previously answered
-        if response:
-            # Set template values for what the student previously said
-            template_values['option'] = response.option
-            template_values['comment'] = response.comment
-            template_values['summary'] = response.summary
-        # end
-        # Now set the remaining template values directly
-        template_values['question'] = rround.quiz.question
-        template_values['options'] = rround.quiz.options
-        template_values['number'] = rround.quiz.options_total
-
-    # end quiz_view_template
 
     def discussion_view_template(self, student, section, round_number, template_values):
         student_info = utils.get_student_info(student.email, section.students)
@@ -256,9 +315,10 @@ class Rounds(webapp2.RequestHandler):
                     previous_round = model.Round.get_by_id(round_number - 1, parent=section.key)
                 # end
                 # Now grab all the group comments for the previous round
-                comments = self.group_comments(group, section, previous_round)
+                comments, did_not_participate = group_comments(group, section, previous_round)
                 # Set the template value for all the group comments
                 template_values['comments'] = comments
+                template_values['did_not_participate'] = did_not_participate
                 # Grab the requested round
                 requested_round = model.Round.get_by_id(round_number, parent=section.key)
                 # Grab the discussion description
@@ -269,51 +329,10 @@ class Rounds(webapp2.RequestHandler):
                 if stu_response:
                     # And set template values to show their previous response
                     template_values['comment'] = stu_response.comment
-                    utils.log("{0}".format(str(stu_response.comment)))
+                    utils.log('Comment = {0}'.format(str(stu_response.comment)))
                     template_values['response'] = ','.join(str(item) for item in stu_response.response)
-                    # end
-                    # end
-                    # end
 
     # end discussion_view_template
-
-    def group_comments(self, group, section, previous_round):
-        # Init an empty list for holding the comments
-        comments = []
-        # Now loop over the members in the group
-        for _student in group.members:
-            # Grab each response from the previous round
-            response = model.Response.get_by_id(_student, parent=previous_round.key)
-            # Check that that student actually answered the previous
-            if response:
-                # Loop over the students in the section
-                for s in section.students:
-                    # And look for the current group member
-                    if s.email == _student:
-                        # Grab their alias, email, comment, and response
-                        comment = {'alias': s.alias,
-                                   'email': s.email,  # TODO: Change to student's name
-                                   'response': response.comment,
-                                   'opinion': response.response
-                                   }
-                        # If the response has an associated option
-                        if not response.option:
-                            comment['option'] = ''  # if there are no options for this question, default comment is ''
-                        elif response.option != 'NA':
-                            # Grab the option
-                            opt = int(response.option[-1]) - 1
-                            comment['option'] = previous_round.quiz.options[opt]
-                        # end
-                        # And finally add the comment to the list
-                        comments.append(comment)
-                        break
-                        # end
-                        # end
-                        # end
-        # end
-        return comments
-
-    # end group_comments
 
     def save_submission(self, student, current_round):
         # Create a new response object
@@ -351,8 +370,26 @@ class Rounds(webapp2.RequestHandler):
             for i in range(1, len(res)):
                 # And save them in our response object for the db
                 response.response.append(res[i])
-                # end
-        # end
+
+            # Get all responses of the previous round
+            prev_responses = find_prev_round_responses(current_round)
+
+            # Fetch thumbs from the view
+            in_thumbs = json.loads(self.request.get('thumbs'))
+
+            if in_thumbs and prev_responses:
+                utils.log('in_thumbs = {0}'.format(str(in_thumbs)))
+
+                # Add the thumbs info. to the previous round's responses
+                for prev_resp in prev_responses:
+                    if in_thumbs.has_key(prev_resp.student):
+                        _thumbs = prev_resp.thumbs.copy()
+                        prev_resp.add_to_thumbs(student.email, in_thumbs[prev_resp.student])
+                    utils.log('For' + prev_resp.comment + ', old thumbs = '
+                              + (str(_thumbs) if _thumbs else 'Empty')
+                              + ', new thumbs = ' + str(prev_resp.thumbs))
+                    prev_resp.put()
+
         # Grab the deadline and the current time
         deadline = current_round.deadline
         current_time = datetime.datetime.now()
@@ -361,17 +398,15 @@ class Rounds(webapp2.RequestHandler):
             # Set the comment and email, and save in the database
             response.comment = comment
             response.student = student.email
+            # utils.log('comment = {0}, response = {1}'.format(comment, response.response))
+
             response.put()
-            utils.log(
-                'Your response has been saved. You can edit it any time before the deadline. ',
-                type='Success!', handler=self)
-        else:
-            # Otherwise alert them that time has passed to submit for this round
-            utils.error(
-                'Sorry, the time for submission for this round has expired \
-                   and your response was not saved, please wait for the next round.',
-                handler=self)
-            # end
-            # end save_submission
+            utils.log('Your response has been saved. You can edit it any time before the deadline. ',
+                      type='Success!', handler=self)
+
+        else:  # Otherwise alert them that time has passed to submit for this round
+            utils.error('Sorry, the time for submission for this round has expired \
+           and your response was not saved, please wait for the next round.',
+                        handler=self)
 
 # end class Rounds

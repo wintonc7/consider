@@ -220,6 +220,7 @@ a:hover {
 .support {
     background-color: rgb(203, 255, 186);
 }
+
 .neutral {
     background-color: rgb(186, 237, 255);
 }
@@ -329,4 +330,11 @@ a:hover {
 .thumbnail {
     padding-left: 15px;
     padding-right: 15px;
+}
+
+/* Badge styling for thumbs up */
+.badge {
+    font-weight: 100;
+    background-color: #110F80;
+    margin-bottom: 10px;
 }
