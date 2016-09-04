@@ -296,6 +296,7 @@ class Rounds(webapp2.RequestHandler):
                 initial = model.Round.get_by_id(1, parent=section.key)
                 initial_answers, did_not_participate = group_comments(group, section, initial)
                 template_values['initial_answers'] = initial_answers
+                template_values['did_not_participate'] = did_not_participate
 
     # end seq_discussion_view_template
 

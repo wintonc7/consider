@@ -32,6 +32,12 @@
                                 <td style="text-align: left">{{answer.response|safe}}</td>
                             </tr>
                             {% endfor %}
+                            {% for email_or_alias in did_not_participate %}
+                                <tr>
+                                <th style="text-align: left">{{ email_or_alias }}</th>
+                                <td style="text-align: left">(Did not participate)</td>
+                                </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
