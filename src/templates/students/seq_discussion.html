@@ -28,7 +28,8 @@
                             <tbody>
                             {% for answer in initial_answers %}
                             <tr>
-                                <th style="text-align: left">{{answer.email if show_name else answer.alias}}</th>
+                                <th style="text-align: left">{{answer.email if show_name else answer.alias}}{% if alias==answer.alias %} (You) {% endif %}</th>
+                                {%- if answer.option -%}<td style="text-align: left">{{ answer.option|safe }}</td>{%- endif -%}
                                 <td style="text-align: left">{{answer.response|safe}}</td>
                             </tr>
                             {% endfor %}
@@ -46,7 +47,7 @@
             {%- for post in posts -%}
             <div class="card">
                 <div class="card-title">
-                    <h3 style="text-align: left">#{{post.index}} &mdash; {{post.author if show_name else post.author_alias}}</h3>
+                    <h3 style="text-align: left">#{{post.index}} &mdash; {{post.author if show_name else post.author_alias}}{% if alias==post.author_alias %} (You) {% endif %}</h3>
                 </div>
                 <div class="card-body" style="text-align: left">
                     {{post.text|safe}}
