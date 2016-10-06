@@ -1,4 +1,4 @@
 CKEDITOR.replace("summary",
-    {
-        height: 200
-    });
+  {
+      height: 200
+  });

@@ -84,8 +84,13 @@ function toggleCourseStatus(course) {
     bootbox.confirm("Toggle status of course: " + course + "?", function (result) {
         if (result) {
             // do the POST and get the callback
-            $.post("/courses", {name: course, action:'toggle'}, function () {
-                location.href = "/home?course=" + course;
+            $.post("/courses",
+            {
+              name: course,
+              action:'toggle'
+            },
+            function () {
+              location.href = "/home?course=" + course;
             });
         }
     });
@@ -95,13 +100,19 @@ function toggleSectionStatus(course, section) {
     bootbox.confirm("Toggle status of: " + section + " in course: " + course + "?", function (result) {
         if (result) {
             // do the POST and get the callback
-            $.post("/sections", {course: course, section: section, action:'toggle'}, function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data.substring(1));
-                }
-                else {
-                    location.href = "/home?course=" + course;
-                }
+            $.post("/sections",
+            {
+              course: course,
+              section: section,
+              action:'toggle'
+            },
+            function (data) {
+              if (data.charAt(0) == 'E') {
+                  bootbox.alert(data.substring(1));
+              }
+              else {
+                  location.href = "/home?course=" + course;
+              }
             });
         }
     });

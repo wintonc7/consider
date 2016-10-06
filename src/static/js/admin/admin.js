@@ -13,7 +13,12 @@ function toggleStatus(instructor) {
     bootbox.confirm("Toggle status of : " + instructor + "?", function (result) {
         if (result) {
             // do the POST and get the callback
-            $.post("/admin", {email: instructor, action: 'toggle'}, function (data) {
+            $.post("/admin",
+              {
+                email: instructor,
+                action: 'toggle'
+              },
+              function (data) {
                 bootbox.alert(data, function () {
                     location.reload();
                 });

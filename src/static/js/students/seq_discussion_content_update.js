@@ -11,16 +11,16 @@ $('#seqDiscussionForm').submit(function (event) {
     var $form = $(this),
         url = $form.attr('action');
     $.post(url,
-            {
-                section: sectionKey,
-                text: $form.find('#seqDiscussionPost').val()
-            },
-            function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data);
-                } else {
-                    location.reload();
-                }
-            }
+      {
+          section: sectionKey,
+          text: $form.find('#seqDiscussionPost').val()
+      },
+      function (data) {
+          if (data.charAt(0) == 'E') {
+              bootbox.alert(data);
+          } else {
+              location.reload();
+          }
+      }
     );
 });
