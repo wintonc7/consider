@@ -587,7 +587,7 @@ try:
         print_passed(test_number)
     logout()
     test_number += 1
-   
+
     #===========[END: testing /admin]===================
     #===========[START: testing /students]===================
     print("testing /students")
@@ -674,7 +674,7 @@ try:
         print_passed(test_number)
     else:
         print_failed(test_number,"permissions error: student was able to remove a student")
-    
+
     #===========[END: testing /students]===================
     #===========[START: testing /courses]===================
     print("testing /courses")
@@ -716,7 +716,7 @@ try:
     else:
         print_failed(test_number,"permissions error: student could add a course")
     logout()
-    test_number += 1  
+    test_number += 1
 
     print("\t testing POST action = toggle")
     #TEST: see if instructor can toggle a course
@@ -789,7 +789,7 @@ try:
     else:
         print_failed(test_number,"permissions error: student could add a section")
     logout()
-    test_number += 1  
+    test_number += 1
 
     print("\t testing POST action = toggle")
     #TEST: see if instructor can toggle a section
@@ -960,7 +960,7 @@ try:
     test_number += 1
 
     #update
-    #this method is testing below: function is to add students to groups and thus must be done after students have done something 
+    #this method is testing below: function is to add students to groups and thus must be done after students have done something
     #===========[END: testing /groups]===================
     #setting up new test data separate from above tests
     #set up new test admin, instructor, course, section and student
