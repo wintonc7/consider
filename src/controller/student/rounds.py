@@ -243,9 +243,13 @@ class Rounds(webapp2.RequestHandler):
 
             # Send round names
             if section.has_rounds:
-                disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+                if section.rounds > 3:
+                    disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+                else:
+                    disc_round_names = ['Round 1']
             else:
                 disc_round_names = ['Discussion']
+
             round_names = ['Initial Submission'] + disc_round_names + ['Final Submission']
             template_values['round_names'] = round_names
 
