@@ -464,59 +464,6 @@ $(document).ready(function () {
             }
         );
     });
-
-    // Toggle anonymity status on server
-    $("#toggleAnonymityForm").submit(function () {
-        var $form = $(this),
-            course = $form.find('[name="course"]').val(),
-            section = $form.find('[name="section"]').val(),
-            action = "toggle_anon";
-        $.post('/rounds',
-            {course: course, section: section, action: action},
-            function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data);
-                } else {
-                    location.href = "/rounds?course=" + course + "&section=" + section;
-                }
-            }
-        );
-        // $.ajax({
-        //     url: '/rounds',
-        //     method: 'POST',
-        //     data: {
-        //         course: course,
-        //         section: section,
-        //         action: action
-        //     },
-        //     success: function(res) {
-        //         //do stuff with res
-        //         alert(res);
-        //         location.reload();
-        //     },
-        //     error: function(xhr, status, error) {
-        //         alert(status);
-        //     }
-        // });
-    });
-
-    // Toggle anonymity status on server
-    $("#toggleRoundStructureForm").submit(function () {
-        var $form = $(this),
-            course = $form.find('[name="course"]').val(),
-            section = $form.find('[name="section"]').val(),
-            action = "toggle_round_structure";
-        $.post('/rounds',
-            {course: course, section: section, action: action},
-            function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data);
-                } else {
-                    location.href = "/rounds?course=" + course + "&section=" + section;
-                }
-            }
-        );
-    });
 });
 
 //Utility methods

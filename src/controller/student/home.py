@@ -48,20 +48,21 @@ class HomePage(webapp2.RequestHandler):
             for section in sections:
                 # Grab it from the db
                 section_obj = section.get()
-                # Get the parent course for the section
-                course_obj = section.parent().get()
-                # Double check that both exist
-                if section_obj and course_obj:
-                    # Grab the section key, section name, and course name
-                    sec = {
-                        'key': section.urlsafe(),
-                        'name': section_obj.name,
-                        'course': course_obj.name
-                    }
-                    # And throw it in the list
-                    section_list.append(sec)
-                    # end
-                    # end
+                if section_obj.is_active:
+                    # Get the parent course for the section
+                    course_obj = section.parent().get()
+                    # Double check that both exist
+                    if section_obj and course_obj:
+                        # Grab the section key, section name, and course name
+                        sec = {
+                            'key': section.urlsafe(),
+                            'name': section_obj.name,
+                            'course': course_obj.name
+                        }
+                        # And throw it in the list
+                        section_list.append(sec)
+                        # end
+                        # end
         # end
         # Add the list of sections the student is in to our template
         template_values['sections'] = section_list

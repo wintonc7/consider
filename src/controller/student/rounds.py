@@ -243,9 +243,13 @@ class Rounds(webapp2.RequestHandler):
 
             # Send round names
             if section.has_rounds:
-                disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+                if section.rounds > 3:
+                    disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+                else:
+                    disc_round_names = ['Round 1']
             else:
                 disc_round_names = ['Discussion']
+
             round_names = ['Initial Submission'] + disc_round_names + ['Final Submission']
             template_values['round_names'] = round_names
 
@@ -382,12 +386,17 @@ class Rounds(webapp2.RequestHandler):
 
                 # Add the thumbs info. to the previous round's responses
                 for prev_resp in prev_responses:
+                    # _thumbs = []    # Added because there was an error when submitting R1 post on the server;
+                                    # could not replicate on dev server
+                                    # Error: There was some error submitting your response please try again later.
+                                    # Exception: local variable '_thumbs' referenced before assignment
                     if in_thumbs.has_key(prev_resp.student):
                         _thumbs = prev_resp.thumbs.copy()
                         prev_resp.add_to_thumbs(student.email, in_thumbs[prev_resp.student])
-                    utils.log('For' + prev_resp.comment + ', old thumbs = '
-                              + (str(_thumbs) if _thumbs else 'Empty')
-                              + ', new thumbs = ' + str(prev_resp.thumbs))
+                    # utils.log('For' + prev_resp.comment + ', old thumbs = '
+                    #           + (str(_thumbs) if _thumbs else 'Empty')
+                    #           + ', new thumbs = ' + str(prev_resp.thumbs))
+                    # Removed this instead of adding _thumbs = [] at line 385
                     prev_resp.put()
 
         # Grab the deadline and the current time
