@@ -23,10 +23,13 @@ function exportData(course, section) {
     {% endfor %}
     {% endif %}
     $.post("/data_file_export", {course: course, section: section, action:selector}, function (data) {
+        console.log(123);
         if (data.charAt(0) == 'E') {
+            console.log(1234);
             bootbox.alert(data.substring(1));
         }
         else {
+            console.log(12345);
             location.href = "/data_file_export"
         }
     });
