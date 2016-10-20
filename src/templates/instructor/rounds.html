@@ -434,10 +434,7 @@
   <script src="/js/bootstrap-datetimepicker.js"></script>
   <script src="/js/instructor_rounds.js"></script>
   <link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-  <!-- NEW LOGICS -->
-  {% block javascript %}
-    <script type="text/javascript">
-      {% include "/js/instructor/rounds_selectors.js" %}
-    </script>
-  {% endblock %}
+
+  <meta id="rounds" data-course="{{selectedCourse}}">
+  <script type="text/javascript" src="/js/instructor/rounds_selectors.js"></script>
 {% endblock %}

@@ -176,7 +176,7 @@ def check_privilege(expected_role):
 
     Args:
         expected_role (object):
-          The role we're checking against from the 
+          The role we're checking against from the
 
     Returns:
         user (object):
