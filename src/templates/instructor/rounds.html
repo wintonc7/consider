@@ -55,27 +55,30 @@
             </tr>
             <tr>
                 <td>Anonymity</td>
-                <td>{{'Yes (Student names will be hidden)' if anon else 'No (Students will see each others\' names)'}}</td>
+                <td>{{ 'Yes (Student names will be hidden)' if anon else 'No (Students will see each others\' names)' }}</td>
                 {%- if activeRound == 0 -%}
-                <td>
-                    <form id="toggleAnonymityForm" action="/rounds">
-                        <input type="hidden" name="course" value="{{selectedCourse}}"/>
-                        <input type="hidden" name="section" value="{{selectedSection}}"/>
-                        <button type="submit" class="btn btn-success btn-sm">{{'Disable' if anon else 'Enable'}}</button>
-                    </form>
-                </td>
+                    <td>
+                        <button type="submit"
+                                class="btn btn-success btn-sm"
+                                id="toggleAnonButton"
+                                name="toggleAnonButton"
+                                onclick="toggleAnon('{{ selectedCourse }}', '{{ selectedSection }}')">Toggle
+                        </button>
+                    </td>
                 {%- endif -%}
             </tr>
             <tr>
                 <td>Rounds-based Structure</td>
-                <td>{{'Yes (One discussion post per round)' if round_structure else 'No (Posts displayed as they are submitted)'}}</td>
+                <td>{{ 'Yes (One discussion post per round)' if round_structure else 'No (Posts displayed as they are submitted)' }}</td>
                 {%- if activeRound == 0 -%}
-                <td>
-                    <form id="toggleRoundStructureForm" action="/rounds">
-                        <input type="hidden" name="course" value="{{selectedCourse}}"/>
-                        <input type="hidden" name="section" value="{{selectedSection}}"/>
-                        <button type="submit" class="btn btn-success btn-sm">{{'Disable' if round_structure else 'Enable'}}</button>
-                    </form>
+                    <td>
+                        <button type="submit"
+                                class="btn btn-success btn-sm"
+                                id="toggleRoundsButton"
+                                name="toggleRoundsButton"
+                                onclick="toggleRounds('{{ selectedCourse }}', '{{ selectedSection }}')">Toggle
+                        </button>
+
                 </td>
                 {%- endif -%}
             </tr>
@@ -436,5 +439,5 @@
   <link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 
   <meta id="rounds" data-course="{{selectedCourse}}">
-  <script type="text/javascript" src="/js/instructor/rounds_selectors.js"></script>
+  <script type="text/javascript" src="/js/instructor/rounds_toggles.js"></script>
 {% endblock %}
