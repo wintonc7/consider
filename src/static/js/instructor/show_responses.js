@@ -28,20 +28,18 @@ function getIndicesOf(searchStr, str, caseSensitive) {
 }
 
 function SelectAll() {
-
   if (rounds > 0 && students.length > 0 && num_std > 0)
   {
     var count = 0;
-
-    var indicesOfEmailStart = getIndicesOf("email", students);
-    var indicesOfEmailEnd = getIndicesOf("com", students);
-
     var emails = [];
+
+    var indicesOfEmailStart = getIndicesOf("email=u", students);
     for (var i = 0; i < indicesOfEmailStart.length; i++)
     {
-      emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd[i] + 3))
+      var indicesOfEmailEnd = students.indexOf("'", indicesOfEmailStart[i] + 8);
+      emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd))
     }
-
+    
     for (var i = 0; i < emails.length; i++)
     {
       for (var j = 1; j <= rounds; j++)
