@@ -1,4 +1,4 @@
-var sectionKey = $('#content-update').data().sectionKey;
+var sectionKey = $('#content-update').data().sectionkey;
 
 $('#seqDiscussionForm').submit(function (event) {
     event.preventDefault();

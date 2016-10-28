@@ -2,7 +2,7 @@
 // the highlighting/styles in the navigation bar to reflect
 // which round is being displayed.
 var currentPage = $('#reload').data().currentPage;
-var sectionKey = $('#reload').data().sectionKey;
+var sectionKey = $('#reload').data().sectionkey;
 
 var curr_round = currentPage;
 function loadRound(round) {
