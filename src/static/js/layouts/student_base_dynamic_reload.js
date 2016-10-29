@@ -6,8 +6,6 @@ var sectionKey = $('#reload').data().sectionkey;
 
 var curr_round = currentPage;
 function loadRound(round) {
-
-
     var url = location.href.split('?')[0] + '?section=' + sectionKey + '&round=' + round;
     $("#navbar li").removeClass("round-viewing nav-active");
     $("#navbar a").removeClass("round-viewing nav-active");
