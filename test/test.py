@@ -29,7 +29,7 @@ class TestServer:
             # security on user input important here ***
             # ie if user input "/home/consider && <malicious shell command>" it could be bad
             # start local server, specifying location for new datastore
-            self.server_process = subprocess.Popen(["dev_appserver.py","--datastore_path="+self.temp_datastore_path,self.app_path,"--clear_datastore"],stdout=fp,stderr=fp)
+            self.server_process = subprocess.Popen(["dev_appserver.py","--datastore_path="+self.temp_datastore_path,self.app_path,"--clear_datastore"],stdout=fp,stderr=fp,shell=True)
             #TODO: check if dev_appserver is in path, if it's not fail
         TestServer.wait_for_server()
 

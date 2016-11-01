@@ -50,7 +50,7 @@ input, textarea, select {
 
 .btn-success {
     border-radius: 4px !important;
-    width: 1140px;
+    height: 100% !important;
 }
 /* INTRUCTOR NAVIGATION SIDE BAR */
 

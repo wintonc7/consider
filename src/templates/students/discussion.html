@@ -92,7 +92,9 @@
 {%- if not expired -%}
 <!-- fixed position discussion response text editor -->
 <div class="container-fluid navbar-fixed-bottom" id="discussion-response">
-    <div class="container">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-11">
         <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
             <div id="text-editor">
 
@@ -104,16 +106,20 @@
                 {%- endif -%}
                 </textarea>
             </div>
-            <br>
-            <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
-                    -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
-                    <br />
-                    Submit
-            </button>
+
             <!-- replace plain textarea with CKEditor WYSIWYG -->
             <script type="text/javascript" src="/js/students/discussion_editor_replace.js"></script>
         </form>
     </div>
+    <div class="col-md-1">
+      <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
+              -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+              <br />
+              Submit
+      </button>
+  </div>
+  </div>
+</div>
 </div>
 {%- endif -%}
 {% endblock content %}
