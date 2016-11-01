@@ -28,8 +28,9 @@ $("#modalForm").submit(function (event) {
             section = selectedSection,
             url = $form.attr("action");
 
-    var emails = email.replace(/ /g, '').split(',');
-
+    var emails = email.replace(/ /g, ',').split(/[\n,]+/);
+    // Allows emails to be space, comma, and newline separated
+    
     bootbox.confirm("Are you sure, you want to add " + emails.length + " student(s)?", function (result) {
         if (result) {
             // do the POST and get the callback
