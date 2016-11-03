@@ -39,7 +39,7 @@ function SelectAll() {
       var indicesOfEmailEnd = students.indexOf("'", indicesOfEmailStart[i] + 8);
       emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd))
     }
-    
+
     for (var i = 0; i < emails.length; i++)
     {
       for (var j = 1; j <= rounds; j++)
@@ -93,16 +93,15 @@ function RowChecked(student, rounds) {
 }
 
 function exportData(course, section) {
-    var indicesOfEmailStart = getIndicesOf("email", students);
-    var indicesOfEmailEnd = getIndicesOf("com", students);
-
-    var emails = [];
+    var students = $('#show-responses').data().students;
+    var indicesOfEmailStart = getIndicesOf("email=u", students);
+    emails = [];
     for (var i = 0; i < indicesOfEmailStart.length; i++)
     {
-      emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd[i] + 3))
+      var indicesOfEmailEnd = students.indexOf("'", indicesOfEmailStart[i] + 8);
+      emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd))
     }
     // Gather student emails
-
     var selector = "";
     var i=0;
     if (rounds > 0 && students.length > 0)
@@ -130,15 +129,15 @@ function exportData(course, section) {
 }
 
 function exportHtml(course, section) {
-    var indicesOfEmailStart = getIndicesOf("email", students);
-    var indicesOfEmailEnd = getIndicesOf("com", students);
-
-    var emails = [];
-    for (var i = 0; i < indicesOfEmailStart.length; i++)
-    {
-      emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd[i] + 3))
-    }
-    // Gather student emails
+  var students = $('#show-responses').data().students;
+  var indicesOfEmailStart = getIndicesOf("email=u", students);
+  emails = [];
+  for (var i = 0; i < indicesOfEmailStart.length; i++)
+  {
+    var indicesOfEmailEnd = students.indexOf("'", indicesOfEmailStart[i] + 8);
+    emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd))
+  }
+  // Gather student emails
 
     var selector = "";
     var i=0;
@@ -171,14 +170,15 @@ function exportHtml(course, section) {
 }
 
 function ColChecked(index) {
-  var indicesOfEmailStart = getIndicesOf("email", students);
-  var indicesOfEmailEnd = getIndicesOf("com", students);
-
-  var emails = [];
+  var students = $('#show-responses').data().students;
+  var indicesOfEmailStart = getIndicesOf("email=u", students);
+  emails = [];
   for (var i = 0; i < indicesOfEmailStart.length; i++)
   {
-    emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd[i] + 3))
+    var indicesOfEmailEnd = students.indexOf("'", indicesOfEmailStart[i] + 8);
+    emails.push(students.substring(indicesOfEmailStart[i] + 8, indicesOfEmailEnd))
   }
+  // Gather student emails
 
   if (num_std > 0 && emails.length > 0)
   {
