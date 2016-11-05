@@ -32,64 +32,11 @@
 
 
 {% block script %}
-<script>
-
-// Dynamically reloads the page content and refreshes
-// the highlighting/styles in the navigation bar to reflect
-// which round is being displayed.
-var curr_round = {{ curr_page }};
-function loadRound(round) {
-
-
-    var url = location.href.split('?')[0] + '?section={{sectionKey}}&round=' + round;
-    $("#navbar li").removeClass("round-viewing nav-active");
-    $("#navbar a").removeClass("round-viewing nav-active");    
-    getRoundButton(round).addClass("round-viewing nav-active");
-    $('#pageContent').load(url + ' #pageContent', function() {
-        $(this).children(':first').unwrap();
-        if (curr_round == round) {
-            reloadOpinions();
-        }       
-    });
-    // Update page number of page being viewed.
-    view_page = round;
-}
-
-// Helper function that dynamically reapplies the selected
-// opinion(s) for comment(s) if viewing current round.
-function reloadOpinions() {
-    if (typeof resp !== 'undefined') {
-        resp.forEach(function(opinion, index) {
-            if (index > 0) {
-                $("#jum_" + index).removeClass().addClass('jumbotron ' + opinion);
-            }
-        });
-    }
-}
-
-// Returns the jQuert element corresponding to the specified
-// round's button (li element).
-function getRoundButton(round) {
-    return $('.nav_reload[data-round="' + round + '"]')
-}
-
-var view_page = {{curr_page}};
-
-// Dynamically reload the page content when a navigation
-// button is pressed.
-$(".nav_reload").click(function(event) {
-    event.preventDefault();
-    loadRound($(event.target).data('round'));
-});
-</script>
+<meta id="reload" data-currentPage = "{{ curr_page }}" data-sectionkey = "{{sectionKey}}">
+<script type="text/javascript" src="/js/layouts/student_base_dynamic_reload.js"></script>
 {% if not expired -%}
 <script src="/js/jquery.countdown.min.js"></script>
-<script>
-    $('#clock').countdown("{{ deadline |local_time}}", function (event) {
-        $(this).html(event.strftime('%D days %H:%M:%S'));
-    });
-    //    TODO: Show 'days' part only when time left is more than 24 hours
-    //    TODO: When it reaches 0, if this is the first time the student is putting in his answer, autosave whatever is in the inupt box, and disable the box as well as the button.
-</script>
+<meta id="countdown" data-countdown = "{{ deadline |local_time}}">
+<script type="text/javascript" src="/js/layouts/student_base_countdown.js"></script>
 {% endif %}
 {% endblock script %}
