@@ -131,13 +131,6 @@
 {% endblock %}
 
 {% block script %}
-<script>
-    $('#courseSelector').on('change', function () {
-        location.href = "/responses?course=" + this.value;
-    });
-
-    $('#sectionSelector').on('change', function () {
-        location.href = "/responses?course={{selectedCourse}}&section=" + this.value;
-    });
-</script>
+  <meta id="responses" data-course="{{selectedCourse}}">
+  <script type="text/javascript" src="/js/instructor/responses.js"></script>
 {% endblock %}

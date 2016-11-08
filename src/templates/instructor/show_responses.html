@@ -2,227 +2,95 @@
 {% block title %} | Responses {% endblock %}
 
 {% block content %}
-    <h1 class="page-header">Show Responses</h1>
-    <div class="card">
-        <div class="card-title">
-            <h4 class="form-signin-heading">Please select a Course and Section below:</h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Course</h4>
-                    {% if courses %}
-                        <select id="courseSelector" class="form-control">
-                            {% for course in courses %}
-                                <option {% if selectedCourse== course.name %}selected="selected" {% endif %}>{{ course.name }}</option>
-                            {% endfor %}
-                        </select>
-                    {% else %}
-                        Please add a course to add Students
-                    {% endif %}
-                </div>
-                <div class="col-md-6">
-                    <h4>Section</h4>
-                    {% if sections %}
-                        <select id="sectionSelector" class="form-control">
-                            {% for section in sections %}
-                                <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{ section.name }}</option>
-                            {% endfor %}
-                        </select>
-                    {% else %}
-                        {% if courses %}
-                            There are no sections in this Course
-                        {% else %}
-                            Please select a course to see sections
-                        {% endif %}
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+<h1 class="page-header">Show Responses</h1>
+<div class="card">
+<div class="card-title">
+<h4 class="form-signin-heading">Please select a Course and Section below:</h4>
+</div>
+<div class="card-body">
+<div class="row">
+    <div class="col-md-6">
+        <h4>Course</h4>
+        {% if courses %}
+        <select id="courseSelector" class="form-control">
+            {% for course in courses %}
+            <option {% if selectedCourse== course.name %}selected="selected" {% endif %}>{{course.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        Please add a course to add Students
+        {% endif %}
     </div>
-    {% if rounds and students %}
-        <div class="card">
-        <div class="card-title">
-            <h4>Please select students and export data:</h4>
-        </div>
-        <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped" id="group_table">
-                <thead>
-                <tr>
-                    <th>Student
-                        <button style="margin-left:30px" onclick="SelectAll()"> Select</button>
-                    </th>
-                    <th>Group</th>
-                    {% for r in range(rounds) %}
-                        <td>
-                            <button onclick="ColChecked('{{ loop.index }}')"> Round-{{ loop.index }} </button>
-                        </td>
-                    {% endfor %}
-                </tr>
-                </thead>
-                <tbody id="group_1">
-                {% for student in students %}
-                    <tr>
-                        <td>
-                            <button style="height:30px;width:180px"
-                                    onclick="RowChecked('{{ student.email }}','{{ rounds }}')">{{ student.email }}</button>
-                        </td>
-                        <td>{{ student.group }}</td>
-                        {% for r in range(rounds) %}
-                            <td><input type="checkbox" style="margin-left:30px" id={{ student.email~loop.index }}></td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <div class="form-group" style="text-align:center;">
+    <div class="col-md-6">
+        <h4>Section</h4>
+        {% if sections %}
+        <select id="sectionSelector" class="form-control">
+            {% for section in sections %}
+            <option {% if selectedSection== section.name %}selected="selected" {% endif %}>{{section.name}}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        {% if courses %}
+        There are no sections in this Course
+        {% else %}
+        Please select a course to see sections
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+</div>
+</div>
+ {% if rounds and students %}
+<div class="card">
+<div class="card-title">
+<h4>Please select students and export data:</h4>
+</div>
+<div class="card-body">
+<div class="table-responsive">
+    <table class="table table-striped" id="group_table">
+      <thead>
+        <tr>
+          <meta id="show-responses" data-students="{{students}}" data-rounds="{{rounds}}" data-std="{{num_std}}">
+          <th>Student <button style="margin-left:30px" onclick="SelectAll()"> Select</button> </th>
+          <th>Group</th>
+            {% for r in range(rounds) %}
+          <td><button  onclick="ColChecked('{{loop.index}}')"> Round-{{loop.index}} </button></td>
+            {% endfor %}
+        </tr>
+      </thead>
+      <tbody id="group_1">
+        {% for student in students %}
+          <tr>
+            <td><button style="height:30px;width:180px" onclick="RowChecked('{{ student.email }}','{{ rounds }}')">{{student.email}}</button></td>
+            <td>{{student.group}}</td>
+              {% for r in range(rounds) %}
+            <td><input type="checkbox" style="margin-left:30px" id={{ student.email~loop.index }}></td>
+                  {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="form-group" style="text-align:center;">
 
-                <button class="label label-success" style="margin-right:60px;width:100px;height:35px;font-size:15px"
-                        onclick="exportHtml('{{ selectedCourse }}','{{ selectedSection }}')">
-                    HTML
-                </button>
+        <button class="label label-success" style="margin-right:60px;width:100px;height:35px;font-size:15px"
+                onclick="exportHtml('{{ selectedCourse }}','{{ selectedSection }}')">
+            HTML
+        </button>
 
-                <button class="label label-success" style="width:100px;height:35px;font-size:15px"
-                        onclick="exportData('{{ selectedCourse }}','{{ selectedSection }}')">
-                    FILE
-                </button>
-            </div>
-        </div>
-    {% else %}
-        <h5 class="sub-header" style="margin-top: 20px;">No results to be exported.</h5>
-    {% endif %}
+        <button class="label label-success" style="width:100px;height:35px;font-size:15px"
+                onclick="exportData('{{ selectedCourse }}','{{ selectedSection }}')">
+            FILE
+        </button>
+    </div>
+</div>
+{% else %}
+<h5 class="sub-header" style="margin-top: 20px;">No results to be exported.</h5>
+{% endif %}
 </div>
 </div>
 {% endblock %}
 
+
 {% block script %}
-    <script>
-        $('#courseSelector').on('change', function () {
-            location.href = "/show_responses?course=" + this.value;
-        });
-
-        $('#sectionSelector').on('change', function () {
-            location.href = "/show_responses?course={{selectedCourse}}&section=" + this.value;
-        });
-
-        function exportData(course, section) {
-            var selector = "";
-            var i = 0;
-            {% if rounds and students %}
-                {% for student in students %}
-                    for (var j = 1; j <= {{ rounds }}; j++) {
-                        var id = "{{ student.email}}";
-                        if (document.getElementById(id.concat(j)).checked) {
-                            selector = selector.concat((i.toString() + ' ').concat(j.toString() + ' ')) + ' ';
-                        }
-                    }
-                    i = i + 1;
-                {% endfor %}
-            {% endif %}
-            $.post("/data_file_export", {course: course, section: section, action: selector}, function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data.substring(1));
-                } else {
-                    location.href = "/data_file_export"
-                }
-            });
-        }
-
-        function exportHtml(course, section) {
-            var selector = "";
-            var i = 0;
-            {% if rounds and students %}
-                {% for student in students %}
-                    for (var j = 1; j <= {{ rounds }}; j++) {
-                        var id = "{{ student.email}}";
-                        if (document.getElementById(id.concat(j)).checked) {
-                            selector = selector.concat((i.toString() + ' ').concat(j.toString() + ' ')) + ' ';
-                        }
-                    }
-                    i = i + 1;
-                {% endfor %}
-            {% endif %}
-            $.post("/data_file_export", {course: course, section: section, action: selector}, function (data) {
-                if (data.charAt(0) == 'E') {
-                    bootbox.alert(data.substring(1));
-                }
-                else {
-                    location.href = "/data_html_export"
-                }
-            });
-        }
-        function RowChecked(student, rounds) {
-            var count = 0;
-            for (i = 1; i <= rounds; i++) {
-                if (document.getElementById(student.concat(i)).checked) {
-                    count++;
-                }
-            }
-            if (count != rounds) {
-                for (i = 1; i <= rounds; i++) {
-                    document.getElementById(student.concat(i)).checked = true;
-                }
-            } else {
-                for (i = 1; i <= rounds; i++) {
-                    document.getElementById(student.concat(i)).checked = false;
-                }
-            }
-        }
-
-        function ColChecked(index) {
-            {% if num_std and students %}
-                var count = 0;
-                {% for student in students %}
-                    id = "{{ student.email}}";
-                    if (document.getElementById(id.concat(index)).checked) {
-                        count++;
-                    }
-                {% endfor %}
-                if (count !={{ num_std }}) {
-                    {% for student in students %}
-                        id = "{{ student.email}}";
-                        document.getElementById(id.concat(index)).checked = true;
-                    {% endfor %}
-                }
-
-                else {
-                    {% for student in students %}
-                        id = "{{ student.email}}";
-                        document.getElementById(id.concat(index)).checked = false;
-                    {% endfor %}
-                }
-            {% endif %}
-        }
-        function SelectAll() {
-            {% if rounds and students and num_std%}
-                var count = 0;
-                {% for student in students %}
-                    id = "{{ student.email}}";
-                    for (i = 1; i <={{ rounds }}; i++) {
-                        if (document.getElementById(id.concat(i)).checked) {
-                            count++;
-                        }
-                    }
-                {% endfor %}
-                var a ={{ num_std }};
-                var b ={{ rounds }};
-                if (count != a * b) {
-                    {% for student in students %}
-                        id = "{{ student.email}}";
-                        for (i = 1; i <={{ rounds }}; i++) {
-                            document.getElementById(id.concat(i)).checked = true;
-                        }
-                    {% endfor %}
-                } else {
-                    {% for student in students %}
-                        id = "{{ student.email}}";
-                        for (i = 1; i <={{ rounds }}; i++) {
-                            document.getElementById(id.concat(i)).checked = false;
-                        }
-                    {% endfor %}
-                }
-            {% endif %}
-        }
-    </script>
+<script type="text/javascript" src="/js/instructor/show_responses.js"></script>
 {% endblock %}

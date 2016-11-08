@@ -87,12 +87,7 @@
                     Submit
             </button>
             <!-- replace plain textarea with CKEditor WYSIWYG -->
-            <script>
-                CKEDITOR.replace('seqDiscussionPost',
-                {
-                    height: 180
-                });
-            </script>
+            <script type="text/javascript" src="js/students/seq_discussion_editor_replace.js"></script>
         </form>
     </div>
 </div>
@@ -101,30 +96,6 @@
 
 {% block script %}
 {{ super() }}
-<script>
-    $('#seqDiscussionForm').submit(function (event) {
-        event.preventDefault();
-
-        // Update content of textarea(s) handled by CKEditor
-        for ( instance in CKEDITOR.instances ) {
-            CKEDITOR.instances[instance].updateElement();
-        }
-
-        var $form = $(this),
-            url = $form.attr('action');
-        $.post(url,
-                {
-                    section: '{{sectionKey}}',
-                    text: $form.find('#seqDiscussionPost').val()
-                },
-                function (data) {
-                    if (data.charAt(0) == 'E') {
-                        bootbox.alert(data);
-                    } else {
-                        location.reload();
-                    }
-                }
-        );
-    });
-</script>
+<meta id="content-update" data-sectionkey="{{sectionKey}}" >
+<script type="text/javascript" src="/js/students/seq_discussion_content_update.js"></script>
 {% endblock script %}
