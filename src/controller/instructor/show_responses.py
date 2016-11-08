@@ -100,6 +100,7 @@ class DataExport(webapp2.RequestHandler):
 
 class HtmlExport(webapp2.RequestHandler):
     def get(self):
+
         instructor_tmp = utils.check_privilege(model.Role.instructor)
         instructor = model.Instructor.get_by_id(instructor_tmp.email)
         course = model.Course.get_by_id(instructor.export_course, parent=instructor.key)
@@ -107,6 +108,7 @@ class HtmlExport(webapp2.RequestHandler):
         students = section.students
         selector = section.export_info
         selector = selector.split()
+        ##group = model.Group.get_by_id()
         count = 0
         export_rounds = {}
         # print selector
@@ -119,6 +121,8 @@ class HtmlExport(webapp2.RequestHandler):
             count += 2
         # print export_rounds
         rounds = model.Round.query(ancestor=section.key).fetch()
+
+        groups = model.Group.query(ancestor=section.key).fetch()
         template_values = {}
         output_students = []
         output_seq_rounds = {}
@@ -126,9 +130,48 @@ class HtmlExport(webapp2.RequestHandler):
         output_comments = {}
         output_responses = {}
         output_summary = {}
+        output_posts = []
+
+        ##reference from groups.py
+        # if 'selectedSectionObject' in template_values:
+        #     # If so, grab that section from the template values
+        #     current_section = template_values['selectedSectionObject']
+        #     # Check that the current section has at least one round
+        #     if current_section.rounds > 0:
+        #
+        #         # Grab the responses from the initial question
+        #         response = model.Response.query(
+        #             ancestor=model.Round.get_by_id(1, parent=current_section.key).key).fetch() #fetches round object
+        #
+        #         no_answer_students = []
+        #         # And loop over the students in this section
+        #         for stu in current_section.students:
+        #             flag = True
+        #             # Loop over the responses
+        #             for res in response:
+        #                 # And check when the response matches the student
+        #                 if res.student == stu.email:
+        #                     # And set the group of the response to the
+        #                     # group of the student who made that response
+        #                     res.group = stu.group
+        #                     flag = False
+        #                     # end
+        #             # end
+        #             if flag:
+        #                 no_answer_students.append(stu)
+        #         # end
+        #         # Add the responses and current group to the template values
+        #         template_values['no_answer_students'] = no_answer_students
+        #         template_values['responses'] = response
+        #         template_values['group'] = current_section.groups
+                # end
+        # end
+        #student_info = []
         # export_rounds contain {key, value}, where key is student and value is round
         for i in export_rounds.keys():
             output_students.append(students[i])
+            #### added for reference
+            #student_info[i] = utils.get_student_info(students[i].email, section.students)
             output_seq_rounds[students[i].email] = []
             output_options[students[i].email] = []
             output_comments[students[i].email] = []
@@ -139,12 +182,15 @@ class HtmlExport(webapp2.RequestHandler):
                 flag = False
                 if section.has_rounds:  # TODO Also for last and first round in seq
                     responses = model.Response.query(ancestor=rounds[j - 1].key).fetch()
+                    # seq_responses = model.SeqResponse.query(ancestor=groups[j].key).order(
+                    #  model.SeqResponse.index).fetch()
                     for resp in responses:
                         utils.log('resp = ' + str(resp))
                         if resp.student == students[i].email:
                             output_options[students[i].email].append(resp.option)
                             output_comments[students[i].email].append(resp.comment)
                             output_responses[students[i].email].append(resp.response)
+
                             output_summary[students[i].email].append(resp.summary)
                             flag = True
                     if not flag:
@@ -152,6 +198,9 @@ class HtmlExport(webapp2.RequestHandler):
                         output_comments[students[i].email].append('NA')
                         output_responses[students[i].email].append('NA')
                         output_summary[students[i].email].append('NA')
+
+
+
                 else:
                     responses = model.SeqResponse.query(ancestor=rounds[j - 1].key).fetch()
                     utils.log('responses = ' + str(responses))
@@ -169,6 +218,59 @@ class HtmlExport(webapp2.RequestHandler):
                             output_responses[students[i].email].append('NA')
                             output_summary[students[i].email].append('NA')
 
+                for group in groups:
+                    posts = model.SeqResponse.query(ancestor=group.key).fetch()
+                    posts.sort
+                    for post in posts:
+                        # WHY WAS [POSTS.AUTHOR] = POST.TEXT?
+                        if not output_posts.__contains__(post):
+                            output_posts.append(post)
+                if posts:
+                    # Grab the responses from the initial question
+                    responses = model.Response.query(
+                        ancestor=model.Round.get_by_id(1, parent=section.key).key).fetch()  # fetches round object
+
+                    no_answer_students = []
+                    for stu in section.students:
+                        flag = True
+                        # Loop over the responses
+                        for res in responses:
+                            # And check when the response matches the student
+                            if res.student == stu.email:
+                                # And set the group of the response to the
+                                # group of the student who made that response
+                                res.group = stu.group
+                                flag = False
+                                # end
+                            # end
+                    if flag:
+                        no_answer_students.append(stu)
+                     # And loop over the students in this section
+
+
+
+
+                    # end
+                    # Add the responses and current group to the template values
+                ##copied from students/rounds.py
+                # student_info = utils.get_student_info(student.email, section.students)
+                # if student_info:
+                #     # 1. Grab student's alias and group from db
+                #     template_values['alias'] = student_info.alias
+                #     group_id = student_info.group
+                #     group = model.Group.get_by_id(group_id, parent=section.key)
+                #     if group:
+                #        # 2. Extract all the posts in that group from db
+                #         posts = model.SeqResponse.query(ancestor=group.key).order(
+                #         model.SeqResponse.index).fetch()
+                #         utils.log('Posts: ' + str(posts))
+                #         # 3. Send all the posts to the template
+                #         template_values['posts'] = posts
+                        #    for resp in seq_responses:
+                        #        if resp.author==students[i].email:
+                        #            output_comments[students[i].email].append(resp.text)
+                        #            flag=True
+        template_values['posts'] = output_posts
         template_values['students'] = output_students
         template_values['seq_rounds'] = output_seq_rounds
         template_values['comments'] = output_comments
