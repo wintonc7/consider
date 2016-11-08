@@ -39,7 +39,7 @@ class Section(ndb.Model):
     """ Boolean. If ``True``, discussions in this `Section`_ are anonymous; if ``False``, identities are revealed."""
     has_rounds = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. If ``True``, asynchronous, rounds-based discussion, else sequential """
-    export_info = ndb.StringProperty(required=False)
+    export_info = ndb.StringProperty(required=False) # FIXME What is this and why is it needed? Used in HTML export
 
     def find_student_info(self, email):
         if self.students:
