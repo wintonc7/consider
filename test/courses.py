@@ -1,148 +1,81 @@
-"""
-courses.py
-~~~~~~~~~~~~~~~~~
-Implements the APIs for Instructor Courses views.
+import socket
+import sys
+import os
+import subprocess
+from time import sleep
+import traceback
+import re
+import datetime
+from __main__ import *
 
-- Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: May 30, 2016
+#===========[START: testing /courses]===================
+try:    
+    print("testing /courses")
+    print("\t testing POST action = add")
+    test_number = 1
+    #TEST: see if instructor can add course
+    login("test-instructor@gmail.com",False)
+    startcount = get_total_course_count()
+    addCourse("COURSEXYZ")
+    aftercount = get_total_course_count()
+    if(aftercount - startcount == 1):
+        print_passed(test_number)
+    else:
+        print_failed(test_number,"instructor could not add a course")
+    logout()
+    test_number += 1
 
---------------------
+    #TEST: see if instructor can add duplicate course
+    login("test-instructor@gmail.com",False)
+    startcount = get_total_course_count()
+    addCourse("COURSEXYZ2")
+    middlecount = get_total_course_count()
+    addCourse("COURSEXYZ2")
+    aftercount = get_total_course_count()
+    if(aftercount - startcount == 1 and middlecount == aftercount):
+        print_passed(test_number)
+    else:
+        print_failed(test_number,"instructor was able to add duplicate courses")
+    logout()
+    test_number += 1
 
+    #TEST: see if student can add course
+    login("test-student@gmail.com",False)
+    startcount = get_total_course_count()
+    addCourse("COURSEXYZ")
+    aftercount = get_total_course_count()
+    if(aftercount - startcount == 0):
+        print_passed(test_number)
+    else:
+        print_failed(test_number,"permissions error: student could add a course")
+    logout()
+    test_number += 1  
 
-"""
+    print("\t testing POST action = toggle")
+    #TEST: see if instructor can toggle a course
+    login("test-instructor@gmail.com",False)
+    if(canToggleCourse("TEST-COURSE")):
+        print_passed(test_number)
+    else:
+        print_failed(test_number,"instructor was unable to toggle a course")
+    logout()
+    test_number+=1
 
-import webapp2
-from google.appengine.api import users
-
-from src import model, utils
-
-
-class Courses(webapp2.RequestHandler):
-    """
-    Handles requests for managing courses: adding a course, toggling its status, etc.
-    """
-
-    def add_course(self, instructor, course_name):
-        """
-        Adds a course to the datastore.
-
-        Args:
-            instructor (object):
-                Instructor who is adding the course.
-            course_name (str):
-                Name of the course; must be unique across the app.
-
-        """
-        # Start by trying to grab the course from the database
-        course = model.Course.get_by_id(course_name, parent=instructor.key)
-        # Check to see if it already exists
-        if course:
-            # And error if so
-            utils.error(course_name + ' already exists', handler=self)
-        else:
-            # Otherwise, create it, store it in the database, and log it
-            course = model.Course(parent=instructor.key, id=course_name)
-            course.name = course_name
-            course.recent_section = ""
-            course.put()
-            utils.log(course_name + ' added', type='Success!', handler=self)
-
-    # end add_course
-
-    def toggle_course(self, instructor, course_name):
-        """
-        Toggles the status of a course between Active and Inactive.
-
-        Args:
-            instructor (object):
-                Instructor whose course is to be toggled.
-            course_name (str):
-                Name of the course to be toggled.
-
-        """
-        # First, grab the course from the database
-        course = model.Course.get_by_id(course_name, parent=instructor.key)
-        if course:
-            course.is_active = not course.is_active
-            course.put()
-            utils.log('Status changed for ' + course_name, type='Success!', handler=self)
-        else:
-            utils.error('Course ' + course_name + ' not found', handler=self)
-            # end
-
-    # end toggle_course
-
-    def post(self):
-        """
-        HTTP POST method for handling course requests.
-        """
-        # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(model.Role.instructor)
-        if not instructor:
-            # Send them home and short circuit all other logic
-            return self.redirect('/')
-        # end
-
-        # Otherwise, get the course name and action from the webpage
-        course_name = self.request.get('name')
-        action = self.request.get('action')
-        # Double check that they were actually supplied
-        if not course_name or not action:
-            # Error if not
-            utils.error('Invalid argument: course_name or action is null', handler=self)
-        else:
-            # Now switch based on the action
-            if action == 'add':
-                # Add course if add
-                self.add_course(instructor, course_name.upper())
-            elif action == 'toggle':
-                # Or toggle if toggle
-                self.toggle_course(instructor, course_name.upper())
-            else:
-                # If any other action, log it as an error
-                utils.error('Unexpected action: ' + action, handler=self)
-                # end
-                # end
-
-    # end post
-
-    def get(self):
-        """
-        Display the Course list for this Instructor.
-        """
-        # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(model.Role.instructor)
-        if not instructor:
-            # Send them home and short circuit all other logic
-            return self.redirect('/')
-        # end
-
-        # Otherwise, generate a logout url
-        logout_url = users.create_logout_url(self.request.uri)
-        # Log that the current instructor is logged in
-        utils.log('Instructor logged in ' + str(instructor))
-        # And start building the template values
-        from src import config
-        template_values = {
-            'documentation': config.DOCUMENTATION,
-            'logouturl': logout_url,
-            'expand': self.request.get('course')
-        }
-        # Grab the list of courses attributed to the logged in instructor
-        courses = model.Course.query(ancestor=instructor.key).fetch()
-        # Double check that they actually have courses
-        if courses:
-            # Then loop over them
-            for course in courses:
-                # And grab all the sections attributed to that course
-                course.sections = model.Section.query(ancestor=course.key).fetch()
-            # end
-            # Add all the instructor's courses to the template values
-            template_values['courses'] = courses
-        # end
-        # And set the template and render the page
-        template = utils.jinja_env().get_template('instructor/courses.html')
-        self.response.write(template.render(template_values))
-        # end get
-
-# end class Courses
+    #TEST: see if student can toggle a course
+    login("test-student@gmail.com",False)
+    if(canToggleCourse("COURSEXYZ")):
+        print_failed(test_number,"permissions error: student was able to toggle a course")
+    else:
+        print_passed(test_number)
+    logout()
+    test_number+=1
+except:
+    #prints the stack trace when there is an error
+    print("exception thrown.")
+    traceback.print_exc()
+finally:
+    if "--stay-alive" not in sys.argv:
+        test_server.quit_server()
+    else:
+        print("leaving server running because of --stay-alive flag")
+    #===========[END: testing /courses]===================
