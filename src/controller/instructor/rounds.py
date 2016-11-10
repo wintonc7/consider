@@ -273,6 +273,9 @@ class Rounds(webapp2.RequestHandler):
                 # Set the discussion round template values
                 template_values['discussionRounds'] = discussion_rounds
             # end
+            template_values['anon'] = current_section.is_anonymous
+            template_values['round_structure'] = current_section.has_rounds
+
             # Check to see if the summary round was set in the template
             if 'summaryQuestion' in template_values:
                 # If so, set the next round to the total number of rounds
@@ -282,9 +285,6 @@ class Rounds(webapp2.RequestHandler):
                 # one (to account for the eventual summary round)
                 template_values['nextRound'] = current_section.rounds + 1
                 # end
-                template_values['anon'] = current_section.is_anonymous
-                template_values['round_structure'] = current_section.has_rounds
-
         # end
         # Set the template and render the page
         template_values['logouturl'] = logout_url
