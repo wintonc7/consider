@@ -60,7 +60,8 @@ class HomePage(webapp2.RequestHandler):
                             'key': section.urlsafe(),
                             'name': section_obj.name,
                             'course': course_obj.name,
-                            'group': findGroupIDByEmail(section_obj, student.email)
+                            'group': findGroupIDByEmail(section_obj, student.email),
+                            'round': section_obj.current_round
                         }
                         # And throw it in the list
                         section_list.append(sec)
