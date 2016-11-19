@@ -21,7 +21,10 @@ $(document).ready(function() {
     });
   }
 
-  $("#form").submit(function (event) {
+  $("#form").submit(formSubmit);
+
+  function formSubmit(event) {
+
     var expired = $('#student-discussion').data().expired;
     if (expired.length == 0)
     {
@@ -29,7 +32,7 @@ $(document).ready(function() {
       event.preventDefault();
 
       var sectionKey = $('#student-discussion').data().sectionkey;
-      
+
       // Update content of textarea(s) handled by CKEditor
       for ( instance in CKEDITOR.instances ) {
           CKEDITOR.instances[instance].updateElement();
@@ -54,7 +57,7 @@ $(document).ready(function() {
           });
       }
     }
-  });
+  }
 
   //$("#form").submit(formSubmit);
 

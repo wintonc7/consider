@@ -94,8 +94,9 @@
 <div class="container-fluid navbar-fixed-bottom" id="discussion-response">
   <div class="container">
     <div class="row">
-      <div class="col-md-11">
+
         <form id="form" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
+          <div class="col-md-11">
             <div id="text-editor">
 
                 <textarea class="form-control" rows="5" id="comment"
@@ -109,15 +110,17 @@
 
             <!-- replace plain textarea with CKEditor WYSIWYG -->
             <script type="text/javascript" src="/js/students/discussion_editor_replace.js"></script>
+
+        </div>
+        <div class="col-md-1">
+          <button type="submit" id="submit" class="btn btn-lg btn-success btn-success-submit" {% if expired -%} disabled="true" {%- endif
+                  -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                  <br />
+                  Submit
+          </button>
+        </div>
         </form>
-    </div>
-    <div class="col-md-1">
-      <button type="submit" id="submit" class="btn btn-lg btn-success btn-success-submit" {% if expired -%} disabled="true" {%- endif
-              -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
-              <br />
-              Submit
-      </button>
-  </div>
+
   </div>
 </div>
 </div>

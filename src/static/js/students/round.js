@@ -12,7 +12,10 @@ $(document).ready(function() {
   }
   var radio, comment, summary;
 
-  function formSubmit(){
+  $("#form").submit(formSubmit);
+
+  function formSubmit(event){
+
     var radio, comment, summary;
     if (expired.length == 0)
     {
@@ -62,9 +65,7 @@ $(document).ready(function() {
 
   if (expired.length == 0)
   {
-    $("#form").submit(formSubmit);
-
-    var ocomment = comment;
+    var ocomment = $("#comment").val();
 
     $(window).bind('beforeunload', function() {
         if (CKEDITOR.instances.comment.getData().replace(/<p>/g,'').replace(/<\/p>/g,'') !== ocomment) {
