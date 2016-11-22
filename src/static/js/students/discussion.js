@@ -59,8 +59,6 @@ $(document).ready(function() {
     }
   }
 
-  //$("#form").submit(formSubmit);
-
   // Checks if the user has selected their opinion for all the comments;
   // returns true if they have, false if there are any comments they have
   // not picked an opinion on.
@@ -97,15 +95,14 @@ $(document).ready(function() {
       thumbs[email] = type;
     }
   }
-
-  if (expired.length == 0)
-  {
-    var ocomment = $('#comment').val();
-
-    $(window).bind('beforeunload', function () {
-        if ($('#comment').val() !== ocomment) {
-            return "It looks like you have input you haven't submitted.";
-        }
-    });
-  }
 });
+
+if ($('#student-discussion').data().expired.length == 0)
+{
+  $(window).bind('beforeunload', function () {
+    var ocomment = $('#comment').val();
+      if ($('#comment').val() !== ocomment) {
+          return "It looks like you have input you haven't submitted.";
+      }
+  });
+}
