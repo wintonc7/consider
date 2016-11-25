@@ -65,9 +65,9 @@ $(document).ready(function() {
 
 if ($('#student-round').data().expired.length == 0)
 {
-  $(window).bind('beforeunload', function() {
-      var ocomment = $("#comment").val();
-      if (CKEDITOR.instances.comment.getData().replace(/<p>/g,'').replace(/<\/p>/g,'') !== ocomment) {
+  $(window).bind('beforeunload', function () {
+    var ocomment = $('#comment').val();
+      if ($('#comment').val() !== ocomment) {
           return "It looks like you have input you haven't submitted.";
       }
   });
