@@ -4,6 +4,50 @@ import webapp2
 from google.appengine.api import users
 
 from src import model, utils
+def group_comments(group, section, previous_round):
+    # Init an empty list for holding the comments
+    comments = []
+    did_not_participate = []
+    # Now loop over the members in the group
+    for student_email in group.members:
+        # Grab each response from the previous round
+        response = model.Response.get_by_id(student_email, parent=previous_round.key)
+
+        # Get the student's info
+        s = section.find_student_info(student_email)
+
+        if response:
+            comment = {
+                'alias': s.alias, 'email': s.email,
+                'response': response.comment, 'opinion': response.response
+            }
+            # Get thumbs if they exist
+            if response.thumbs:
+                _thumbs = []
+                for _email, _value in response.thumbs.iteritems():
+                    s_info = section.find_student_info(_email)
+                    name = s_info.alias if s_info and section.is_anonymous else _email
+                    _thumbs.append((name, _value))  # Add as a tuple
+                comment['thumbs'] = sorted(_thumbs)  # Send as sorted tuples
+
+            # If the response has an associated option
+            if response.option and response.option != 'NA':
+                # Grab the option
+                utils.log('response.option = ' + str(response.option))
+                opt = int(response.option[-1]) - 1
+                comment['option'] = previous_round.quiz.options[opt]
+            else:
+                comment['option'] = ''  # default
+
+            # And finally add the comment to the list
+            comments.append(comment)
+        else:
+            # Else note down who did not participate
+            name = s.alias if section.is_anonymous else s.email
+            did_not_participate.append(name)
+
+    utils.log('Comments = ' + str(comments))
+    return comments, sorted(did_not_participate)
 
 
 class ShowResponses(webapp2.RequestHandler):
@@ -277,9 +321,10 @@ class HtmlExport(webapp2.RequestHandler):
         #output_seq_responses = {}
         #output_seq_responses.initial_response = {}
         #for student in students:
+        initial = model.Round.get_by_id(1, parent=section.key)
+        initial_answers, did_not_participate = group_comments(group, section, initial)
 
-
-
+        template_values ['initial_seq'] = initial_answers
         template_values['groups'] = groups
         template_values['posts'] = output_posts
         template_values['students'] = output_students

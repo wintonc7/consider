@@ -2,7 +2,7 @@
 {% block title %} | Responses {% endblock %}
 {% block content %}
 
-<!-- for each group -->
+{% if not posts %}
     {% for student in students %}
         <!-- post initial -->
 
@@ -62,22 +62,73 @@
             </div> <!-- ./card-body -->
         </div> <!-- ./card -->
         {% endfor %}
-                <div class="card">
-                 <h3>SEQUENTIAL DISCUSSION</h3>
-                            {% for p in posts %}
-                                <div class="card-title">
+    {% endif %}
+<!--sequential round stuff, only works if you're at round 2 or later-->
+{% if posts %}
+    <!-- -->
+    {% for group in groups %}
+        <!-- initials -->
 
-                                <h3 style="text-align: left">{{p.author}} </h3>
+        <div class="card">
+            <h3>INITIAL RESPONSES</h3>
+            {% for answer in initial_seq %}
+                            <div class="card-title">
+                        <h3 style="text-align: left">{{answer.email}} </h3>
+                    </div>
+                     <div class="card-body" style="text-align: left">
+                         {{answer.response|safe}}
+                     </div>
 
-                                </div>
-                                <div class="card-body" style="text-align: left">
-                                    {{p.text|safe}}
-                                </div>
+
+
+            {% endfor %}
+        </div>
+
+        <!-- post sequentials -->
+        <div class="card">
+            <h3>SEQUENTIAL DISCUSSION</h3>
+                 {% for p in posts %}
+                    <div class="card-title">
+                        <h3 style="text-align: left">{{p.author}} </h3>
+                    </div>
+                     <div class="card-body" style="text-align: left">
+                         {{p.text|safe}}
+                     </div>
+                 {% endfor %}
+        </div>
+        <!-- final -->
+        <div class="card">
+        <H3> SUMMARIES </H3>
+            {% for answer in initial_seq %}
+                            <tr>
+                                <th style="text-align: left">{{answer.email if show_name else answer.alias}}{% if alias==answer.alias %} (You) {% endif %}</th>
+                                {%- if answer.option -%}<td style="text-align: left">{{ answer.option|safe }}</td>{%- endif -%}
+                                <td style="text-align: left">{{answer.response|safe}}</td>
+                            </tr>
                             {% endfor %}
-                </div>
+                            {% for email_or_alias in did_not_participate %}
+                                <tr>
+                                <th style="text-align: left">{{ email_or_alias }}</th>
+                                <td style="text-align: left">(Did not participate)</td>
+                                </tr>
+            {% endfor %}
+
+        </div>
+
+
+    {% endfor %}
+{% endif %}
 
 
 
+
+
+
+
+
+
+
+{#<!--
 {% for student in students %}
         <!-- post initial -->
 
@@ -101,8 +152,9 @@
                 </table>
             </div> <!-- ./card-body -->
         </div> <!-- ./card -->
-{% endfor %}
+{% endfor %}-->#}
 {% endblock %}
+
 <!--  UNIQUE GROUP1 -->
     <!-- SELECTED STUDENT'S INITIAL SUBMISSION -->
 
