@@ -95,7 +95,8 @@ class DataExport(webapp2.RequestHandler):
                         # print 'test@@@'
                         writer.writerow([resp.student, resp.comment, resp.response, ])
         # writer.writerow([instructor.export_course, course.export_section, instructor.email, ])
-        print 'Hello!'
+
+        print 'Hello!' #purpose? use specific print callouts for debugging
 
 
 class HtmlExport(webapp2.RequestHandler):
@@ -177,13 +178,14 @@ class HtmlExport(webapp2.RequestHandler):
             output_comments[students[i].email] = []
             output_responses[students[i].email] = []
             output_summary[students[i].email] = []
+
             for j in export_rounds[i]:
                 output_seq_rounds[students[i].email].append(j)
                 flag = False
                 if section.has_rounds:  # TODO Also for last and first round in seq
                     responses = model.Response.query(ancestor=rounds[j - 1].key).fetch()
-                    # seq_responses = model.SeqResponse.query(ancestor=groups[j].key).order(
-                    #  model.SeqResponse.index).fetch()
+                    output_seq_responses = model.SeqResponse.query(ancestor=groups[j].key).order(
+                    model.SeqResponse.index).fetch()
                     for resp in responses:
                         utils.log('resp = ' + str(resp))
                         if resp.student == students[i].email:
@@ -219,8 +221,9 @@ class HtmlExport(webapp2.RequestHandler):
                             output_summary[students[i].email].append('NA')
 
                 for group in groups:
-                    posts = model.SeqResponse.query(ancestor=group.key).fetch()
-                    posts.sort
+
+                    posts = model.SeqResponse.query(ancestor=group.key).order(model.SeqResponse.timestamp).fetch()
+
                     for post in posts:
                         # WHY WAS [POSTS.AUTHOR] = POST.TEXT?
                         if not output_posts.__contains__(post):
@@ -228,8 +231,7 @@ class HtmlExport(webapp2.RequestHandler):
                 if posts:
                     # Grab the responses from the initial question
                     responses = model.Response.query(
-                        ancestor=model.Round.get_by_id(1, parent=section.key).key).fetch()  # fetches round object
-
+                        ancestor=model.Round.get_by_id(1, parent=section.key).key).fetch()
                     no_answer_students = []
                     for stu in section.students:
                         flag = True
@@ -270,6 +272,15 @@ class HtmlExport(webapp2.RequestHandler):
                         #        if resp.author==students[i].email:
                         #            output_comments[students[i].email].append(resp.text)
                         #            flag=True
+
+        #get the sequential initial response
+        #output_seq_responses = {}
+        #output_seq_responses.initial_response = {}
+        #for student in students:
+
+
+
+        template_values['groups'] = groups
         template_values['posts'] = output_posts
         template_values['students'] = output_students
         template_values['seq_rounds'] = output_seq_rounds
