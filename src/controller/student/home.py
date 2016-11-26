@@ -55,7 +55,6 @@ class HomePage(webapp2.RequestHandler):
                     # Double check that both exist
                     if section_obj and course_obj:
                         # Grab the section key, section name, and course name
-
                         sec = {
                             'key': section.urlsafe(),
                             'name': section_obj.name,
