@@ -99,7 +99,7 @@
         <!-- final -->
         <div class="card">
         <H3> SUMMARIES </H3>
-            {% for answer in initial_seq %}
+            {% for answer in final_answers %}
                             <tr>
                                 <th style="text-align: left">{{answer.email if show_name else answer.alias}}{% if alias==answer.alias %} (You) {% endif %}</th>
                                 {%- if answer.option -%}<td style="text-align: left">{{ answer.option|safe }}</td>{%- endif -%}
