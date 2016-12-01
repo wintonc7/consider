@@ -14,7 +14,7 @@
     {% if sections %}
     <div class="list-group">
         {% for section in sections %}
-        <button type="button" onclick="redirect('{{section.key}}')" class="list-group-item btn-block">
+        <button type="button" onclick="redirect('{{section.key}}', '{{section.group}}', '{{section.round}}')" class="list-group-item btn-block">
             {{section.course}} - {{section.name}}
         </button>
         {% endfor %}

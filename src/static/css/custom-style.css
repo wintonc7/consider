@@ -48,7 +48,7 @@ input, textarea, select {
     background: #31b0d5 !important;
 }
 
-.btn-success {
+.btn-success-submit {
     border-radius: 4px !important;
     height: 100% !important;
 }
