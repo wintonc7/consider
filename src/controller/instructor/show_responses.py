@@ -323,7 +323,9 @@ class HtmlExport(webapp2.RequestHandler):
         #for student in students:
         initial = model.Round.get_by_id(1, parent=section.key)
         initial_answers, did_not_participate = group_comments(group, section, initial)
-
+        final = model.Round.get_by_id(3, parent=section.key)
+        final_answers, did_not_participate = group_comments(group, section, final)
+        template_values['final_seq'] = final_answers
         template_values ['initial_seq'] = initial_answers
         template_values['groups'] = groups
         template_values['posts'] = output_posts
