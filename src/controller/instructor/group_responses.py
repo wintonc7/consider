@@ -51,6 +51,7 @@ class GroupResponses(webapp2.RequestHandler):
             # Set the rounds and groups
             template_values['round'] = current_section.rounds
             template_values['groups'] = current_section.groups
+
             # And check that groups have actually been assigned
             if current_section.groups > 0:
                 # Create a new dict for responses

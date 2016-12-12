@@ -322,8 +322,54 @@ class HtmlExport(webapp2.RequestHandler):
         #output_seq_responses.initial_response = {}
         #for student in students:
         initial = model.Round.get_by_id(1, parent=section.key)
-        initial_answers, did_not_participate = group_comments(group, section, initial)
-        final_answers = group_comments(group, section, model.Round.get_by_id(2, parent=section.key))
+        initial_answers  = []
+        ##from group_responses.py
+        # Create a new dict for responses
+        resp = {}
+        # Loop over the groups (indexed by 1)
+        for g in range(1, section.groups + 1):
+            # And loop over the rounds (indexed by 1)
+            for r in range(1, section.rounds + 1):
+                # Now set an empty list for each group and round
+                resp['group_' + str(g) + '_' + str(r)] = []
+                # end
+        # end
+        # Loop over the number of rounds (indexed by 1)
+        for r in range(1, section.rounds + 1):
+            # Grab the responses for that round from the db
+            responses = model.Response.query(
+                ancestor=model.Round.get_by_id(r, parent=section.key).key).fetch()
+            # Double check that the responses actually exist
+            if responses:
+                # And loop over the responses
+                for res in responses:
+                    # And loop over the students in this section
+                    for s in section.students:
+                        # Check that the email of the student
+                        # and the email of the response match
+                        # and that the student is in a group
+                        if s.email == res.student and s.group != 0:
+                            # Set the alias of the response
+                            res.alias = s.alias
+                            # Append the response to the appropriate
+                            # group and round
+                            resp['group_' + str(s.group) + '_' + str(r)].append(res)
+                            break
+                            # end
+                            # end
+                            # end
+                            # end
+        # end
+        # And set the template values for all the responses
+        template_values['seq_resp'] = resp
+        # end
+
+        for group in groups:
+            answer, did_not_participate = group_comments(group, section, initial)
+            initial_answers.append(answer)
+            final_answers = group_comments(group, section, model.Round.get_by_id(3, parent=section.key))
+
+
         template_values['final_answers'] = final_answers
         template_values ['initial_seq'] = initial_answers
         template_values['groups'] = groups
