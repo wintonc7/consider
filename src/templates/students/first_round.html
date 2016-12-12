@@ -7,7 +7,7 @@
             {% if description %}
             <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description|safe}}</h1>
             {% endif %}
-    
+
             <div class="jumbotron">
                 <p> {{question|safe}} </p>
             </div>
@@ -30,22 +30,14 @@
             {%- endif -%}" required {% if expired -%} disabled="true" {%- endif -%}>
             {%- if comment -%}{{comment}}{%- endif -%}
             </textarea>
-            
+
             <button type="submit" class="btn btn-lg btn-success sub-btn" {% if expired -%} disabled="true" {%- endif -%}>
                 <span class="glyphicon glyphicon-send" aria-hidden="true"></span> Submit
             </button>
             <!-- replace plain textarea with CKEditor WYSIWYG -->
-            <script>
-                CKEDITOR.replace("comment", 
-                    {
-                        height: 200
-                    });
-             </script> 
-
+             <script type="text/javascript" src="/js/students/comment_editor_replace.js"></script>
             </form>
             {%- endif -%}
         </div>
     </div>
 </div>
-
-

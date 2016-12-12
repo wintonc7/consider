@@ -73,22 +73,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/bootbox.min.js"></script>
-<script>
-    jQuery.ajaxSetup({
-        beforeSend: function () {
-            $('#spinner').show();
-        },
-        complete: function () {
-            $('#spinner').hide();
-        },
-        success: function () {
-        }
-    });
-
-    $(window).load(function () {
-        $("#spinner").fadeOut("slow");
-    });
-</script>
+<script type="text/javascript" src="/js/layouts/base.js" ></script>
 {% block script %}{% endblock script %}
 </body>
 </html>

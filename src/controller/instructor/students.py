@@ -30,7 +30,7 @@ class Students(webapp2.RequestHandler):
         Args:
             section (object):
                 Section to which the studetns are to be added.
-            emails (str):
+            emails (list):
                 Emails (IDs) of students to be added.
 
         """
