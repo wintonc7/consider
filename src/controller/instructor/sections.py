@@ -11,8 +11,6 @@ Implements the APIs for Instructor control of adding/removing sections.
 
 """
 import webapp2
-import csv
-from datetime import datetime
 
 from src import model, utils
 
@@ -45,16 +43,12 @@ class Sections(webapp2.RequestHandler):
             section.name = section_name
             section.put()
             utils.log(section_name + ' added', type='Success!')
-            # TODO Include `Students from {{recent_section}} added to the {{current_section}}` - when it shows the 'Success' box after adding a section?
+            # TODO Ask which section to copy from
             if course.recent_section:
                 recent_section = model.Section.get_by_id(course.recent_section, parent=course.key)
-                for s in recent_section.students:
-                    section.students.append(s)
-                    student = model.Student.get_by_id(s.email)
-                    if section.key not in student.sections:
-                        student.sections.append(section.key)
-                        student.put()
-                    section.put()
+                emails = [s.email for s in recent_section.students]
+                from src.controller.instructor import Students
+                Students.add_students(Students(self), section, emails)
 
     # end add_section
 

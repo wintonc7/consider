@@ -31,6 +31,7 @@ class HomePage(webapp2.RequestHandler):
 
         # Create a url for the user to logout
         logout_url = users.create_logout_url(self.request.uri)
+        students = [student]
         # Set up the template
         from src import config
         template_values = {
@@ -57,7 +58,9 @@ class HomePage(webapp2.RequestHandler):
                         sec = {
                             'key': section.urlsafe(),
                             'name': section_obj.name,
-                            'course': course_obj.name
+                            'course': course_obj.name,
+                            'group': findGroupIDByEmail(section_obj, student.email),
+                            'round': utils.get_current_round(section_obj)
                         }
                         # And throw it in the list
                         section_list.append(sec)
@@ -72,4 +75,11 @@ class HomePage(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
         # end get
 
+
+
 # end class HomePage
+
+def findGroupIDByEmail(section, email):
+    for student in section.students:
+        if student.email == email:
+            return student.group

@@ -105,7 +105,8 @@ def error_codes():
         '102': "Sorry you are not an instructor.",
         '103': "Sorry no rounds are active for this section, please try again later.",
         '104': "Sorry the round was not found, please contact your Instructor.",
-        '105': "Sorry, your group was not found, please contact your Instructor."
+        '105': "Sorry, your group was not found, please contact your Instructor.",
+        '106': "Sorry, you are not in a group, please contact your Instructor."
     }
 
 
@@ -179,7 +180,7 @@ def check_privilege(expected_role):
 
     Args:
         expected_role (object):
-          The role we're checking against from the 
+          The role we're checking against from the
 
     Returns:
         user (object):

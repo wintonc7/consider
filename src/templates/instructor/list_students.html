@@ -145,7 +145,7 @@ understanding of the code for graders.
                     {{selectedCourse}}</h4>
             </div>
             <div class="modal-body">
-                <h5>Add emails of students separated by commas:</h5>
+                <h5>Add emails of students separated by commas, spaces, or newlines:</h5>
 
                 <form class="form-horizontal" id="modalForm" method="post" style="margin-top: 20px;text-align: center;"
                       action="/students">
@@ -205,148 +205,7 @@ understanding of the code for graders.
 {% endblock %}
 
 {% block script %}
-<script>
-    $('#courseSelector').on('change', function () {
-        location.href = "/students?course=" + this.value;
-    });
-
-    $('#sectionSelector').on('change', function () {
-        location.href = "/students?course={{selectedCourse}}&section=" + this.value;
-    });
-
-    function addStudents() {
-        $("#myModal").modal('show');
-    }
-
-    function submitStudents() {
-        $("#modalForm").find('[type="submit"]').trigger('click');
-    }
-
-    $("#modalForm").submit(function (event) {
-        //Prevent the default behaviour
-        event.preventDefault();
-
-        //collect form elements
-        var $form = $(this),
-                email = $form.find("input[name='email']").val(),
-                course = "{{selectedCourse}}",
-                section = "{{selectedSection}}",
-                url = $form.attr("action");
-
-        var emails = email.replace(/ /g, '').split(',');
-
-        bootbox.confirm("Are you sure, you want to add " + emails.length + " student(s)?", function (result) {
-            if (result) {
-                // do the POST and get the callback
-                $.post(url, {
-                    emails: JSON.stringify(emails),
-                    course: course,
-                    section: section,
-                    action: 'add'
-                }, function (data) {
-                    if (data.charAt(0) == 'E') {
-                        bootbox.alert(data.substring(1));
-                    }
-                    else {
-                        location.reload();
-                    }
-                });
-            }
-        });
-    });
-
-    function deleteStudent(student) {
-        bootbox.confirm("Are you sure, you want to remove student: " + student + "?", function (result) {
-            if (result) {
-                // do the POST and get the callback
-                $.post("/students", {
-                    email: student,
-                    course: "{{selectedCourse}}",
-                    section: "{{selectedSection}}",
-                    action: 'remove'
-                }, function (data) {
-                    if (data.charAt(0) == 'E') {
-                        bootbox.alert(data.substring(1));
-                    }
-                    else {
-                        location.reload();
-                    }
-                });
-            }
-        });
-    }
-    // grader code
-    $('#courseSelector').on('change', function () {
-        location.href = "/graders?course=" + this.value;
-    });
-
-    $('#sectionSelector').on('change', function () {
-        location.href = "/graders?course={{selectedCourse}}&section=" + this.value;
-    });
-
-    function addGraders() {
-        $("#myModalGrader").modal('show');
-    }
-
-    function submitGraders() {
-        $("#modalFormGrader").find('[type="submit"]').trigger('click');
-    }
-
-    $("#modalFormGrader").submit(function (event) {
-        //Prevent the default behaviour
-        event.preventDefault();
-
-        //collect form elements
-        var $form = $(this),
-                email = $form.find("input[name='email']").val(),
-                course = "{{selectedCourse}}",
-                section = "{{selectedSection}}",
-                url = $form.attr("action");
-
-        var emails = email.replace(/ /g, '').split(',');
-        console.log(url)
-        bootbox.confirm("Are you sure, you want to add " + emails.length + " grader(s)?", function (result) {
-            debug.log("!!!!!!!" + result)
-            if (result) {
-                // do the POST and get the callback
-                $.post(url, {
-                    emails: JSON.stringify(emails),
-                    course: course,
-                    section: section,
-                    action: 'add'
-                }, function (data) {
-                    if (data.charAt(0) == 'E') {
-                        bootbox.alert(data.substring(1));
-                    }
-                    else {
-                        location.reload();
-                    }
-                });
-            }
-        });
-    });
-
-    function deleteGrader(grader) {
-        bootbox.confirm("Are you sure, you want to remove grader: " + grader + "?", function (result) {
-            if (result) {
-                // do the POST and get the callback
-                $.post("/graders", {
-                    email: grader,
-                    course: "{{selectedCourse}}",
-                    section: "{{selectedSection}}",
-                    action: 'remove'
-                }, function (data) {
-                    if (data.charAt(0) == 'E') {
-                        bootbox.alert(data.substring(1));
-                    }
-                    else {
-                        location.reload();
-                    }
-                });
-            }
-        });
-    }
-</script>
-
+  <meta id="list-students" data-course="{{selectedCourse}}" data-section="{{selectedSection}}">
+  <script type="text/javascript" src="/js/instructor/list_students.js" ></script>
 
 {% endblock %}

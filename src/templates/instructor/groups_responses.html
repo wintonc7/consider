@@ -117,14 +117,7 @@
 </div>
 </div>
 {% endblock %}
-
+  <meta id="group-responses-selectors" data-course="{{selectedCourse}}">
+  <script type="text/javascript" src="/js/instructor/groups_responses_selectors.js"></script>
 {% block script %}
-<script>
-    $('#courseSelector').on('change', function () {
-        location.href = "/group_responses?course=" + this.value;
-    });
-    $('#sectionSelector').on('change', function () {
-        location.href = "/group_responses?course={{selectedCourse}}&section=" + this.value;
-    });
-</script>
 {% endblock %}

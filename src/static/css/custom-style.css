@@ -37,6 +37,7 @@ input, textarea, select {
 
 .btn-success:hover {
     background: #59A766 !important;
+    border-radius: 4px !important;
 }
 
 .btn-danger:hover {
@@ -47,6 +48,10 @@ input, textarea, select {
     background: #31b0d5 !important;
 }
 
+.btn-success-submit {
+    border-radius: 4px !important;
+    height: 100% !important;
+}
 /* INTRUCTOR NAVIGATION SIDE BAR */
 
 .sidebar {
@@ -261,12 +266,10 @@ a:hover {
     padding: 5px;
     display: block;
     box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-    height: 230px;
 }
 
 #text-editor {
     display: block;
-    float: left;
     height: 220px;
 }
 
