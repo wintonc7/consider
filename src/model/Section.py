@@ -14,6 +14,18 @@ class StudentInfo(ndb.Model):
     group = ndb.IntegerProperty(default=0)
     """ Integer. The group this student is part of. """
 
+class GraderInfo(ndb.Model):
+    """
+    .. _GraderInfo:
+
+    An object to represent a grader's information in the datastore.
+    """
+    email = ndb.StringProperty(required=True)
+    """ String. Must be non-empty and unique. """
+    alias = ndb.StringProperty(default='NA', indexed=False)
+    """ String. Identifies a grader within a discussion round. Takes values S1, S2, etc. """
+    group = ndb.IntegerProperty(default=0)
+    """ Integer. The group this grader is part of. """
 
 class Section(ndb.Model):
     """
@@ -33,6 +45,8 @@ class Section(ndb.Model):
     """ Integer. Number of rounds for this section. (default: 0)"""
     students = ndb.StructuredProperty(StudentInfo, repeated=True)
     """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
+    graders = ndb.StructuredProperty(GraderInfo, repeated=True)
+    """ new grader code """
     is_active = ndb.BooleanProperty(default=True, indexed=False)
     """ Boolean. Indicates if this section is active or not. """
     is_anonymous = ndb.BooleanProperty(default=True, indexed=False)
@@ -46,3 +60,13 @@ class Section(ndb.Model):
             return next(s for s in self.students if s.email == email)
         else:
             return None
+
+    def find_grader_info(self, email):
+        if self.graders:
+            return next(s for s in self.graders if s.email == email)
+        else:
+            return None
+
+""" New grader code """
+
+

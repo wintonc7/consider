@@ -164,6 +164,9 @@ def get_role_user():
         student = model.Student.query(model.Student.email == user.email().lower()).get()
         if student:
             return model.Role.student, student
+        grader = model.Grader.query(model.Grader.email == user.email().lower()).get()
+        if grader:
+            return model.Role.grader, grader
         else:
             return None, user
     else:
@@ -458,6 +461,12 @@ def get_student_info(email, students):
             return student_info
     return None
 
+
+def get_grader_info(email, graders):
+    for grader_info in graders:
+        if grader_info.email == email:
+            return grader_info
+    return None
 
 # end
 
