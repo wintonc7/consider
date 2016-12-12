@@ -17,7 +17,7 @@ from google.appengine.api import users
 import config
 import utils
 from src import model
-from .controller import admin, instructor, student
+from .controller import admin, instructor, student, grader
 
 
 class ErrorPage(webapp2.RequestHandler):

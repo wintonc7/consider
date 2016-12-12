@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
 
 from Section import StudentInfo
+from Section import GraderInfo
 
 class Course(ndb.Model):
     """
@@ -22,5 +23,7 @@ class Course(ndb.Model):
 
     students = ndb.StructuredProperty(StudentInfo, repeated=True)
     """ List of `StudentInfo`_ representing all the `Student`_ entities in this section. """
+
+    graders = ndb.StructuredProperty(GraderInfo, repeated=True)
 
     export_section = ndb.StringProperty(required=False)
