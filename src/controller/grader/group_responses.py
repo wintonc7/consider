@@ -1,10 +1,12 @@
 """
 group_responses.py
 ~~~~~~~~~~~~~~~~~
-Implements the APIs for Instructor role in the app.
+Implements the APIs for Grader role in the app.
 
-- Author(s): Rohit Kapoor, Swaroop Joshi, Tyler Rasor
-- Last Modified: May 30, 2016
+- Author(s): Capstone team AU16
+
+Refer to comments within /src/controller/grader/init.py for a better
+understanding of the code for graders.
 
 --------------------
 
@@ -26,9 +28,9 @@ class GroupResponses(webapp2.RequestHandler):
         """
         HTTP GET method to retrieve the group responses.
         """
-        # First, check that the logged in user is an instructor
-        instructor = utils.check_privilege(model.Role.instructor)
-        if not instructor:
+        # First, check that the logged in user is an grader
+        grader = utils.check_privilege(model.Role.grader)
+        if not grader:
             # Send them home and short circuit all other logic
             return self.redirect('/')
         # end
@@ -40,9 +42,9 @@ class GroupResponses(webapp2.RequestHandler):
         # And get the course and section name from the page
         course_name = self.request.get('course')
         selected_section_name = self.request.get('section')
-        # And grab the other courses and sections from this instructor
+        # And grab the other courses and sections from this grader
         template_values = utils.get_template_all_courses_and_sections(
-            instructor, course_name, selected_section_name)
+            grader, course_name, selected_section_name)
         # Now check that the section from the webpage actually corresponded
         # to an actual section in this course, and that the template was set
         if 'selectedSectionObject' in template_values:
@@ -51,7 +53,6 @@ class GroupResponses(webapp2.RequestHandler):
             # Set the rounds and groups
             template_values['round'] = current_section.rounds
             template_values['groups'] = current_section.groups
-
             # And check that groups have actually been assigned
             if current_section.groups > 0:
                 # Create a new dict for responses
@@ -98,7 +99,7 @@ class GroupResponses(webapp2.RequestHandler):
         template_values['logouturl'] = logout_url
         from src import config
         template_values['documentation'] = config.DOCUMENTATION
-        template = utils.jinja_env().get_template('instructor/groups_responses.html')
+        template = utils.jinja_env().get_template('grader/groups_responses.html')
         self.response.write(template.render(template_values))
         # end get
 

@@ -105,7 +105,8 @@ def error_codes():
         '102': "Sorry you are not an instructor.",
         '103': "Sorry no rounds are active for this section, please try again later.",
         '104': "Sorry the round was not found, please contact your Instructor.",
-        '105': "Sorry, your group was not found, please contact your Instructor."
+        '105': "Sorry, your group was not found, please contact your Instructor.",
+        '106': "Sorry, you are not in a group, please contact your Instructor."
     }
 
 
@@ -163,6 +164,9 @@ def get_role_user():
         student = model.Student.query(model.Student.email == user.email().lower()).get()
         if student:
             return model.Role.student, student
+        grader = model.Grader.query(model.Grader.email == user.email().lower()).get()
+        if grader:
+            return model.Role.grader, grader
         else:
             return None, user
     else:
@@ -457,6 +461,12 @@ def get_student_info(email, students):
             return student_info
     return None
 
+
+def get_grader_info(email, graders):
+    for grader_info in graders:
+        if grader_info.email == email:
+            return grader_info
+    return None
 
 # end
 

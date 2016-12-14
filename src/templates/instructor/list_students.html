@@ -1,3 +1,15 @@
+<!-- 
+    
+- Author(s): Capstone team AU16
+
+Refer to comments within /src/controller/grader/init.py for a better
+understanding of the code for graders. 
+
+-->
+
+
+
+
 {% extends "layouts/instructor_base.html" %}
 {% block title %} | Students{% endblock %}
 
@@ -45,6 +57,10 @@
         aria-label="Add Students">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Students
 </button>
+<button type="button" class="btn btn-default" onclick="addGraders()" style="margin-top: 20px; margin-bottom: 20px"
+        aria-label="Add Graders">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Graders
+</button>
 {% if sections %}
 {% if students %}
 
@@ -81,6 +97,44 @@
 </div>
 {% endif %}
 {% endif %}
+
+{% if sections %}
+{% if graders %}
+
+<div class="card">
+<div class="card-title">
+<h4>Graders already enrolled {% if selectedCourse and selectedSection -%} in Section
+    {{selectedSection}} of Course {{selectedCourse}} {%- endif %} {% if graders -%}
+    ({{graders|length}}) {%- endif -%}</h4>
+</div>
+<div class="card-body">
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for grader in graders %}
+        <tr>
+            <td>{{loop.index}}</td>
+            <td>{{grader.email}}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteGrader('{{grader.email}}')">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+{% endif %}
+{% endif %}
+
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -109,6 +163,41 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" onclick="submitStudents()">Add Students</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="myModalGrader" tabindex="-1" role="dialog" aria-labelledby="myModalLabelGrader" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabelGrader">Add Graders for {{selectedSection}} of
+                    {{selectedCourse}}</h4>
+            </div>
+            <div class="modal-body">
+                <h5>Add emails of graders separated by commas:</h5>
+
+                <form class="form-horizontal" id="modalFormGrader" method="post" style="margin-top: 20px;text-align: center;"
+                      action="/graders">
+                    <div class="form-group">
+                        <label for="inputEmail" class="col-sm-2 control-label">Email(s)</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inputEmail" placeholder="Email(s)" name="email"
+                                   required="true">
+                        </div>
+                    </div>
+                    <button type="submit" class="hide"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitGraders()">Add Graders</button>
             </div>
         </div>
     </div>

@@ -17,7 +17,7 @@ from google.appengine.api import users
 import config
 import utils
 from src import model
-from .controller import admin, instructor, student
+from .controller import admin, instructor, student, grader
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -32,7 +32,8 @@ class ErrorPage(webapp2.RequestHandler):
     * '102': "Sorry you are not an instructor.",
     * '103': "Sorry no rounds are active for this section, please try again later.",
     * '104': "Sorry the round was not found, please contact your Instructor.",
-    * '105': "Sorry, your group was not found, please contact your Instructor."
+    * '105': "Sorry, your group was not found, please contact your Instructor.",
+    * '106': "Sorry, you are not in a group, please contact your Instructor."
 
     HTTP errors like 404, 500 are handled by the system in the default manner.
 

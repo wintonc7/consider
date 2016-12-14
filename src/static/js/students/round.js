@@ -1,9 +1,8 @@
 $(document).ready(function() {
   var option = $('#student-round').data().option;
-
-    var expired = $('#student-round').data().expired;
-    var lastRound = $('#student-round').data().last;
-    var sectionKey = $('#student-round').data().sectionkey;
+  var expired = $('#student-round').data().expired;
+  var lastRound = $('#student-round').data().last;
+  var sectionKey = $('#student-round').data().sectionkey;
 
   if (option.length > 0)
   {
@@ -12,7 +11,10 @@ $(document).ready(function() {
   }
   var radio, comment, summary;
 
-  function formSubmit(){
+  $("#form").submit(formSubmit);
+
+  function formSubmit(event){
+
     var radio, comment, summary;
     if (expired.length == 0)
     {
@@ -59,17 +61,14 @@ $(document).ready(function() {
       }
     }
   }
-
-  if (expired.length == 0)
-  {
-    $("#form").submit(formSubmit);
-
-    var ocomment = comment;
-
-    $(window).bind('beforeunload', function() {
-        if (CKEDITOR.instances.comment.getData().replace(/<p>/g,'').replace(/<\/p>/g,'') !== ocomment) {
-            return "It looks like you have input you haven't submitted.";
-        }
-    });
-  } // not expired
 });
+
+if ($('#student-round').data().expired.length == 0)
+{
+  $(window).bind('beforeunload', function () {
+    var ocomment = $('#comment').val();
+      if ($('#comment').val() !== ocomment) {
+          return "It looks like you have input you haven't submitted.";
+      }
+  });
+} // not expired

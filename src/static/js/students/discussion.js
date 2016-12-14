@@ -21,7 +21,10 @@ $(document).ready(function() {
     });
   }
 
-  $("#form").submit(function (event) {
+  $("#form").submit(formSubmit);
+
+  function formSubmit(event) {
+
     var expired = $('#student-discussion').data().expired;
     if (expired.length == 0)
     {
@@ -29,7 +32,7 @@ $(document).ready(function() {
       event.preventDefault();
 
       var sectionKey = $('#student-discussion').data().sectionkey;
-      
+
       // Update content of textarea(s) handled by CKEditor
       for ( instance in CKEDITOR.instances ) {
           CKEDITOR.instances[instance].updateElement();
@@ -54,9 +57,7 @@ $(document).ready(function() {
           });
       }
     }
-  });
-
-  //$("#form").submit(formSubmit);
+  }
 
   // Checks if the user has selected their opinion for all the comments;
   // returns true if they have, false if there are any comments they have
@@ -94,15 +95,14 @@ $(document).ready(function() {
       thumbs[email] = type;
     }
   }
-
-  if (expired.length == 0)
-  {
-    var ocomment = $('#comment').val();
-
-    $(window).bind('beforeunload', function () {
-        if ($('#comment').val() !== ocomment) {
-            return "It looks like you have input you haven't submitted.";
-        }
-    });
-  }
 });
+
+if ($('#student-discussion').data().expired.length == 0)
+{
+  $(window).bind('beforeunload', function () {
+    var ocomment = $('#comment').val();
+      if ($('#comment').val() !== ocomment) {
+          return "It looks like you have input you haven't submitted.";
+      }
+  });
+}
