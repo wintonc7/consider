@@ -54,6 +54,7 @@ class Students(webapp2.RequestHandler):
                 # Create a new student and assign the email address
                 student = model.Student(id=email)
                 student.email = email
+                student.preferred_email = email
             # end
             # Now check if the current student is subscribed to this section
             if section.key not in student.sections:
