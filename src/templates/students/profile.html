@@ -14,14 +14,17 @@
                 <h2>Profile</h2>
             </div>
             <div class="card-body">
-                <strong>Login ID</strong>
-                <input type="text" class="form-control" disabled placeholder="{{ nickname }}">
-                <strong>First Name</strong>
-                <input type="text" class="form-control">
-                <strong>Last Name</strong>
-                <input type="text" class="form-control">
-                <strong>Preferred Email Address</strong>
-                <input type="text" class="form-control">
+                <form id="profile" method="post">
+                    <strong>Login ID</strong>
+                    <div type="text" class="form-control">{{ nickname }}</div>
+                    <label for="fname"><strong>First Name</strong></label>
+                    <input id="fname" type="text" class="form-control">
+                    <label for="lname"><strong>Last Name</strong></label>
+                    <input id="lname" type="text" class="form-control">
+                    <label for="prefemail"><strong>Preferred Email Address</strong></label>
+                    <input id="prefemail" type="text" class="form-control">
+                    <button type="submit" class="btn btn-lg btn-success btn-success-submit">Save</button>
+                </form>
             </div>
         </div>
     </div>
