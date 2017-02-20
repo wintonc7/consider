@@ -352,7 +352,7 @@ class Rounds(webapp2.RequestHandler):
             if current_round.quiz.options_total > 0 and not (option and comment):
                 # if the question had 0 options, it's not an error
                 # Error if not
-                utils.error('Invalid Parameters: option or comment is null', handler=self)
+                utils.error('Please select one of the options before submitting.', handler=self)
                 return
             # end
             # if current_round.number != 1 and not summary:
