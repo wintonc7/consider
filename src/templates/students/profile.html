@@ -11,10 +11,17 @@
     <div class="container" id='pageContent'>
         <div class="card">
             <div class="card-title">
-                <h2>Profile for {{ nickname }}</h2>
+                <h2>Profile</h2>
             </div>
             <div class="card-body">
-                Inputs, man
+                <strong>Login ID</strong>
+                <input type="text" class="form-control" disabled placeholder="{{ nickname }}">
+                <strong>First Name</strong>
+                <input type="text" class="form-control">
+                <strong>Last Name</strong>
+                <input type="text" class="form-control">
+                <strong>Preferred Email Address</strong>
+                <input type="text" class="form-control">
             </div>
         </div>
     </div>
