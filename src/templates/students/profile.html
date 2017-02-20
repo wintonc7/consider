@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>HELLO THERE STUDENT</title>
-</head>
-<body>
+{% extends 'layouts/student_base.html' %}
 
-</body>
-</html>
+{% block title %}| Rounds{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock head %}
+
+{% block content %}
+{{ super() }}
+
+{% endblock %}
