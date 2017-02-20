@@ -257,6 +257,8 @@ class Rounds(webapp2.RequestHandler):
             template_values['logouturl'] = logout_url
             from src import config
             template_values['documentation'] = config.DOCUMENTATION
+            if (utils.check_privilege(model.Role.student)):
+                template_values['student'] = True
             template_values['curr_page'] = requested_round_number
 
             # Now we need to check if it's the initial or summary question

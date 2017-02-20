@@ -42,6 +42,9 @@
                 {% block topnavbar %}{% endblock topnavbar %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
+            {% if student %}
+                <li><a class="navbar-link">HELLO THERE STUDENT</a></li>
+            {% endif %}
                 <li><a class="navbar-link" href="{{documentation}}"><span class="glyphicon glyphicon-book"></span> Documentation</a></li>
             {% if loginpage %}
                 <li><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
