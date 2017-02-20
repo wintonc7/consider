@@ -1,6 +1,6 @@
-{% extends 'layouts/student_base.html' %}
+{% extends 'layouts/base.html' %}
 
-{% block title %}| Rounds{% endblock %}
+{% block title %}| Profile{% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -8,5 +8,14 @@
 
 {% block content %}
 {{ super() }}
-
+    <div class="container" id='pageContent'>
+        <div class="card">
+            <div class="card-title">
+                <h2>Profile for {{ nickname }}</h2>
+            </div>
+            <div class="card-body">
+                Inputs, man
+            </div>
+        </div>
+    </div>
 {% endblock %}
