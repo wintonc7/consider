@@ -49,7 +49,6 @@ class Profile(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
         # end get
 
-    # TODO: Make sure this request works/fix it
     def post(self):
         """
         HTTP POST method to submit the response.
