@@ -14,8 +14,8 @@ import datetime
 import webapp2
 from google.appengine.api import users
 
-import config
-import utils
+from . import config
+from . import utils
 from src import model
 from .controller import admin, instructor, student, grader
 
