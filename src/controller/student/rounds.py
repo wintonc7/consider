@@ -367,7 +367,8 @@ class Rounds(webapp2.RequestHandler):
             # And double check that we have a comment and valid response
             if not (res and comment) or not utils.is_valid_response(res):
                 # Error if not
-                utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
+                # utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
+                utils.error('Unable to save submission. Please ensure you have entered a comment and that you have entered a valid response.', handler=self)
                 return
             # end
             # Now loop over the agree, etc. responses
