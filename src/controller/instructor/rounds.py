@@ -349,7 +349,7 @@ class Rounds(webapp2.RequestHandler):
                 message = self.request.get('message')
                 # Grab the subject of the email
                 subject = self.request.get('subject')
-                to_emails = [s.preferred_email for s in email_section.students]
+                to_emails = [s.email for s in email_section.students]
                 utils.send_mails(to_emails, subject, message)
                 email_course.recent_section = email_section.name
                 email_course.put()
