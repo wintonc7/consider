@@ -37,11 +37,39 @@ class Profile(webapp2.RequestHandler):
         template_values = {
             'documentation': config.DOCUMENTATION,
             'logouturl': logout_url,
-            'nickname': student.email,
-            'student': True
+            'student': True,
+            'user_id': student.email,
+            'fname': student.fname,
+            'lname': student.lname,
+            'preferred_email': student.preferred_email
         }
         # Set the template html page
         template = utils.jinja_env().get_template('students/profile.html')
         # And render it
         self.response.write(template.render(template_values))
         # end get
+
+    # TODO: Make sure this request works/fix it
+    def post(self):
+        """
+        HTTP POST method to submit the response.
+        """
+        # First, check that the logged in user is a student
+        student = utils.check_privilege(model.Role.student)
+        if not student:
+            # Redirect home if not a student
+            return self.redirect('/')
+        # end
+
+        # First, grab the section key from the page
+        fname = self.request.get('fname')
+        lname = self.request.get('lname')
+        preferred_email = self.request.get('preferred_email')
+
+        if fname:
+            student.fname = fname
+        if lname:
+            student.lname = lname
+        if preferred_email:
+            student.preferred_email = preferred_email
+        # end post
