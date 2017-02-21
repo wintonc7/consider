@@ -72,4 +72,8 @@ class Profile(webapp2.RequestHandler):
             student.lname = lname
         if preferred_email:
             student.preferred_email = preferred_email
+
+        student.put()
+
+        return self.redirect('/student_home')
         # end post

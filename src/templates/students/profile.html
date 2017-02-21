@@ -3,6 +3,8 @@
 {% block title %}| Profile{% endblock %}
 
 {% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/students/profile.js"></script>
 {{ super() }}
 {% endblock head %}
 
@@ -14,7 +16,7 @@
                 <h2>Profile</h2>
             </div>
             <div class="card-body">
-                <form id="profile" method="post">
+                <form id="profile" method="post" action="/student_profile">
                     <strong>Login ID</strong>
                     <div type="text" class="form-control">{{ user_id }}</div>
                     <label for="fname"><strong>First Name</strong></label>
