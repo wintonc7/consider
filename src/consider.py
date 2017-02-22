@@ -14,8 +14,8 @@ import datetime
 import webapp2
 from google.appengine.api import users
 
-import config
-import utils
+from . import config
+from . import utils
 from src import model
 from .controller import admin, instructor, student, grader
 
@@ -111,7 +111,7 @@ class CronTask(webapp2.RequestHandler):
         current_time = datetime.datetime.now()
         sections = model.Section.query().fetch()
         for section in sections:
-            print section.name
+            print(section.name)
             num = utils.get_current_round(section)
             if num:
                 rounds = model.Round.query(ancestor=section.key).fetch()
@@ -150,6 +150,7 @@ application = webapp2.WSGIApplication([
     ('/group_responses', instructor.GroupResponses),
     ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
+    ('/student_profile', student.Profile),
     ('/student_rounds', student.Rounds),
     ('/crontask', CronTask),
     ('/show_responses', instructor.ShowResponses),

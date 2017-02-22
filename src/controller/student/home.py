@@ -37,7 +37,8 @@ class HomePage(webapp2.RequestHandler):
         template_values = {
             'documentation': config.DOCUMENTATION,
             'logouturl': logout_url,
-            'nickname': student.email
+            'nickname': student.email,
+            'student': True
         }
         # Grab the sections the student is a part of
         sections = student.sections

@@ -1,0 +1,33 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}| Profile{% endblock %}
+
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/students/profile.js"></script>
+{{ super() }}
+{% endblock head %}
+
+{% block content %}
+{{ super() }}
+    <div class="container" id='pageContent'>
+        <div class="card">
+            <div class="card-title">
+                <h2>Profile</h2>
+            </div>
+            <div class="card-body">
+                <form id="profile" method="post" action="/student_profile">
+                    <strong>Login ID</strong>
+                    <div type="text" class="form-control">{{ user_id }}</div>
+                    <label for="fname"><strong>First Name</strong></label>
+                    <input id="fname" type="text" class="form-control" value="{{ fname }}">
+                    <label for="lname"><strong>Last Name</strong></label>
+                    <input id="lname" type="text" class="form-control" value="{{ lname }}">
+                    <label for="preferred_email"><strong>Preferred Email Address</strong></label>
+                    <input id="preferred_email" type="email" class="form-control" value="{{ preferred_email }}">
+                    <button type="submit" class="btn btn-lg btn-success btn-success-submit">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
