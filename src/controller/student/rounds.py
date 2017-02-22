@@ -352,7 +352,7 @@ class Rounds(webapp2.RequestHandler):
             if current_round.quiz.options_total > 0 and not (option and comment):
                 # if the question had 0 options, it's not an error
                 # Error if not
-                utils.error('Invalid Parameters: option or comment is null', handler=self)
+                utils.error('Please select one of the options before submitting.', handler=self)
                 return
             # end
             # if current_round.number != 1 and not summary:
@@ -367,7 +367,8 @@ class Rounds(webapp2.RequestHandler):
             # And double check that we have a comment and valid response
             if not (res and comment) or not utils.is_valid_response(res):
                 # Error if not
-                utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
+                # utils.error('Invalid Parameters: comment is null or res is not a valid response', handler=self)
+                utils.error('Unable to save submission. Please ensure you have entered a comment and that you have entered a valid response.', handler=self)
                 return
             # end
             # Now loop over the agree, etc. responses
