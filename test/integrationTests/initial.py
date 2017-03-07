@@ -5,8 +5,6 @@ import subprocess
 from time import sleep
 import traceback
 import re
-import datetime
-
 
 
 class TestServer:
@@ -124,7 +122,6 @@ test_server.startServer()
 #most of these test methods are implemented via webscraping the local dev server
 
 import requests
-import json
 
 #this session will be used in the tests
 session = requests.Session()
@@ -519,9 +516,9 @@ def testGET(admin,instructor,student,course,section,situation_string):
 
 
 
-import admin, students, courses, sections, rounds, groups, GETtests   
-    
-   
+from test.integrationTests import courses
+
+
 
 
 #==================[END: run tests]==================
