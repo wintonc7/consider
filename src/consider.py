@@ -150,6 +150,7 @@ application = webapp2.WSGIApplication([
     ('/group_responses', instructor.GroupResponses),
     ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
+    ('/activity_log', student.ActivityLog),
     ('/student_profile', student.Profile),
     ('/student_rounds', student.Rounds),
     ('/crontask', CronTask),
