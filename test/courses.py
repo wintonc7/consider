@@ -7,7 +7,7 @@ import traceback
 import re
 import datetime
 from __main__ import *
-
+"""
 #===========[START: testing /courses]===================
 try:    
     print("testing /courses")
@@ -79,3 +79,5 @@ finally:
     else:
         print("leaving server running because of --stay-alive flag")
     #===========[END: testing /courses]===================
+
+"""

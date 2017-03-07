@@ -6,10 +6,10 @@ from time import sleep
 import traceback
 import re
 import datetime
-from __main__ import *
+#from __main__ import *
 
 #==================[START: run tests]==================
-
+"""
 try:
     #set up test admin, instructor, course, section and student
     login("test-admin@gmail.com",True)
@@ -96,3 +96,4 @@ finally:
         print("leaving server running because of --stay-alive flag")
    
     #===========[END: testing /admin]===================
+"""

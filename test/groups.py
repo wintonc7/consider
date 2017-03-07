@@ -6,12 +6,12 @@ from time import sleep
 import traceback
 import re
 import datetime
+"""
 from __main__ import *
+try:
 
-#===========[START: testing /groups]===================
-    
-try:    
     print("testing /groups")
+    #===========[START: testing /groups]===================
     #add
     print("\t testing POST action = add")
     test_number = 1
@@ -36,5 +36,6 @@ finally:
     else:
         print("leaving server running because of --stay-alive flag")
     #update
-    #this method is testing below: function is to add students to groups and thus must be done after students have done something 
+    #this method is testing below: function is to add students to groups and thus must be done after students have done something
     #===========[END: testing /groups]===================
+"""
