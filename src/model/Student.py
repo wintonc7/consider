@@ -15,7 +15,7 @@ class Student(ndb.Model):
     """ List of active `Section`_ s this student is enrolled in. """
     preferred_email = ndb.StringProperty()
     """ Additional email addresses to notify. Configured through profile page. """
-    fname = ndb.StringProperty()
+    first_name = ndb.StringProperty()
     """ String. Optional. Configured through profile page. """
-    lname = ndb.StringProperty()
+    last_name = ndb.StringProperty()
     """ String. Optional. Configured through profile page. """
