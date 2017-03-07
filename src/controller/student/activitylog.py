@@ -48,3 +48,20 @@ class ActivityLog(webapp2.RequestHandler):
         # And render it
         self.response.write(template.render(template_values))
         # end get
+
+    def new_entry(self, group, assignment, course):
+        """
+        Creates a new log entry, and log if necessary
+        """
+        # TODO: get log
+        if not log:
+            # if log doesn't exist, create it
+            new_log = model.Log(parent=group.key)
+            new_log.group = group
+            # set log variable to use newly created log
+            log = new_log
+            new_log.put()
+        # end
+
+        log_entry = model.LogEntry()
+        log_entry.student =
