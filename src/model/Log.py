@@ -9,6 +9,6 @@ class Log(ndb.Model):
 
     An object which represents the activity log for a group in the app.
     """
-    group = ndb.StructuredProperty(Group)
+    group = ndb.StructuredProperty(Group, required=True)
     """ Group. May be null if this log applies to a Student. Must be non-empty otherwise. """
     log_entries = ndb.StructuredProperty(LogEntry, repeated=True)
