@@ -100,8 +100,7 @@ class Groups(webapp2.RequestHandler):
                     if not group:
                         # And create it if not, giving it the proper number
                         group = model.Group(parent=section.key, id=student.group)
-                        log = model.Log(parent=group.key)
-                        log.log_created_entry(group.key, section, course)
+                        model.Log.create_log(group.key, section, course)
                         group.number = student.group
                     # end
                     # Now check if the student is listed in the correct group

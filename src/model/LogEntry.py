@@ -1,7 +1,5 @@
 from google.appengine.ext import ndb
 
-from . import Student, Section, Course
-
 
 class LogEntry(ndb.Model):
     """
@@ -15,9 +13,5 @@ class LogEntry(ndb.Model):
     """ DateTime. The time when the log entry was created. Automatic. """
     description = ndb.StringProperty()
     """ String. Describes the activity. """
-    assignment = ndb.StructuredProperty(Section, required=True)
-    """ Section. Refers to the section (assignment) to which this entry pertains. """
-    course = ndb.StructuredProperty(Course, required=True)
-    """ Course. Refers to the course to which this entry pertains. """
     link = ndb.StringProperty()
     """ String. Link to the part of the site where this entry is relevant. """
