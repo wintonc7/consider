@@ -663,6 +663,7 @@ class Rounds(webapp2.RequestHandler):
         # Now simply turn on the first round
         section.current_round = 1
         section.put()
+        # TODO - ADD LOGENTRY FOR START OF ROUND 1
 
         # Add the dummy read only round if it's a rounds based discussion
         if section.has_rounds:
@@ -687,12 +688,13 @@ class Rounds(webapp2.RequestHandler):
         # if/else is to support both legacy (string) and new (datetime) data types
         current_round.deadline = datetime.datetime.now()
         current_round.put()
+        # TODO - ADD LOGENTRY FOR ROUND END
         if next_round:
             next_round.starttime = datetime.datetime.now()
             next_round.put()
             section.current_round = next_round.number
             section.put()
-
+            # TODO - ADD LOGENTRY FOR ROUND START
             # end end_current_round
 
 # end class Rounds

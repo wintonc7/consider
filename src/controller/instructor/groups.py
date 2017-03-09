@@ -94,6 +94,7 @@ class Groups(webapp2.RequestHandler):
                         pre_group.members.remove(student.email)
                         pre_group.size = len(pre_group.members)
                         pre_group.put()
+                        # TODO - ADD LOGENTRY FOR GROUP CREATION?
                     # -------------------Fix group allocation bug
 
                     # Double check that it actually exists
@@ -115,6 +116,7 @@ class Groups(webapp2.RequestHandler):
                         student.alias = 'S' + str(group.size)
                         # And commit the changes to the group
                         group.put()
+                        # TODO - ADD LOGENTRY FOR GROUP CREATION
                         # end
                         # end
             # end
