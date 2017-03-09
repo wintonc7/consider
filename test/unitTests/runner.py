@@ -27,6 +27,8 @@ import os
 import sys
 import unittest
 
+import dev_appserver
+
 
 def fixup_paths(path):
     """Adds GAE SDK path to system path and appends it to the google path
@@ -56,7 +58,7 @@ def main(sdk_path, test_path, test_pattern):
     fixup_paths(sdk_path)
 
     # Make sure all bundled third-party packages are available.
-    import dev_appserver
+    # import dev_appserver
     dev_appserver.fix_sys_path()
 
     # Loading appengine_config from the current project ensures that any
