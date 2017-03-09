@@ -54,10 +54,6 @@ class ActivityLog(webapp2.RequestHandler):
                 })
             output['logs'].append(new_dict)
 
-        # Format log entries as JSON and export
-        output_string = json.dumps(output)
-        self.response.headers.add_header("Logs", output_string)
-
         # Create a url for the user to logout
         logout_url = users.create_logout_url(self.request.uri)
         # Set up the template
@@ -65,7 +61,8 @@ class ActivityLog(webapp2.RequestHandler):
         template_values = {
             'documentation': config.DOCUMENTATION,
             'logouturl': logout_url,
-            'student': True
+            'student': True,
+            'logs': output['logs']
         }
         # Set the template html page
         template = utils.jinja_env().get_template('students/activitylog.html')

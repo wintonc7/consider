@@ -16,9 +16,24 @@
                 <h2>Activity Log</h2>
             </div>
             <div class="card-body">
-
-                <!-- TODO: activity log here -->
-
+                <table class="table table-striped">
+                    <tr>
+                        <th class="col-xs-2">Timestamp</th>
+                        <th class="col-xs-2">Course</th>
+                        <th class="col-xs-2">Assignment</th>
+                        <th class="col-xs-6">Activity</th>
+                    </tr>
+                    {% for log in logs %}
+                        {% for log_entry in log['entries'] %}
+                        <tr>
+                            <td>{{ log_entry['time'] }}</td>
+                            <td>{{ log['course'] }}</td>
+                            <td>{{ log['assignment'] }}</td>
+                            <td>{{ log_entry['description'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </table>
             </div>
         </div>
     </div>
