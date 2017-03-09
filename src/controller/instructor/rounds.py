@@ -663,7 +663,12 @@ class Rounds(webapp2.RequestHandler):
         # Now simply turn on the first round
         section.current_round = 1
         section.put()
-        # TODO - ADD LOGENTRY FOR START OF ROUND 1
+
+        # Log first round starting
+        groups = model.Group.query(ancestor=section.key).fetch()
+        for group in groups:
+            log = model.ActivityLog.query(ancestor=group.key).fetch()
+            log.new_entry("Round 1 started")
 
         # Add the dummy read only round if it's a rounds based discussion
         if section.has_rounds:
@@ -696,5 +701,13 @@ class Rounds(webapp2.RequestHandler):
             section.put()
             # TODO - ADD LOGENTRY FOR ROUND START
             # end end_current_round
+
+        groups = model.Group.query(ancestor=section.key).fetch()
+        for group in groups:
+            log = model.ActivityLog.query(ancestor=group.key).fetch()
+            if next_round:
+                log.new_entry("Round " + str(section.current_round - 1) + " ended. Round " + str(section.current_round) + " started.")
+            else:
+                log.new_entry("Round " + str(section.current_round - 1) + " (final) ended.")
 
 # end class Rounds
