@@ -706,8 +706,8 @@ class Rounds(webapp2.RequestHandler):
         for group in groups:
             log = model.ActivityLog.query(ancestor=group.key).fetch()
             if next_round:
-                log.new_entry("Round " + str(section.current_round - 1) + " ended. Round " + str(section.current_round) + " started.")
+                log[0].new_entry("Round " + str(section.current_round - 1) + " ended. Round " + str(section.current_round) + " started.")
             else:
-                log.new_entry("Round " + str(section.current_round - 1) + " (final) ended.")
+                log[0].new_entry("Round " + str(section.current_round - 1) + " (final) ended.")
 
 # end class Rounds

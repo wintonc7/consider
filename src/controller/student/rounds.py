@@ -163,7 +163,12 @@ class Rounds(webapp2.RequestHandler):
                         # save it in the usual way
                         if section.has_rounds or current_round.is_quiz:
                             self.save_submission(student, current_round)
-                            # TODO - ADD LOGENTRY FOR ROUNDS BASED SUBMISSION - SHOULD ADD CHECK TO SEE IF THIS IS INITIAL RESPONSE OR EDITED RESPONSE
+                            # TODO - ADD LOGENTRY FOR EDITED RESPONSE
+                            # Log submission
+                            groups = model.Group.query(ancestor=section.key).fetch()
+                            for group in groups:
+                                log = model.ActivityLog.query(ancestor=group.key).fetch()
+                                log[0].new_entry("Response submitted for round " + section.current_round + ".", student.email)
                         else:
                             # Otherwise, save as a Seq Discussion
                             # 1. Make sure the author email passed from view is same as current student's email
@@ -181,7 +186,14 @@ class Rounds(webapp2.RequestHandler):
                                 post.text = self.request.get('text')
                                 post.index = group.num_seq_responses + 1
                                 post.put()
-                                # TODO - ADD LOGENTRY FOR DISCUSSION BASED RESPONSE
+
+                                # Log submission
+                                groups = model.Group.query(ancestor=section.key).fetch()
+                                for group in groups:
+                                    log = model.ActivityLog.query(ancestor=group.key).fetch()
+                                    log[0].new_entry("Response submitted to " + section.name + " discussion.",
+                                                     student.email)
+
                                 group.num_seq_responses += 1
                                 group.put()
                                 utils.log('Post created:' + str(post))
