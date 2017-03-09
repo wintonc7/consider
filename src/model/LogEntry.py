@@ -8,7 +8,7 @@ class LogEntry(ndb.Model):
     An object which represents an entry for a log within the app.
     """
     student = ndb.StringProperty()
-    """ String. Student's ID (gmail address). Required. """
+    """ String. Student's ID (gmail address). """
     time = ndb.DateTimeProperty(auto_now_add=True)
     """ DateTime. The time when the log entry was created. Automatic. """
     description = ndb.StringProperty()
