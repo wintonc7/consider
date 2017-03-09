@@ -35,6 +35,7 @@ class ActivityLog(webapp2.RequestHandler):
         groups = []
         for section_key in student.sections:
             groups.extend(model.Group.query(ancestor=section_key).fetch())
+            # TODO: Only use groups student is included in
         logs = []
         for group in groups:
             logs.extend(model.ActivityLog.query(ancestor=group.key).fetch())
