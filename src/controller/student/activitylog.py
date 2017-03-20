@@ -31,7 +31,7 @@ class ActivityLog(webapp2.RequestHandler):
         # end
 
         # Use obtained user object to obtain relevant log entries
-        output = {"logs": [], "courses": ["All Courses"], "assignments": ["All Assignments"]}
+        output = {"logs": [], "courses": [], "assignments": []}
         groups = []
         for section_key in student.sections:
             groups.extend(model.Group.query(ancestor=section_key).fetch())

@@ -17,13 +17,15 @@
             </div>
             <div class="card-body">
 
-                <select>
+                <select class="form-control" id="course-select">
+                    <option value="DEFAULT" selected>All Courses</option>
                     {% for course in courses %}
                     <option value="{{ course }}">{{ course }}</option>
                     {% endfor %}
                 </select>
 
-                <select>
+                <select class="form-control" id="assignment-select" disabled>
+                    <option value="DEFAULT" selected>All Assignments</option>
                     {% for assignment in assignments %}
                     <option value="{{ assignment }}">{{ assignment }}</option>
                     {% endfor %}
