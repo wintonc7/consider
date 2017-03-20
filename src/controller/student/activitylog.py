@@ -31,7 +31,7 @@ class ActivityLog(webapp2.RequestHandler):
         # end
 
         # Use obtained user object to obtain relevant log entries
-        output = {"logs": []}
+        output = {"logs": [], "courses": ["All Courses"], "assignments": ["All Assignments"]}
         groups = []
         for section_key in student.sections:
             groups.extend(model.Group.query(ancestor=section_key).fetch())
@@ -47,6 +47,8 @@ class ActivityLog(webapp2.RequestHandler):
                 "assignment": log.assignment.get().name,
                 "entries": []
             }
+            output['courses'].append(log.course.get().name)
+            output['assignments'].append(log.assignment.get().name)
             for log_entry in log_entries:
                 new_dict['entries'].append({
                     "student": log_entry.student,
@@ -63,6 +65,8 @@ class ActivityLog(webapp2.RequestHandler):
             'documentation': config.DOCUMENTATION,
             'logouturl': logout_url,
             'student': True,
+            'courses': output['courses'],
+            'assignments': output['assignments'],
             'logs': output['logs']
         }
         # Set the template html page
