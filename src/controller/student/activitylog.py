@@ -11,7 +11,7 @@ Implements the APIs for the Student activity log in the app.
 
 """
 
-import webapp2, json, StringIO
+import webapp2, logging
 from google.appengine.api import users
 
 from src import model, utils
@@ -35,20 +35,23 @@ class ActivityLog(webapp2.RequestHandler):
         student_groups = []
         for section_key in student.sections:
             groups = model.Group.query(ancestor=section_key).fetch()
-            student_groups = [group for group in groups if student.email in group.members]
+            student_groups.extend([group for group in groups if student.email in group.members])
         logs = []
         for group in student_groups:
             logs.extend(model.ActivityLog.query(ancestor=group.key).fetch())
-        log_entries = []
         for log in logs:
-            log_entries.extend(model.LogEntry.query(ancestor=log.key).fetch())
+            log_entries = (model.LogEntry.query(ancestor=log.key).fetch())
+            course_name = log.course.get().name
+            assignment_name = log.assignment.get().name
+            if (course_name not in output['courses']):
+                output['courses'].append(course_name)
+            if (assignment_name not in output['assignments']):
+                output['assignments'].append(assignment_name)
             new_dict = {
-                "course": log.course.get().name,
-                "assignment": log.assignment.get().name,
+                "course": course_name,
+                "assignment": assignment_name,
                 "entries": []
             }
-            output['courses'].append(log.course.get().name)
-            output['assignments'].append(log.assignment.get().name)
             for log_entry in log_entries:
                 new_dict['entries'].append({
                     "student": log_entry.student,
