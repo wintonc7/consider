@@ -168,7 +168,7 @@ class Rounds(webapp2.RequestHandler):
                             groups = model.Group.query(ancestor=section.key).fetch()
                             for group in groups:
                                 log = model.ActivityLog.query(ancestor=group.key).fetch()
-                                log[0].new_entry("Response submitted for round " + section.current_round + ".", student.email)
+                                log[0].new_entry("Response submitted for round " + str(section.current_round) + ".", student.email)
                         else:
                             # Otherwise, save as a Seq Discussion
                             # 1. Make sure the author email passed from view is same as current student's email
