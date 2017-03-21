@@ -43,7 +43,15 @@
                         <tr class="log-row">
                             <td>{{ log_entry['time'] }}</td>
                             <td>{{ log['course'] }}</td>
-                            <td>{{ log['assignment'] }}</td>
+                            <td>
+                                {% if log_entry['link'] %}
+                                    <a href="{{ log_entry['link'] }}">
+                                {% endif %}
+                                    {{ log['assignment'] }}
+                                {% if log_entry['link'] %}
+                                    </a>
+                                {% endif %}
+                            </td>
                             <td>{{ log_entry['description'] }}</td>
                         </tr>
                         {% endfor %}

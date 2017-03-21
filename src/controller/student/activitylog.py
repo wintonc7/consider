@@ -50,13 +50,15 @@ class ActivityLog(webapp2.RequestHandler):
             new_dict = {
                 "course": course_name,
                 "assignment": assignment_name,
+                "link": "",
                 "entries": []
             }
             for log_entry in log_entries:
                 new_dict['entries'].append({
                     "student": log_entry.student,
                     "description": log_entry.description,
-                    "time": log_entry.time.strftime("%c")
+                    "time": log_entry.time.strftime("%c"),
+                    "link": log_entry.link
                 })
             output['logs'].append(new_dict)
 
