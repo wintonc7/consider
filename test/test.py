@@ -6,7 +6,15 @@ from time import sleep
 import traceback
 import re
 import datetime
+from sys import path
+from os import getcwd
+path.append(getcwd() + "/model") #Yes, i'm on windows
+print path
+import src
+from src import model, utils
+#from model import Student
 
+student = utils.check_privilege(model.Role.student)
 
 class TestServer:
     # class for instantiating the test server
