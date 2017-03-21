@@ -594,7 +594,10 @@ def send_mails(recipients, subject, message):
         auth=(secrets.MAILJET_API_KEY, secrets.MAILJET_API_SECRET))
 
     for recipient in recipients:
-        preferred_email = model.Student.get_by_key_name(recipient).preferred_email
+        #preferred_email = model.Student.query(email=recipient).fetch().preferred_email
+        pref_email_query = model.Student.query()
+        pref_email_query.filter(model.Student.email == recipient)
+        preferred_email = pref_email_query.get().preferred_email
         data = {
             'FromEmail': secrets.MAILJET_SENDER,
             'FromName': 'CONSIDER Admin',

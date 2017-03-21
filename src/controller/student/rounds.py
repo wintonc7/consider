@@ -415,7 +415,14 @@ class Rounds(webapp2.RequestHandler):
             response.put()
             utils.log('Your response has been saved. You can edit it any time before the deadline. ',
                       type='Success!', handler=self)
-
+            #send email confirmation
+            to_addr = []
+            to_addr.append(student.email)
+            msg = "You have submitted the following response: \n" + str(response.comment) + "\nYou have until " + str(deadline) + " to modify this submission \n\nThanks!\nThe CONSIDER Team"
+            current_section = current_round.key.parent().get()
+            subject = "CONSIDER ASSIGNMENT " + str(current_section.name) + " SUBMISSION FOR ROUND " + str(current_round.number)
+            utils.send_mails(to_addr, subject, msg)
+            utils.log("RESPONSE Email confirmation sent", type='Success!', handler=self)
         else:  # Otherwise alert them that time has passed to submit for this round
             utils.error('Sorry, the time for submission for this round has expired \
            and your response was not saved, please wait for the next round.',
