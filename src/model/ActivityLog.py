@@ -28,8 +28,7 @@ class ActivityLog(ndb.Model):
         # if student optional parameter is included, set it
         if student:
             new_entry.student = student
-        new_entry.description = description
-
-        # TODO: Handle the link
+            new_entry.description = description
+            new_entry.link = "student_rounds?section=" + str(self.key.parent().parent().urlsafe())
 
         new_entry.put()

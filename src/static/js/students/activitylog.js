@@ -14,6 +14,7 @@ function filterCourses() {
         if (selectedCourse == "DEFAULT") {
             $('#assignment-select')[0].disabled = true;
             $('#assignment-select')[0].value = "DEFAULT";
+            $(logRows[i]).css("display", "table-row");
         } else if (logRows[i].hasChildNodes() && logRows[i].children[1].innerHTML == selectedCourse) {
             $('#assignment-select')[0].disabled = false;
             $(logRows[i]).css("display", "table-row");
