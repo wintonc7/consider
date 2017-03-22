@@ -7,7 +7,7 @@ import traceback
 import re
 import datetime
 
-
+"""
 
 class TestServer:
     #class for instantiating the test server
@@ -525,3 +525,5 @@ import admin, students, courses, sections, rounds, groups, GETtests
 
 
 #==================[END: run tests]==================
+
+"""

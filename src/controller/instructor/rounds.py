@@ -664,6 +664,12 @@ class Rounds(webapp2.RequestHandler):
         section.current_round = 1
         section.put()
 
+        # Log first round starting
+        groups = model.Group.query(ancestor=section.key).fetch()
+        for group in groups:
+            log = model.ActivityLog.query(ancestor=group.key).fetch()
+            log.new_entry("Round 1 started")
+
         # Add the dummy read only round if it's a rounds based discussion
         if section.has_rounds:
             self.add_rounds(num_of_rounds=1, duration=0, instructor=instructor,
@@ -687,12 +693,21 @@ class Rounds(webapp2.RequestHandler):
         # if/else is to support both legacy (string) and new (datetime) data types
         current_round.deadline = datetime.datetime.now()
         current_round.put()
+        # TODO - ADD LOGENTRY FOR ROUND END
         if next_round:
             next_round.starttime = datetime.datetime.now()
             next_round.put()
             section.current_round = next_round.number
             section.put()
-
+            # TODO - ADD LOGENTRY FOR ROUND START
             # end end_current_round
+
+        groups = model.Group.query(ancestor=section.key).fetch()
+        for group in groups:
+            log = model.ActivityLog.query(ancestor=group.key).fetch()
+            if next_round:
+                log[0].new_entry("Round " + str(section.current_round - 1) + " ended. Round " + str(section.current_round) + " started.")
+            else:
+                log[0].new_entry("Round " + str(section.current_round - 1) + " (final) ended.")
 
 # end class Rounds

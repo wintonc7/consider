@@ -17,8 +17,46 @@
             </div>
             <div class="card-body">
 
-                <!-- TODO: activity log here -->
+                <select class="form-control" id="course-select">
+                    <option value="DEFAULT" selected>All Courses</option>
+                    {% for course in courses %}
+                    <option value="{{ course }}">{{ course }}</option>
+                    {% endfor %}
+                </select>
 
+                <select class="form-control" id="assignment-select" disabled>
+                    <option value="DEFAULT" selected>All Assignments</option>
+                    {% for assignment in assignments %}
+                    <option value="{{ assignment }}">{{ assignment }}</option>
+                    {% endfor %}
+                </select>
+
+                <table class="table table-striped">
+                    <tr>
+                        <th class="col-xs-2">Timestamp</th>
+                        <th class="col-xs-2">Course</th>
+                        <th class="col-xs-2">Assignment</th>
+                        <th class="col-xs-6">Activity</th>
+                    </tr>
+                    {% for log in logs %}
+                        {% for log_entry in log['entries'] %}
+                        <tr class="log-row">
+                            <td>{{ log_entry['time'] }}</td>
+                            <td>{{ log['course'] }}</td>
+                            <td>
+                                {% if log_entry['link'] %}
+                                    <a href="{{ log_entry['link'] }}">
+                                {% endif %}
+                                    {{ log['assignment'] }}
+                                {% if log_entry['link'] %}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>{{ log_entry['description'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </table>
             </div>
         </div>
     </div>

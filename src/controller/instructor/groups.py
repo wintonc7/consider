@@ -50,7 +50,7 @@ class Groups(webapp2.RequestHandler):
 
     # end modify_group_count
 
-    def update_groups(self, section, groups):
+    def update_groups(self, course, section, groups):
         """
         Updates the groups assignments for the given section.
 
@@ -100,6 +100,9 @@ class Groups(webapp2.RequestHandler):
                     if not group:
                         # And create it if not, giving it the proper number
                         group = model.Group(parent=section.key, id=student.group)
+                        activity_log = model.ActivityLog(parent=group.key, assignment=section.key, course=course.key)
+                        activity_log.put()
+                        activity_log.create_log()
                         group.number = student.group
                     # end
                     # Now check if the student is listed in the correct group
@@ -218,7 +221,7 @@ class Groups(webapp2.RequestHandler):
                 # For update, grab the group settings from the page
                 groups = json.loads(self.request.get('groups'))
                 # And modify the database
-                self.update_groups(section, groups)
+                self.update_groups(course, section, groups)
             else:
                 # Send an error if a different action is supplied
                 utils.error('Unknown action' + action if action else 'None', handler=self)
