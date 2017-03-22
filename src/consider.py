@@ -126,12 +126,15 @@ class CronTask(webapp2.RequestHandler):
                     response = model.Response.query(ancestor=round.key).fetch()
                     res_emails = [res.student for res in response]
                     to_emails = [email for email in sec_emails if email not in res_emails]
-                    email_message = 'Dear Students: \n' \
-                                    'No more than 30 minutes left to submit your answer.' \
-                                    'Please finish it as soon as possible! \n' \
-                                    'Best,\n' \
-                                    'Consider Team\n'
-
+                    #email_message = 'Dear Students: \n' \
+                    #                'No more than 30 minutes left to submit your answer.' \
+                    #                'Please finish it as soon as possible! \n' \
+                    #                'Best,\n' \
+                    #                'Consider Team\n'
+                    email_message = "<html><body>Dear Students,<br><br>You have until <b>" + str(round.deadline) + \
+                                    "</b> to submit a response to <b>" + str(section.name) + \
+                                    "</b><br><br>Please submit or modify your submission before this deadline<br><br>" \
+                                    "Thanks,<br>The CONSIDER Team</body></html>"
                     utils.send_mails(to_emails, "CONSIDER: Deadline Approaching", email_message)
 
         self.redirect('/')
