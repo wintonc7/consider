@@ -4,6 +4,7 @@
 $(document).ready(function() {
     $('#course-select').change(filterCourses);
     $('#assignment-select').change(filterAssignments);
+    sortActivity();
 });
 
 function filterCourses() {
@@ -22,6 +23,7 @@ function filterCourses() {
             $(logRows[i]).css("display", "none");
         }
     }
+    sortActivity();
 }
 
 function filterAssignments() {
@@ -35,4 +37,26 @@ function filterAssignments() {
             $(logRows[i]).css("display", "none");
         }
     }
+    sortActivity();
+}
+
+function sortActivity() {
+    // f is a placeholder for the ascending/descending selection
+    f = -1;
+    logRows = $('.log-row');
+    logRows.sort(function(a, b) {
+        A = a.children[0].innerText;
+        B = b.children[0].innerText;
+        if (A < B) {
+            return -1 * f;
+        } else if (A > B) {
+            return 1 * f;
+        } else {
+            return 0;
+        }
+    });
+
+    $.each(logRows, function(index, row) {
+        $('#activity-table').children('tbody').append(row);
+    })
 }
