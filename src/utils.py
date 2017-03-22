@@ -594,13 +594,17 @@ def send_mails(recipients, subject, message):
         auth=(secrets.MAILJET_API_KEY, secrets.MAILJET_API_SECRET))
 
     for recipient in recipients:
+        #preferred_email = model.Student.query(email=recipient).fetch().preferred_email
+        pref_email_query = model.Student.query()
+        pref_email_query.filter(model.Student.email == recipient)
+        preferred_email = pref_email_query.get().preferred_email
         data = {
             'FromEmail': secrets.MAILJET_SENDER,
             'FromName': 'CONSIDER Admin',
             'Subject': subject,
             'Text-part': message,
             'Html-part': message,
-            'Recipients': [{'Email': recipient}]
+            'Recipients': [{'Email': preferred_email}]
         }
         result = client.send.create(data=data)
         log("Email sent:" + str(result.json()))
