@@ -27,6 +27,7 @@ function filterCourses() {
 }
 
 function filterAssignments() {
+    filterCourses();
     selectedAssignment = $('#assignment-select')[0].value;
     logRows = $('.log-row');
     for (i = 0; i < logRows.length; i++) {
