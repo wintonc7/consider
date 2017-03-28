@@ -667,7 +667,7 @@ class Rounds(webapp2.RequestHandler):
         # Log first round starting
         groups = model.Group.query(ancestor=section.key).fetch()
         for group in groups:
-            log = model.ActivityLog.query(ancestor=group.key).fetch()
+            log = model.ActivityLog.query(ancestor=group.key).get()
             log.new_entry("Round 1 started")
 
         # Add the dummy read only round if it's a rounds based discussion
