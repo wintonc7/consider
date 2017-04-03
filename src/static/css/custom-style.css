@@ -421,6 +421,11 @@ a:hover {
     margin-top: 10px;
 }
 
+.student-profile h6 {
+    padding-left: 10px;
+    color: #757575;
+}
+
 /* Student Activity Log */
 
 .activity-log-filters {
