@@ -40,6 +40,10 @@ class HomePage(webapp2.RequestHandler):
             'nickname': student.email,
             'student': True
         }
+        # Use first and last name for nickname if set
+        if student.fname and student.lname:
+            template_values['nickname'] = student.fname + " " + student.lname
+
         # Grab the sections the student is a part of
         sections = student.sections
         # Create a new list for holding the section objects from the db

@@ -9,13 +9,13 @@
     <h2>Welcome {{nickname}}!</h2>
     </div>
     <div class="card-body">
-    <h4 class="form-signin-heading">Select a section to continue</h4>
+    <h5 class="form-signin-heading">Please select a section to continue.</h5>
 
     {% if sections %}
     <div class="list-group">
         {% for section in sections %}
         <button type="button" onclick="redirect('{{section.key}}', '{{section.group}}', '{{section.round}}')" class="list-group-item btn-block">
-            {{section.course}} - {{section.name}}
+            <span class="course-name">{{section.course}}</span> <span class="separator-bar">|</span> {{section.name}}
         </button>
         {% endfor %}
     </div>

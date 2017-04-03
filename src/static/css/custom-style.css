@@ -1,10 +1,12 @@
 body {
     background-color: rgb(240, 240, 240);
-    font-family: 'Lato', sans-serif;
+    font-family: 'Arial', sans-serif;
+    color: #212121;
     padding-top: 70px;
 }
 
-/* FORM INPUT STYLING */
+/* FORM INPUT STYLING - turning this off because I think it looks mad ugly
+   TODO: See if Swaroop and Neelam are okay with getting rid of form gradients.
 
 input, textarea, select {
     border-radius: 0px !important;
@@ -16,10 +18,10 @@ input, textarea, select {
     background: -ms-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
     background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7', GradientType=0) !important;
-}
+} */
 
-/* BUTTON STYLING */
-
+/* BUTTON STYLING
+   TODO: See which of these button classes are not harmful/hideous
 .btn {
     color: #ffffff !important;
     font-size: 13px !important;
@@ -47,11 +49,21 @@ input, textarea, select {
 .btn-info:hover {
     background: #31b0d5 !important;
 }
+*/
+.btn {
+    border: 0;
+    font-family: 'Roboto', sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 6px 15px 5px 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
 
 .btn-success-submit {
     border-radius: 4px !important;
     height: 100% !important;
 }
+
 /* INTRUCTOR NAVIGATION SIDE BAR */
 
 .sidebar {
@@ -119,56 +131,82 @@ h1 {
 /* CARD STYLING */
 
 .card {
-    -webkit-box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-    -moz-box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-    box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-    border-radius: 3px !important;
-    -moz-border-radius: 0px 0px 0px 0px;
-    -webkit-border-radius: 0px 0px 0px 0px;
+    -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    -moz-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    -webkit-transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    -moz-transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    border-radius: 3px;
     border: 0px solid #000000;
     background-color: rgb(254, 254, 254);
     padding: 0px !important;
     margin: 20px 0px !important;
 }
 
+.card:hover {
+    -webkit-box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    -moz-box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
 .card-title {
     padding: 1px 15px !important;
-    background-color: #0B0B71;
+    background-color: #D32F2F;
     color: white !important;
-    border-radius: 3px 3px 0px 0px;
+    border-radius: 3px 3px 0 0;
+}
+
+.card-title h2 {
+    font-size: 1.5em;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-left: 5px;
+}
+
+.card-title .glyphicon {
+    font-size: 0.8em;
+    padding-right: 5px;
 }
 
 .card-body {
-    padding: 10px 15px !important;
+    padding: 10px 20px !important;
 }
 
 /* CUSTOM LINK STYLING */
 
 a:link, a:visited {
-    color: #2A4D6E;
+    color: #0277bd;
 
     text-decoration: none;
     target-new: none;
 }
 
 a:hover {
-    color: #267257 !important;
+    color: #0288d1 !important;
 
     target-new: none;
 }
 
 /* NAVBAR STYLING */
 
+.navbar-fixed-top {
+    border-width: 0px;
+}
+
+.navbar-brand {
+    font-family: 'Lato', sans-serif;
+}
+
 .navbar a:link, .navbar a:visited {
     color: white !important;
 }
 
 .navbar {
-    background-color: rgba(40, 40, 40, 0.95);
-    -webkit-box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-    -moz-box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-    box-shadow: 1px 5px 5px 0px rgba(119, 119, 119, 0.54);
-
+    background-color: #4C4C4C;
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
 .nav-hover:hover {
@@ -307,8 +345,23 @@ a:hover {
     pointer-events: none;
 }
 
+#count-container .glyphicon {
+    padding-right: 5px;
+}
+
 .alert {
-    margin-top: 10px;
+    margin: 10px 15px;
+    padding: 15px 20px;
+    background-color: #f9a825;
+    border: 0;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    color: #fffde7;
+}
+
+.alert:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 
 .placeholders {
@@ -340,4 +393,49 @@ a:hover {
     font-weight: 100;
     background-color: #110F80;
     margin-bottom: 10px;
+}
+
+/* Student Home Page */
+
+.course-name {
+    color: #D32F2F;
+    font-weight: bold;
+}
+
+.separator-bar {
+    color: #BDBDBD;
+    padding: 0px 3px;
+}
+
+/* Student Profile Settings */
+
+#profile {
+    margin: 10px 0px;
+}
+
+.student-profile .form-control {
+    margin-bottom: 10px;
+}
+
+.student-profile .btn {
+    margin-top: 10px;
+}
+
+/* Student Activity Log */
+
+.activity-log-filters {
+    margin-bottom: 10px;
+}
+
+.activity-log-filters select {
+    margin-bottom: 10px;
+}
+
+#activity-table th {
+    background-color: #757575;
+    color: #ffffff;
+}
+
+#activity-table tr > th, #activity-table tr > td {
+    padding-left: 15px;
 }
