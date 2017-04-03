@@ -59,6 +59,14 @@ input, textarea, select {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
+.btn-success {
+    background-color: #4caf50;
+}
+
+.btn-success:hover {
+    background-color: #66bb6a;
+}
+
 .btn-success-submit {
     border-radius: 4px !important;
     height: 100% !important;
@@ -120,12 +128,12 @@ input, textarea, select {
 
 /* CUSTOM FONT STYLING */
 
-.page-header {
-    color: rgb(100, 50, 50);
+.consider-login .jumbotron {
+    font-family: 'Lato', sans-serif;
 }
 
 h1 {
-    color: #9E0008 !important;
+    color: #D32F2F !important;
 }
 
 /* CARD STYLING */
@@ -137,7 +145,7 @@ h1 {
     -webkit-transition: all 0.3s cubic-bezier(.25,.8,.25,1);
     -moz-transition: all 0.3s cubic-bezier(.25,.8,.25,1);
     transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-    border-radius: 3px;
+    border-radius: 5px;
     border: 0px solid #000000;
     background-color: rgb(254, 254, 254);
     padding: 0px !important;
@@ -154,7 +162,7 @@ h1 {
     padding: 1px 15px !important;
     background-color: #D32F2F;
     color: white !important;
-    border-radius: 3px 3px 0 0;
+    border-radius: 5px 5px 0 0;
 }
 
 .card-title h2 {
