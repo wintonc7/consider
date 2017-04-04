@@ -5,6 +5,14 @@
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script type="text/javascript" src="/js/students/feedback_form.js"></script>
+<script type="text/javascript">
+function CheckTag(val){
+ var element=document.getElementById('othertag');
+ if(val=='other')
+   element.style.display='block';
+ else
+   element.style.display='none';
+}</script>
 {{ super() }}
 {% endblock head %}
 

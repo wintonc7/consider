@@ -32,6 +32,7 @@ class FeedbackForm(webapp2.RequestHandler):
         feedback = model.Feedback()
         email = self.request.get('email')
         tag = self.request.get('tag')
+        othertag = self.request.get('othertag')
         comments = self.request.get('comments')
 
         if email:
@@ -39,10 +40,14 @@ class FeedbackForm(webapp2.RequestHandler):
         else:
             feedback.email = "invalid email"
         if tag:
-            feedback.tag = tag
             if tag == "other":
                 feedback.other_selected = True
+                if othertag:
+                    feedback.tag = othertag
+                else:
+                    feedback.tag = tag
             else:
+                feedback.tag = tag
                 feedback.other_selected = False
         else:
             feedback.tag = "NO TAG"
