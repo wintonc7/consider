@@ -269,15 +269,15 @@ a:hover {
 
 /* From discussion.css */
 .support {
-    background-color: rgb(203, 255, 186);
+    background-color: #4caf50;
 }
 
 .neutral {
-    background-color: rgb(186, 237, 255);
+    background-color: #9e9e9e;
 }
 
 .disagree {
-    background-color: rgb(255, 186, 186);
+    background-color: #f44336;
 }
 
 .list-group input[type="radio"] {
@@ -455,9 +455,12 @@ a:hover {
 
 /* Rounds-based/Discussion UI */
 
+.initial-submission-card .jumbotron {
+    padding: 20px 25px 10px 25px;
+}
+
 .discussion-card .jumbotron {
     padding: 0px 10px;
-    background: none;
     border-radius: 0px;
 }
 
