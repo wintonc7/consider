@@ -6,12 +6,11 @@ $(document).ready(function() {
 
   }
 
-  function checktag(tag){
-        if(tag==="other"){
-            document.getElementById('othertag').style.display='block';
-        }
-        else{
-            document.getElementById('othertag').style.display='none';
-        }
+  function CheckTag(val){
+        var element = getElementById('othertag');
+        if(val=="other")
+            element.style.display='block';
+        else
+            element.style.display='none';
   }
 });

@@ -18,14 +18,15 @@
             <div class="card-body">
                 <form id="feedback" method="post" action="/feedback_form">
                     <strong>Email</strong>
-                    <input type="text" name="email" id="email" value={{ email }}/>
+                    <input type="text" name="email" id="email" value="{{ email }}"/>
                     <br>
                     <strong>Tag</strong>
-                    <select name="tag" onchange='checktag(this.value)'>
-                        <option value="profile">Profile</option>
-                        <option value="prompts">Question Prompts</option>
-                        <option value="responding">Posting Responses</option>
-                        <option value="viewing responses">Viewing Responses</option>
+                    <select name="tag" id="tag" onchange='CheckTag(this.value)'>
+                        <option>Please Select a Tag</option>
+                        <option value="Profile">Profile</option>
+                        <option value="Question Prompts">Question Prompts</option>
+                        <option value="Posting Responses">Posting Responses</option>
+                        <option value="Viewing Responses">Viewing Responses</option>
                         <option value="other">Other</option>
                     </select>
                     <br>
