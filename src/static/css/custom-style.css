@@ -159,7 +159,7 @@ h1 {
 }
 
 .card-title {
-    padding: 1px 15px !important;
+    padding: 1px 15px;
     background-color: #D32F2F;
     color: white !important;
     border-radius: 5px 5px 0 0;
@@ -451,4 +451,20 @@ a:hover {
 
 #activity-table tr > th, #activity-table tr > td {
     padding-left: 15px;
+}
+
+/* Rounds-based/Discussion UI */
+
+.discussion-card .jumbotron {
+    padding: 0px 10px;
+    background: none;
+    border-radius: 0px;
+}
+
+.response-card .student-response {
+    padding: 10px 15px;
+}
+
+.response-card .card-title {
+    background-color: #00B0E8;
 }

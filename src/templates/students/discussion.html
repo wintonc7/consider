@@ -20,11 +20,9 @@
 {%- endif -%}
 <div class="container discussion-container" id='pageContent'>
 
-    <div class="card">
+    <div class="card discussion-card">
     <div class="card-title">
-        <h2>{{ round_names[curr_page-1] }}
-            &gt; Welcome {{alias}}
-        </h2>
+        <h2>{{ round_names[curr_page-1] }}</h2>
     </div>
     <div class="card-body">
     {% if description %}
@@ -32,13 +30,13 @@
     {% endif %}
     {% for comment in comments %}
         <div class="jumbotron{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}" id="jum_{{loop.index}}">
-            <div class="row card-header">
-                <div class="col-md-6">
-                    <h2>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h2>
+            <div class="card response-card">
+                <div class="card-title">
+                    <h4>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h4>
                 </div>
 
                 {%- if not expired and comment.response -%}
-                <div class="col-md-12">
+                <div class="card-body">
                 <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="pull-right btn btn-sm btn-info" {% if
                             expired -%} disabled="true" {%- endif -%}>
                             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
@@ -52,27 +50,24 @@
                             expired -%} disabled="true" {%- endif -%}>
                         <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
                     </button>
-                </div>
                 {%- endif -%}
-            </div>
-            {% if comment.option %}
-            <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
-            {% endif %}
-
-            {% for (key, value) in comment.thumbs %}
-                {%  if expired %}
-                <span class="badge">{{ key }}: <span
-                        class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
-                        aria-hidden="true"></span></span>
+                {% if comment.option %}
+                <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
                 {% endif %}
-            {% endfor %}
-            <div class="row">
-                <div class="well col-md-12"
-                     style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px; margin-top: 10px;">
+
+                {% for (key, value) in comment.thumbs %}
+                    {%  if expired %}
+                    <span class="badge">{{ key }}: <span
+                            class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
+                            aria-hidden="true"></span></span>
+                    {% endif %}
+                {% endfor %}
+                <div class="student-response">
                     {{ comment.response|safe }}
                 </div>
             </div>
         </div>
+    </div>
     {% endfor %}
     {% if did_not_participate %}
     <div class="jumbotron">
