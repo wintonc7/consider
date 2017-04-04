@@ -1,0 +1,42 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}| Feedback Form{% endblock %}
+
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/students/feedback_form.js"></script>
+{{ super() }}
+{% endblock head %}
+
+{% block content %}
+{{ super() }}
+    <div class="container" id='pageContent'>
+        <div class="card">
+            <div class="card-title">
+                <h2>Feedback Form</h2>
+            </div>
+            <div class="card-body">
+                <form id="feedback" method="post" action="/feedback_form">
+                    <strong>Email</strong>
+                    <input type="text" name="email" id="email" value={{ email }}/>
+                    <br>
+                    <strong>Tag</strong>
+                    <select name="tag" onchange='checktag(this.value)'>
+                        <option value="profile">Profile</option>
+                        <option value="prompts">Question Prompts</option>
+                        <option value="responding">Posting Responses</option>
+                        <option value="viewing responses">Viewing Responses</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <br>
+                    <input type="text" name="othertag" id="othertag" style='display:none'/>
+                    <br>
+                    <strong>Feedback</strong>
+                    <input type="text" name="feedback" id="comments"/>
+                    <br>
+                    <button type="submit" class="btn btn-lg btn-success btn-success-submit">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

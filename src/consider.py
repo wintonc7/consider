@@ -154,6 +154,7 @@ application = webapp2.WSGIApplication([
     ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
     ('/activity_log', student.ActivityLog),
+    ('/feedback_form', student.FeedbackForm),
     ('/student_profile', student.Profile),
     ('/student_rounds', student.Rounds),
     ('/crontask', CronTask),
