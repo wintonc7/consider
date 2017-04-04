@@ -18,9 +18,11 @@
             <div class="card-body">
                 <form id="feedback" method="post" action="/feedback_form">
                     <strong>Email</strong>
+                    <br>
                     <input type="text" name="email" id="email" value="{{ email }}"/>
                     <br>
                     <strong>Tag</strong>
+                    <br>
                     <select name="tag" id="tag" onchange='CheckTag(this.value)'>
                         <option>Please Select a Tag</option>
                         <option value="Profile">Profile</option>
@@ -30,12 +32,12 @@
                         <option value="other">Other</option>
                     </select>
                     <br>
-                    <input type="text" name="othertag" id="othertag" style='display:none'/>
+                    <input type="text" name="othertag" id="othertag" style='display:none' value="Please enter the topic of your feedback"/>
                     <br>
                     <strong>Feedback</strong>
                     <input type="text" name="comments" id="comments"/>
                     <br>
-                    <button type="submit" class="btn btn-lg btn-success btn-success-submit">Save</button>
+                    <button type="submit" class="btn btn-lg btn-success btn-success-submit">Submit</button>
                 </form>
             </div>
         </div>
