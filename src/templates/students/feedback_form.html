@@ -27,9 +27,9 @@ function CheckTag(val){
             </div>
             <div class="card-body">
                 <form id="feedback" method="post" action="/feedback_form">
-                    <strong>Email</strong>
+                    <strong>Would you like this feedback to be submitted anonymously? (If left unchecked, your preferred email will be included in the feedback)</strong>
                     <br>
-                    <input class="form-control" type="text" name="email" id="email" value="{{ email }}"/>
+                    <input type="checkbox" name="email" id="email"/>
                     <br>
                     <strong>Tag</strong>
                     <br>

@@ -35,10 +35,10 @@ class FeedbackForm(webapp2.RequestHandler):
         othertag = self.request.get('othertag')
         comments = self.request.get('comments')
 
-        if email:
-            feedback.email = email
+        if email == "false":
+            feedback.email = student.preferred_email
         else:
-            feedback.email = "invalid email"
+            feedback.email = "ANONYMOUS"
         if tag:
             if tag == "other":
                 feedback.other_selected = True

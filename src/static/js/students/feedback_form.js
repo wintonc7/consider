@@ -8,22 +8,22 @@ $(document).ready(function() {
 
       var email, tag, othertag, comments;
 
-      email = $('#email').value;
+      email = $('#email').is(":checked");
       tag = $('#tag').val();
       othertag= $('#othertag').val();
+
+      console.log(email);
 
       // Update content of textarea(s) handled by CKEditor
       for ( instance in CKEDITOR.instances ) {
           CKEDITOR.instances[instance].updateElement();
-          //console.log("CKEDITOR Instance FOUND");
-          //console.log("CKEditor contains " + CKEDITOR.instances[instance].getData());
           comments = CKEDITOR.instances[instance].getData().replace(/<p>/g,'').replace(/<\/p>/g,'').replace(/&nbsp;/g,'');
       }
 
       var $form = $(this);
       var url = $form.attr("action");
 
-          $.post(url, {email: email, tag: tag, othertag: othertag, comments: comments});
+          $.post(url, {email: email.toString(), tag: tag, othertag: othertag, comments: comments});
   }
 
 
