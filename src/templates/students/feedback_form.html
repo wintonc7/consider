@@ -12,8 +12,10 @@ function CheckTag(val){
    element.style.display='block';
  else
    element.style.display='none';
+   element.value = "Please enter the topic of your feedback"
 }</script>
 {{ super() }}
+<script src="/ckeditor/ckeditor.js"></script>
 {% endblock head %}
 
 {% block content %}
@@ -27,7 +29,7 @@ function CheckTag(val){
                 <form id="feedback" method="post" action="/feedback_form">
                     <strong>Email</strong>
                     <br>
-                    <input type="text" name="email" id="email" value="{{ email }}"/>
+                    <input class="form-control" type="text" name="email" id="email" value="{{ email }}"/>
                     <br>
                     <strong>Tag</strong>
                     <br>
@@ -40,10 +42,17 @@ function CheckTag(val){
                         <option value="other">Other</option>
                     </select>
                     <br>
-                    <input type="text" name="othertag" id="othertag" style='display:none' value="Please enter the topic of your feedback"/>
+                    <input class="form-control" type="text" name="othertag" id="othertag" style='display:none' value="Please enter the topic of your feedback"/>
                     <br>
                     <strong>Feedback</strong>
+                    <br>
                     <input type="text" name="comments" id="comments"/>
+                    <script type="text/javascript">
+                        CKEDITOR.replace("comments",
+                        {
+                            height: 200
+                        });
+                    </script>
                     <br>
                     <button type="submit" class="btn btn-lg btn-success btn-success-submit">Submit</button>
                 </form>
