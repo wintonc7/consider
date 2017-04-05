@@ -14,5 +14,7 @@ class Feedback(ndb.Model):
     tag = ndb.StringProperty(required=False)
 
     #Feedback Response
-    #TODO stringproperty limits length, could use text property for longer feedback. howmuch do we need?
     feedback = ndb.StringProperty(required=True)
+
+    #Timestamp of feedback submisssion
+    timestamp = ndb.DateTimeProperty(auto_now_add=True)
