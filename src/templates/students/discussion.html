@@ -21,7 +21,7 @@
 <div class="container discussion-container" id='pageContent'>
 
     <div class="card discussion-card">
-    <div class="card-title">
+    <div class="card-title support">
         <h2>{{ round_names[curr_page-1] }}</h2>
     </div>
     <div class="card-body">
@@ -29,26 +29,28 @@
         <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description}}</h1>
     {% endif %}
     {% for comment in comments %}
-        <div class="card response-card">
-            <div class="card-title{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
+        <div class="card response-card{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
+            <div class="card-title">
                 <h4>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h4>
             </div>
 
             {%- if not expired and comment.response -%}
             <div class="card-body">
-            <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="pull-right btn btn-sm btn-info" {% if
-                        expired -%} disabled="true" {%- endif -%}>
-                        <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
-                </button>
-                <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="pull-right btn btn-sm btn-danger" {% if
-                        expired -%} disabled="true" {%- endif -%}>
-                        <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree with at least one key point
-                </button>
+                <div class="btn-group-vertical pull-right">
+                    <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="btn btn-sm btn-neutral" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
+                    </button>
+                    <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="btn btn-sm btn-danger" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree with at least one key point
+                    </button>
 
-                <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="pull-right btn btn-sm btn-success" {% if
-                        expired -%} disabled="true" {%- endif -%}>
-                    <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
-                </button>
+                    <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="btn btn-sm btn-success" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
+                    </button>
+                </div>
             {%- endif -%}
             {% if comment.option %}
             <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
