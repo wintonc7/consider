@@ -186,7 +186,49 @@ h1 {
 }
 
 .card-body {
-    padding: 10px 20px !important;
+    padding: 10px 20px;
+}
+
+.course-card .card-title {
+    background-color: #666666;
+}
+
+.course-card .card-body {
+    padding: 0;
+}
+
+.course-card .table td {
+    border: 0;
+    border-top: 1px solid #eaeaea;
+    padding: 10px 15px;
+}
+
+.course-card .table th {
+    color: #ffffff;
+    background-color: #444444;
+    border: 0;
+    padding: 8px 15px;
+    font-size: 0.8em;
+}
+
+.course-card .table tr td {
+    transition: linear 0.2s;
+}
+
+.course-card .table tr:hover td {
+    background-color: #eaeaea;
+}
+
+.course-card .table tr:not(:first-child) {
+    cursor: pointer;
+}
+
+.course-card .table tr:last-child td:first-child {
+    border-radius: 0 0 0 5px;
+}
+
+.course-card .table tr:last-child td:last-child {
+    border-radius: 0 0 5px 0;
 }
 
 /* CUSTOM LINK STYLING */
