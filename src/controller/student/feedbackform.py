@@ -31,7 +31,7 @@ class FeedbackForm(webapp2.RequestHandler):
 
         feedback = model.Feedback()
         email = self.request.get('email')
-        tag = self.request.get('tag')
+        tags = self.request.get('tags')
         othertag = self.request.get('othertag')
         comments = self.request.get('comments')
 
@@ -39,22 +39,17 @@ class FeedbackForm(webapp2.RequestHandler):
             feedback.email = student.preferred_email
         else:
             feedback.email = "ANONYMOUS"
-        if tag:
-            if tag == "other":
-                feedback.other_selected = True
-                if othertag:
-                    feedback.tag = othertag
-                else:
-                    feedback.tag = tag
-            else:
-                feedback.tag = tag
-                feedback.other_selected = False
+        if tags:
+            split_tags = tags.split(",")
+            feedback.tags = split_tags
         else:
-            feedback.tag = "NO TAG"
+            feedback.tag = "NO TAGS"
         if comments:
             feedback.feedback = comments
         else:
             feedback.feedback = "NO COMMENTS"
+        feedback.other_selected = (othertag == "true")
+
         feedback.put()
 
         return self.redirect('/student_home')

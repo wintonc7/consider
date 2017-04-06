@@ -6,13 +6,10 @@ $(document).ready(function() {
       //Prevent the default behaviour
       event.preventDefault();
 
-      var email, tag, othertag, comments;
+      var email, tags, othertagged, comments;
 
       email = $('#email').is(":checked");
-      tag = $('#tag').val();
-      othertag= $('#othertag').val();
-
-      console.log(email);
+      othertag= $('#other').is(":checked");
 
       // Update content of textarea(s) handled by CKEditor
       for ( instance in CKEDITOR.instances ) {
@@ -20,18 +17,24 @@ $(document).ready(function() {
           comments = CKEDITOR.instances[instance].getData().replace(/<p>/g,'').replace(/<\/p>/g,'').replace(/&nbsp;/g,'');
       }
 
+      //construct tag list
+      tags = "";
+
+      for(i = 1; i <= 4; i++) {
+        if($('#tag' + i).is(':checked')) {
+            tags+=$('#tag' + i).val();
+            tags+=",";
+        }
+      }
+
+      if(othertag){
+            tags+=$('#othertag').val();
+      }
+
       var $form = $(this);
       var url = $form.attr("action");
 
-          $.post(url, {email: email.toString(), tag: tag, othertag: othertag, comments: comments});
-  }
-
-
-  function CheckTag(val){
-        var element = getElementById('othertag');
-        if(val=="other")
-            element.style.display='block';
-        else
-            element.style.display='none';
+          $.post(url, {email: email.toString(), tags: tags, othertag: othertag.toString(), comments: comments});
   }
 });
+

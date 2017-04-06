@@ -10,8 +10,8 @@ class Feedback(ndb.Model):
     #check if other was selected
     other_selected = ndb.BooleanProperty(required=True)
 
-    #tag selected for this post
-    tag = ndb.StringProperty(required=False)
+    #tag(s) selected for this post
+    tags = ndb.StringProperty(required=False, repeated=True)
 
     #Feedback Response
     feedback = ndb.StringProperty(required=True)

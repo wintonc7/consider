@@ -6,14 +6,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script type="text/javascript" src="/js/students/feedback_form.js"></script>
 <script type="text/javascript">
-function CheckTag(val){
- var element=document.getElementById('othertag');
- if(val=='other')
-   element.style.display='block';
- else
-   element.style.display='none';
-   element.value = "Please enter the topic of your feedback"
-}</script>
+  function CheckTag(){
+        var element = document.getElementById('othertag');
+        if($('#other').is(":checked"))
+            element.style.display='block';
+        else
+            element.style.display='none';
+  }
+</script>
 {{ super() }}
 <script src="/ckeditor/ckeditor.js"></script>
 {% endblock head %}
@@ -27,20 +27,28 @@ function CheckTag(val){
             </div>
             <div class="card-body">
                 <form id="feedback" method="post" action="/feedback_form">
-                    <strong>Would you like this feedback to be submitted anonymously? (If left unchecked, your preferred email will be included in the feedback)</strong>
-                    <br>
+                    <label>Would you like this feedback to be submitted anonymously?</label>
                     <input type="checkbox" name="email" id="email"/>
                     <br>
-                    <strong>Tag</strong>
+                    *If left unchecked, your preferred email will be included in the feedback
                     <br>
-                    <select name="tag" id="tag" onchange='CheckTag(this.value)'>
-                        <option>Please Select a Tag</option>
-                        <option value="Profile">Profile</option>
-                        <option value="Question Prompts">Question Prompts</option>
-                        <option value="Posting Responses">Posting Responses</option>
-                        <option value="Viewing Responses">Viewing Responses</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <br>
+                    <strong>Tag(s): Please Select All That Apply</strong>
+                    <br>
+                    <label>Profile</label>
+                    <input type="checkbox" name ="tag1" id="tag1" value="Profile">
+                    <br>
+                    <label>Viewing Questions</label>
+                    <input type="checkbox" name ="tag2" id="tag2" value="Viewing Questions">
+                    <br>
+                    <label>Posting Responses</label>
+                    <input type="checkbox" name ="tag3" id="tag3" value="Posting Responses">
+                    <br>
+                    <label>Viewing Responses</label>
+                    <input type="checkbox" name ="tag4" id="tag4" value="Viewing Responses">
+                    <br>
+                    <label>Other</label>
+                    <input type="checkbox" name ="other" id="other" onchange="CheckTag()">
                     <br>
                     <input class="form-control" type="text" name="othertag" id="othertag" style='display:none' value="Please enter the topic of your feedback"/>
                     <br>
