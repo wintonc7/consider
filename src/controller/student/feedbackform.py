@@ -40,6 +40,7 @@ class FeedbackForm(webapp2.RequestHandler):
         else:
             feedback.email = "ANONYMOUS"
         if tags:
+            tags = tags[:-1]
             split_tags = tags.split(",")
             feedback.tags = split_tags
         else:

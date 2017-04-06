@@ -29,6 +29,7 @@ $(document).ready(function() {
 
       if(othertag){
             tags+=$('#othertag').val();
+            tags+=","
       }
 
       var $form = $(this);
