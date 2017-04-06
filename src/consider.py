@@ -17,7 +17,7 @@ from google.appengine.api import users
 from . import config
 from . import utils
 from src import model
-from .controller import admin, instructor, student, grader
+from .controller import admin, instructor, student, grader, feedbackviewer
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -145,6 +145,7 @@ application = webapp2.WSGIApplication([
     ('/home', MainPage),  # TODO can we do away with /home?
     ('/error', ErrorPage),
     ('/admin', admin.AdminPage),
+    ('/view_feedback', feedbackviewer.ViewFeedBackPage),
     ('/courses', instructor.Courses),
     ('/sections', instructor.Sections),
     ('/students', instructor.Students),
