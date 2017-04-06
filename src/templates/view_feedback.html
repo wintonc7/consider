@@ -1,5 +1,27 @@
 {% extends "layouts/base.html" %}
 
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/students/activitylog.js"></script>
+{{ super() }}
+{% endblock head %}
+
 {% block content %}
-    <strong>FEEDBACK</strong>
+    {{ super() }}
+    <div class="container" id='pageContent'>
+        {% for fb in feedback %}
+            <div class="card">
+                <div class="card-title">
+                    <h3>Timestamp: {{ fb.timestamp }}</h3>
+                </div>
+                 <div class="card-body">
+                     <strong>Submitted By:</strong> {{ fb.email }}
+                     <br>
+                     <strong>Tags:</strong> {{ fb.tags }}
+                     <br>
+                     <strong>Feedback:</strong> {{ fb.feedback }}
+                 </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock content %}
