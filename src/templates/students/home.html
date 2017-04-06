@@ -14,8 +14,10 @@
     {% if sections and courses %}
     <div class="list-group">
         {% for course in courses %}
-            <div class="card course-card">
-                <div class="card-title"><h4>{{ course }}</h4></div>
+            <div class="card course-card" id="{{ course }}">
+                <div class="card-title" onclick="collapse('{{ course }}')">
+                    <h4>{{ course }}</h4>
+                </div>
                 <div class="card-body">
                     <table class="table">
                     <tr>

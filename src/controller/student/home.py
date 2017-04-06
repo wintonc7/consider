@@ -77,6 +77,7 @@ class HomePage(webapp2.RequestHandler):
         # end
         # Get list of courses
         course_list = list(set([section['course'] for section in section_list]))
+        course_list.sort()
         # Add the list of sections the student is in to our template
         template_values['sections'] = section_list
         template_values['courses'] = course_list

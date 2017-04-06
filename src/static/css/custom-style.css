@@ -191,6 +191,7 @@ h1 {
 
 .course-card .card-title {
     background-color: #666666;
+    cursor: pointer;
 }
 
 .course-card .card-body {
