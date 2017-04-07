@@ -10,9 +10,10 @@ function redirect(key, group, round) {
 
 function collapse(id) {
   var card = document.getElementById(id);
-  if (card.hasChildNodes()) {
-    card.children[1].style = "display: none";
-    console.log('hiding');
-  }
+  if (card.hasChildNodes() && card.children[1].style.display == 'none') {
+        card.children[1].style.display = 'block';
+    } else {
+        card.children[1].style.display = 'none';
+    }
   // TODO: ALLOW SHOWING AGAIN
 }
