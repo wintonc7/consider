@@ -70,7 +70,9 @@
                 </div>
             {%- endif -%}
             {% if comment.option %}
-            <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
+            <div class="student-response col-sm-4">
+                <span class="response-option">Option selected: {{comment.option}}</span>
+            </div>
             {% endif %}
         </div>
         </div>

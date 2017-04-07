@@ -562,3 +562,10 @@ a:hover {
 .response-card .card-title {
     background-color: #00B0E8;
 }
+
+.response-option {
+    background-color: #f0f0f0;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+}
