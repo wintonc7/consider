@@ -37,6 +37,6 @@ class ViewFeedBackPage(webapp2.RequestHandler):
             # end get
         else:
             return self.redirect('/')
-        
+
     def post(self):
        i = "placeholder"

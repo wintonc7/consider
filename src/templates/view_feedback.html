@@ -2,19 +2,28 @@
 
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script type="text/javascript" src="/js/students/activitylog.js"></script>
+<script type="text/javascript" src="/js/admin/view_feedback.js"></script>
 {{ super() }}
 {% endblock head %}
 
 {% block content %}
     {{ super() }}
     <div class="container" id='pageContent'>
+        <select class="form-control" id="tag-select">
+            <option value="DEFAULT" selected>Feedback with any tag(s)</option>
+            <option value="Profile">Profile</option>
+            <option value="Viewing Questions">Viewing Questions</option>
+            <option value="Posting Responses">Posting Responses</option>
+            <option value="Viewing Responses">Viewing Responses</option>
+            <option value="Other">Other</option>
+        </select>
+        {% set cardID = 1 %}
         {% for fb in feedback %}
-            <div class="card">
+            <div class="card" id="card{{ cardID }}" value="{{ fb.other_selected }}">
                 <div class="card-title">
                     <h3>Timestamp: {{ fb.timestamp }}</h3>
                 </div>
-                 <div class="card-body">
+                 <div class="card-body" id="cardBody{{ cardID }}" value="{{ fb.tags }}">
                      <strong>Submitted By:</strong> {{ fb.email }}
                      <br>
                      <strong>Tags:</strong>
@@ -25,6 +34,7 @@
                      <strong>Feedback:</strong> {{ fb.feedback }}
                  </div>
             </div>
+        {% set cardID = cardID+1 %}
         {% endfor %}
     </div>
 {% endblock content %}
