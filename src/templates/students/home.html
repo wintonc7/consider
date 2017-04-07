@@ -9,7 +9,7 @@
     <h2>Welcome {{nickname}}!</h2>
     </div>
     <div class="card-body">
-    <h5 class="form-signin-heading">Please select a section to continue.</h5>
+    <h5 class="form-signin-heading">Please select an assignment to continue.</h5>
 
     {% if sections and courses %}
     <div class="list-group">
@@ -21,30 +21,30 @@
                 <div class="card-body">
                     <table class="table">
                     <tr>
-                        <th class="col-md-6 hidden-xs">Assignment Name</th>
-                        <th class="col-md-2 hidden-xs">Format</th>
-                        <th class="col-md-2 hidden-xs">Current Round</th>
-                        <th class="col-md-2 hidden-xs">Total Rounds</th>
+                        <th class="col-sm-6 hidden-xs">Assignment Name</th>
+                        <th class="col-sm-2 hidden-xs">Format</th>
+                        <th class="col-sm-2 hidden-xs">Current Round</th>
+                        <th class="col-sm-2 hidden-xs">Total Rounds</th>
                     </tr>
                     {% for section in sections %}
                         {% if section.course == course %}
                             <tr onclick="redirect('{{section.key}}', '{{section.group}}', '{{section.round}}')">
-                                <td class="col-md-6 col-xs-12">{{ section.name }}</td>
-                                <td class="col-md-2 hidden-xs">
+                                <td class="col-sm-6 col-xs-12">{{ section.name }}</td>
+                                <td class="col-sm-2 hidden-xs">
                                     {% if section.rounds_based %}
                                         Rounds
                                     {% else %}
                                         Sequential Discussion
                                     {% endif %}
                                 </td>
-                                <td class="col-md-2 hidden-xs">
+                                <td class="col-sm-2 hidden-xs">
                                     {% if section.rounds_based %}
                                         {{ section.current_round }}
                                     {% else %}
                                         -
                                     {% endif %}
                                 </td>
-                                <td class="col-md-2 hidden-xs">
+                                <td class="col-sm-2 hidden-xs">
                                     {% if section.rounds_based %}
                                         {{ section.total_rounds }}
                                     {% else %}

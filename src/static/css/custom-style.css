@@ -189,9 +189,11 @@ h1 {
     padding: 10px 20px;
 }
 
+/* Course Cards - Student Home Page */
+
 .course-card .card-title {
     background-color: #666666;
-    transition: linear 0.2s;
+    transition: background-color 0.2s linear;
     cursor: pointer;
 }
 
@@ -485,8 +487,8 @@ a:hover {
 /* Badge styling for thumbs up */
 .badge {
     font-weight: 100;
-    background-color: #110F80;
-    margin-bottom: 10px;
+    background-color: rgba(0, 0, 0, 0.35);
+    margin: 10px 5px 10px 5px;
 }
 
 /* Student Home Page */
@@ -531,8 +533,11 @@ a:hover {
 }
 
 #activity-table th {
-    background-color: #757575;
     color: #ffffff;
+    background-color: #444444;
+    border: 0;
+    padding: 8px 15px;
+    font-size: 0.8em;
 }
 
 #activity-table tr > th, #activity-table tr > td {
@@ -556,8 +561,4 @@ a:hover {
 
 .response-card .card-title {
     background-color: #00B0E8;
-}
-
-.response-card .card-body {
-    min-height: 110px;
 }

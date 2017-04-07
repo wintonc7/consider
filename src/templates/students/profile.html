@@ -18,7 +18,7 @@
             <div class="card-body student-profile">
                 <form id="profile" method="post" action="/student_profile">
                     <label for="loginid">Login ID</label>
-                    <div id="loginid" type="text" class="form-control" disabled>{{ user_id }}</div>
+                    <input id="loginid" type="text" class="form-control" value="{{ user_id }}" disabled>
                     <h6><span class="glyphicon glyphicon-info-sign"></span> <em>This is the gmail address you provided to be signed up for CONSIDER. It cannot be changed.</em></h6>
                     <label for="fname"><strong>First Name</strong></label>
                     <input id="fname" type="text" class="form-control" value="{{ fname }}">

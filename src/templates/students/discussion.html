@@ -31,12 +31,29 @@
     {% for comment in comments %}
         <div class="card response-card{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
             <div class="card-title">
-                <h4>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h4>
+                <div class="row">
+                    <div class="col-sm-8 col-xs-6">
+                        <h4>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h4>
+                    </div>
+                    <div class="col-sm-4 col-xs-6 text-right">
+                        {% for (key, value) in comment.thumbs %}
+                            {%  if expired %}
+                            <span class="badge">{{ key }}: <span
+                                    class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
+                                    aria-hidden="true"></span></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
-            {%- if not expired and comment.response -%}
             <div class="card-body">
-                <div class="btn-group-vertical pull-right">
+            <div class="row">
+            <div class="student-response col-sm-8">
+                {{ comment.response|safe }}
+            </div>
+            {%- if not expired and comment.response -%}
+                <div class="btn-group-vertical col-sm-4">
                     <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="btn btn-sm btn-neutral" {% if
                             expired -%} disabled="true" {%- endif -%}>
                             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
@@ -55,17 +72,7 @@
             {% if comment.option %}
             <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
             {% endif %}
-
-            {% for (key, value) in comment.thumbs %}
-                {%  if expired %}
-                <span class="badge">{{ key }}: <span
-                        class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
-                        aria-hidden="true"></span></span>
-                {% endif %}
-            {% endfor %}
-            <div class="student-response">
-                {{ comment.response|safe }}
-            </div>
+        </div>
         </div>
     </div>
     {% endfor %}
