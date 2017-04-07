@@ -191,7 +191,12 @@ h1 {
 
 .course-card .card-title {
     background-color: #666666;
+    transition: linear 0.2s;
     cursor: pointer;
+}
+
+.course-card .card-title:hover {
+    background-color: #777777;
 }
 
 .course-card .card-body {
@@ -230,6 +235,14 @@ h1 {
 
 .course-card .table tr:last-child td:last-child {
     border-radius: 0 0 5px 0;
+}
+
+.course-card-collapsed .card-body {
+    display: none;
+}
+
+.course-card-collapsed .card-title {
+    border-radius: 5px;
 }
 
 /* CUSTOM LINK STYLING */
