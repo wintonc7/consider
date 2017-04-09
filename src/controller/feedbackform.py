@@ -23,10 +23,12 @@ class FeedbackForm(webapp2.RequestHandler):
         HTTP POST method to submit the response.
         """
         # First, check that the logged in user is a student
-        student = utils.check_privilege(model.Role.student)
-        if not student:
+        is_student = True;
+        user = utils.check_privilege(model.Role.student)
+        if not user:
             # Redirect home if not a student
-            return self.redirect('/')
+            user = utils.check_privilege(model.Role.instructor)
+            is_student = False
         # end
 
         feedback = model.Feedback()
@@ -36,7 +38,10 @@ class FeedbackForm(webapp2.RequestHandler):
         comments = self.request.get('comments')
 
         if email == "false":
-            feedback.email = student.preferred_email
+            if is_student:
+                feedback.email = user.preferred_email
+            else:
+                feedback.email = user.email
         else:
             feedback.email = "ANONYMOUS"
         if tags:
@@ -52,8 +57,10 @@ class FeedbackForm(webapp2.RequestHandler):
         feedback.other_selected = (othertag == "true")
 
         feedback.put()
-
-        return self.redirect('/student_home')
+        if(is_student):
+            return self.redirect('/student_home')
+        else:
+            return self.redirect('/courses')
         # end post
 
     def get(self):
@@ -61,10 +68,12 @@ class FeedbackForm(webapp2.RequestHandler):
         Displays form for submitting feedback
         """
         # First, check that the logged in user is a student
-        student = utils.check_privilege(model.Role.student)
-        if not student:
+        is_student = True;
+        user = utils.check_privilege(model.Role.student)
+        if not user:
             # Redirect home if not a student
-            return self.redirect('/')
+            user = utils.check_privilege(model.Role.instructor)
+            is_student = False
         # end
 
         # Create a url for the user to logout
@@ -74,11 +83,14 @@ class FeedbackForm(webapp2.RequestHandler):
         template_values = {
             'documentation': config.DOCUMENTATION,
             'logouturl': logout_url,
-            'student': True,
-            'email': student.preferred_email
+            'is_student': is_student,
         }
+        if is_student:
+            template_values['email'] = user.preferred_email
+        else:
+            template_values['email'] = user.email
         # Set the template html page
-        template = utils.jinja_env().get_template('students/feedback_form.html')
+        template = utils.jinja_env().get_template('feedback_form.html')
         # And render it
         self.response.write(template.render(template_values))
         # end get

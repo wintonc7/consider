@@ -38,7 +38,12 @@ $(document).ready(function() {
       if(comments.length > 0 && tags.length > 0){
             $.post(url, {email: email.toString(), tags: tags, othertag: othertag.toString(), comments: comments});
             bootbox.alert("Thank You for submitting feedback!", function(){
-                window.location = "/student_home";
+                is_student = $('#email').val();
+                if(is_student){
+                    window.location = "/student_home";
+                }else{
+                    window.location = "/courses";
+                }
             });
       }else{
             bootbox.alert("To submit you must have entered feedback and selected at least one tag");

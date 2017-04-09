@@ -17,7 +17,7 @@ from google.appengine.api import users
 from . import config
 from . import utils
 from src import model
-from .controller import admin, instructor, student, grader, feedbackviewer
+from .controller import admin, instructor, student, grader, feedbackviewer, feedbackform
 
 
 class ErrorPage(webapp2.RequestHandler):
@@ -155,7 +155,7 @@ application = webapp2.WSGIApplication([
     ('/groups', instructor.Groups),
     ('/student_home', student.HomePage),
     ('/activity_log', student.ActivityLog),
-    ('/feedback_form', student.FeedbackForm),
+    ('/feedback_form', feedbackform.FeedbackForm),
     ('/student_profile', student.Profile),
     ('/student_rounds', student.Rounds),
     ('/crontask', CronTask),
