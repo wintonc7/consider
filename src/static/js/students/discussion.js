@@ -106,3 +106,14 @@ if ($('#student-discussion').data().expired.length == 0)
       }
   });
 }
+
+function collapse_prompt() {
+  var prompt = document.getElementById('initialPrompt');
+  if (prompt.className == 'collapsible-prompt') {
+      prompt.className = 'collapsible-prompt collapsed';
+      prompt.children[0].innerHTML = "<strong>Original Prompt</strong> (click to show)";
+  } else {
+      prompt.className = 'collapsible-prompt';
+      prompt.children[0].innerHTML = "<strong>Original Prompt</strong> (click to hide)";
+  }
+}

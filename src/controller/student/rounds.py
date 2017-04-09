@@ -228,6 +228,9 @@ class Rounds(webapp2.RequestHandler):
 
         # Grab the requested round
         requested_round = model.Round.get_by_id(requested_round_number, parent=section.key)
+        # Grab the first round
+        first_round = model.Round.get_by_id(1, parent=section.key)
+
         # And check that it's not null
         if not requested_round:
             # Error if so
@@ -255,6 +258,7 @@ class Rounds(webapp2.RequestHandler):
             template_values['rounds'] = section.current_round
             template_values['num_total_rounds'] = section.rounds
             template_values['show_name'] = not section.is_anonymous
+            template_values['prompt'] = first_round.quiz.question
 
             # Send round names
             if section.has_rounds:

@@ -27,6 +27,11 @@
     <div class="card-body">
     {% if description %}
         <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description}}</h1>
+    {% else %}
+        <div class="collapsible-prompt collapsed" id="initialPrompt">
+            <div class="prompt-head" onClick="collapse_prompt()"><strong>Original Prompt</strong> (click to show)</div>
+            <div class="prompt-body">{{ prompt }}</div>
+        </div>
     {% endif %}
     {% for comment in comments %}
         <div class="card response-card{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
@@ -79,8 +84,8 @@
     </div>
     {% endfor %}
     {% if did_not_participate %}
-    <div class="jumbotron">
-        <strong>These students did not participate in the last round</strong>
+    <div class="nonparticipant">
+        <strong>These students did not participate in the last round:</strong>
         {% for name in did_not_participate %}
             <p>{{ name }}</p>
         {% endfor %}
