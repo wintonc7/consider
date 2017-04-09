@@ -35,7 +35,14 @@ $(document).ready(function() {
       var $form = $(this);
       var url = $form.attr("action");
 
-          $.post(url, {email: email.toString(), tags: tags, othertag: othertag.toString(), comments: comments});
+      if(comments.length > 0 && tags.length > 0){
+            $.post(url, {email: email.toString(), tags: tags, othertag: othertag.toString(), comments: comments});
+            bootbox.alert("Thank You for submitting feedback!", function(){
+                window.location = "/student_home";
+            });
+      }else{
+            bootbox.alert("To submit you must have entered feedback and selected at least one tag");
+      }
   }
 });
 
