@@ -9,6 +9,7 @@ from Section import *
 from SeqResponse import *
 from Student import *
 from Grader import *
+from Feedback import *
 
 
 # TODO consistent naming of attributes
