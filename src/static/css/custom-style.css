@@ -609,6 +609,14 @@ a:hover {
     padding: 10px 15px;
 }
 
+.sequential-initial-answers .card-title {
+    background-color: #666666;
+}
+
+.sequential-card .card-title {
+    background-color: #00B0E8;
+}
+
 .response-card .card-title {
     background-color: #00B0E8;
 }
