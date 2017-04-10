@@ -3,6 +3,14 @@
  */
 $(document).ready(function() {
     $('#tag-select').change(filterFeedback);
+    //var id = 1;
+    //var cardTitle = document.getElementById("cardTitle"+id);
+    //while(cardTitle){
+    //    $('#delete'+id).onClick = deleteTicket(id);
+    //    $('#advance'+id).onClick = advanceTicket(id);
+    //    id = id+1;
+    //    cardTitle = document.getElementById("cardTitle"+id);
+    //}
 });
 
 function filterFeedback(){
@@ -43,4 +51,18 @@ function filterFeedback(){
         card = document.getElementById(cardId);
         cardBody = document.getElementById(cardBodyId);
     }
+}
+
+function advanceTicket(idnum){
+    console.log("advance ticket " +idnum);
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "ADVANCE"});
+    location.reload();
+}
+
+function deleteTicket(idnum){
+    console.log("delete ticket " + idnum);
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "DELETE"});
+    location.reload();
 }

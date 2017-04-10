@@ -39,4 +39,18 @@ class ViewFeedBackPage(webapp2.RequestHandler):
             return self.redirect('/')
 
     def post(self):
-       i = "placeholder"
+       #get id of feedback obj in question
+        id = self.request.get('id')
+
+       #get model obj from id
+        fb = model.Feedback.get_by_id(int(id))
+        if fb:
+       #determine which action to take: advance ticket or delete
+            action = self.request.get('action')
+            if action == "ADVANCE":
+                fb.advance_ticket_status()
+            elif action == "DELETE":
+                fb.key.delete()
+        else:
+            import logging
+            logging.info("fb object not found for id: " + id)

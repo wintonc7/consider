@@ -18,3 +18,20 @@ class Feedback(ndb.Model):
 
     #Timestamp of feedback submisssion
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
+
+    #status of feedback ticket
+    #Status flow Open -> In Progress -> Closed
+    ticket_status = ndb.StringProperty(required=True)
+
+    def advance_ticket_status(self):
+        if self.ticket_status == "OPEN":
+            self.ticket_status = "IN PROGRESS"
+        elif self.ticket_status == "IN PROGRESS":
+            self.ticket_status = "CLOSED"
+        elif self.ticket_status == "CLOSED":
+            self.ticket_status = "CLOSED"
+        else:
+            self.ticket_status = "OPEN"
+        self.put()
+
+

@@ -24,8 +24,13 @@
         {% set cardID = 1 %}
         {% for fb in feedback %}
             <div class="card" id="card{{ cardID }}" value="{{ fb.other_selected }}">
-                <div class="card-title">
-                    <h3>Timestamp: {{ fb.timestamp }}</h3>
+                <div class="card-title" id="cardTitle{{ cardID}}" value="{{ fb.key.id() }}">
+                    <h3>
+                        Timestamp: {{ fb.timestamp }}
+                    </h3>
+                    <h4>
+                        Status: {{ fb.ticket_status }}
+                    </h4>
                 </div>
                  <div class="card-body" id="cardBody{{ cardID }}" value="{{ fb.tags }}">
                      <strong>Submitted By:</strong> {{ fb.email }}
@@ -36,6 +41,8 @@
                      {% endfor %}
                      <br>
                      <strong>Feedback:</strong> {{ fb.feedback }}
+                     <button class="form-control" type="button" id="advance{{ cardID }}" onclick="advanceTicket( {{ cardID }} )">Advance Ticket</button>
+                     <button class="form-control" type="button" id="delete{{ cardID }}" onclick="deleteTicket( {{ cardID }} )">Delete</button>
                  </div>
             </div>
         {% set cardID = cardID+1 %}
