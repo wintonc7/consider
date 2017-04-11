@@ -62,6 +62,30 @@ function advanceTicket(idnum){
     });
 }
 
+function markOpen(idnum){
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "OPEN"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
+}
+
+function markInProgress(idnum){
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "IN PROGRESS"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
+}
+
+function markClosed(idnum){
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "CLOSED"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
+}
+
 function deleteTicket(idnum){
     console.log("delete ticket " + idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");

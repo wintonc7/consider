@@ -26,7 +26,7 @@
             <div class="card" id="card{{ cardID }}" value="{{ fb.other_selected }}">
                 <div class="card-title" id="cardTitle{{ cardID}}" value="{{ fb.key.id() }}">
                     <h3>
-                        Timestamp: {{ fb.timestamp }}
+                        Timestamp: {{ fb.timestamp.strftime('%x %H:%M') }}
                     </h3>
                     <h4>
                         Status: {{ fb.ticket_status }}
@@ -41,7 +41,19 @@
                      {% endfor %}
                      <br>
                      <strong>Feedback:</strong> {{ fb.feedback }}
-                     <button class="form-control" type="button" id="advance{{ cardID }}" onclick="advanceTicket( {{ cardID }} )">Advance Ticket</button>
+                     <table>
+                         <tr>
+                             <td>
+                                 <button class="form-control" type="button" id="markOpen{{ cardID }}" onclick="markOpen( {{ cardID }} )">Mark as Open</button>
+                             </td>
+                             <td>
+                                 <button class="form-control" type="button" id="markIP{{ cardID }}" onclick="markInProgress( {{ cardID }} )">Mark as In Progress</button>
+                             </td>
+                             <td>
+                                 <button class="form-control" type="button" id="markClosed{{ cardID }}" onclick="markClosed( {{ cardID }} )">Mark as Closed</button>
+                             </td>
+                         </tr>
+                     </table>
                      <button class="form-control" type="button" id="delete{{ cardID }}" onclick="deleteTicket( {{ cardID }} )">Delete</button>
                  </div>
             </div>

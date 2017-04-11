@@ -22,7 +22,7 @@ class ViewFeedBackPage(webapp2.RequestHandler):
         if user:
             logout_url = users.create_logout_url(self.request.uri)
            #get feedback
-            feedback = model.Feedback.query()
+            feedback = model.Feedback.query().order(-model.Feedback.timestamp)
 
             from src import config
             template_values = {
@@ -49,6 +49,18 @@ class ViewFeedBackPage(webapp2.RequestHandler):
             action = self.request.get('action')
             if action == "ADVANCE":
                 fb.advance_ticket_status()
+                fb.put()
+                self.response.out.write("Status updated to: " + fb.ticket_status)
+            elif action == "OPEN":
+                fb.mark_ticket_as("OPEN")
+                fb.put()
+                self.response.out.write("Status updated to: " + fb.ticket_status)
+            elif action == "IN PROGRESS":
+                fb.mark_ticket_as("IN PROGRESS")
+                fb.put()
+                self.response.out.write("Status updated to: " + fb.ticket_status)
+            elif action == "CLOSED":
+                fb.mark_ticket_as("CLOSED")
                 fb.put()
                 self.response.out.write("Status updated to: " + fb.ticket_status)
             elif action == "DELETE":

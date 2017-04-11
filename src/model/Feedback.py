@@ -34,4 +34,7 @@ class Feedback(ndb.Model):
             self.ticket_status = "OPEN"
         self.put()
 
+    def mark_ticket_as(self, status):
+        self.ticket_status=status
+        self.put()
 
