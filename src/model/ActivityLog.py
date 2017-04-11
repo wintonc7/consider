@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
 
-from .LogEntry import LogEntry
+#from .LogEntry import LogEntry
+import LogEntry
 
 
 class ActivityLog(ndb.Model):
