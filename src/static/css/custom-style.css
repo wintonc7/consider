@@ -272,6 +272,14 @@ a:hover {
     font-family: 'Lato', sans-serif;
 }
 
+.navbar-inverse .navbar-brand {
+    transition: background-color 0.2s linear;
+}
+
+.navbar-inverse .navbar-brand:hover {
+    background-color: #333333;
+}
+
 .navbar a:link, .navbar a:visited {
     color: white !important;
 }
