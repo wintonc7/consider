@@ -2,10 +2,10 @@
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
-import Round as models
-import datetime
+import Round as model
 import unittest
 
+from datetime import datetime 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
@@ -47,10 +47,10 @@ class ModelTestCase_Question(unittest.TestCase):
 	# TODO: Test all properties
 	# TODO: Test methods
 
-class TestRound(ndb.Model):
-	deadline = datetime.time()
+class TestRound(ndb.Model):	
+	deadline = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
 	number = 1
-	starttime = datetime.time()
+	starttime = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
 
 
 class ModelTestCase_Round(unittest.TestCase):
@@ -70,22 +70,22 @@ class ModelTestCase_Round(unittest.TestCase):
 		self.assertEqual(1, len(TestRound.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
-	deadline = datetime.time()
-	number = 1
-	starttime = datetime.time()
-		response_expected = model.Round(comment=comment, student=student)
+		deadline = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
+		number = 1
+		starttime = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
+		response_expected = model.Round(deadline=deadline, number=number, starttime=starttime)
 		response_expected.put();
 		
 		response_actual = response_expected.key.get()
-		assert response_actual.comment == comment
-		assert response_actual.student == student
+		assert response_actual.deadline == deadline
+		assert response_actual.number == number
+		assert response_actual.starttime == starttime
 
 	# Test key as a group
 	# TODO: Test Structured Property
 	# TODO: Test parent-child relationships
 	# TODO: Test all properties
 	# TODO: Test methods
-
 
 
 if __name__ == '__main__':
