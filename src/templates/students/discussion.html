@@ -58,19 +58,19 @@
                 {{ comment.response|safe }}
             </div>
             {%- if not expired and comment.response -%}
-                <div class="btn-group-vertical col-sm-4">
-                    <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="btn btn-sm btn-neutral" {% if
+                <div class="text-right col-sm-4">
+                    <button type="button" data-toggle="tooltip" data-placement="top" title="Did not understand some key points" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="btn btn-sm btn-neutral" {% if
                             expired -%} disabled="true" {%- endif -%}>
-                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
+                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
                     </button>
-                    <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="btn btn-sm btn-danger" {% if
+                    <button type="button" data-toggle="tooltip" title="Disagree with at least one key point" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="btn btn-sm btn-danger" {% if
                             expired -%} disabled="true" {%- endif -%}>
-                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree with at least one key point
+                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
                     </button>
 
-                    <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="btn btn-sm btn-success" {% if
+                    <button type="button" data-toggle="tooltip" title="Agree with ALL key points" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="btn btn-sm btn-success" {% if
                             expired -%} disabled="true" {%- endif -%}>
-                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
+                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
                     </button>
                 </div>
             {%- endif -%}

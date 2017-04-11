@@ -1,3 +1,7 @@
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 $(document).ready(function() {
   var numComments = $('#student-discussion').data().numcomments;
   var response = $('#student-discussion').data().response;
