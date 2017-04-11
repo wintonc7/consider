@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 
 #from .LogEntry import LogEntry
-import LogEntry
+import LogEntry # TODO: Figure out how to run test so you don't need to do this
 
 
 class ActivityLog(ndb.Model):

@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
 
 # from . import Section
+import Section # TODO: Figure out how to not have relative imports
 
 """ 
 - Author(s): Capstone team AU16
