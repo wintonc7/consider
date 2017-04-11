@@ -46,6 +46,9 @@
                 <li><a class="navbar-link" href="/activity_log"><span class="glyphicon glyphicon-list"></span> Log</a></li>
                 <li><a class="navbar-link" href="/student_profile"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
             {% endif %}
+                {% if not loginpage %}
+                    <li><a class="navbar-link" href="/feedback_form"><span class="glyphicon glyphicon-comment"></span> Feedback</a></li>
+                {% endif %}
                 <li><a class="navbar-link" href="{{documentation}}"><span class="glyphicon glyphicon-book"></span> Documentation</a></li>
             {% if loginpage %}
                 <li><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>

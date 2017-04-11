@@ -1,0 +1,70 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}| Feedback Form{% endblock %}
+
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/feedback_form.js"></script>
+<script type="text/javascript">
+  function CheckTag(){
+        var element = document.getElementById('othertag');
+        if($('#other').is(":checked"))
+            element.style.display='block';
+        else
+            element.style.display='none';
+  }
+</script>
+{{ super() }}
+<script src="/ckeditor/ckeditor.js"></script>
+{% endblock head %}
+
+{% block content %}
+{{ super() }}
+    <div class="container" id='pageContent'>
+        <div class="card">
+            <div class="card-title">
+                <h2>Feedback Form</h2>
+            </div>
+            <div class="card-body">
+                <form id="feedback" method="post" action="/feedback_form">
+                    <label>Would you like this feedback to be submitted anonymously?</label>
+                    <input type="checkbox" name="email" id="email" value="{{ is_student }}"/>
+                    <br>
+                    *If left unchecked, your preferred email will be included in the feedback
+                    <br>
+                    <br>
+                    <strong>Tag(s): Please Select All That Apply</strong>
+                    <br>
+                    <label>{% if is_student %} Profile {% else %} Adding Students {% endif %}</label>
+                    <input type="checkbox" name ="tag1" id="tag1" value="{% if is_student %} Profile {% else %} Adding Students {% endif %}">
+                    <br>
+                    <label>{% if is_student %} Viewing Questions {% else %} Adding Assignments {% endif %}</label>
+                    <input type="checkbox" name ="tag2" id="tag2" value="{% if is_student %} Viewing Questions {% else %} Adding Assignments {% endif %}">
+                    <br>
+                    <label>{% if is_student %} Posting Responses {% else %} Adding Courses {% endif %}</label>
+                    <input type="checkbox" name ="tag3" id="tag3" value="{% if is_student %} Posting Responses {% else %} Adding Courses {% endif %}">
+                    <br>
+                    <label>{% if is_student %} Viewing Responses {% else %} Adding Rounds {% endif %}</label>
+                    <input type="checkbox" name ="tag4" id="tag4" value="{% if is_student %} Viewing Responses {% else %} Adding Rounds {% endif %}">
+                    <br>
+                    <label>Other</label>
+                    <input type="checkbox" name ="other" id="other" onchange="CheckTag()">
+                    <br>
+                    <input class="form-control" type="text" name="othertag" id="othertag" style='display:none' value="Please enter the topic of your feedback"/>
+                    <br>
+                    <strong>Feedback</strong>
+                    <br>
+                    <input type="text" name="comments" id="comments"/>
+                    <script type="text/javascript">
+                        CKEDITOR.replace("comments",
+                        {
+                            height: 200
+                        });
+                    </script>
+                    <br>
+                    <button type="submit" class="btn btn-lg btn-success btn-success-submit">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
