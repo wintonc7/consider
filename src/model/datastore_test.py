@@ -11,17 +11,15 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+# Class to test Google App Engine Datastore
 
-# [START imports]
 import unittest
 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
-# [END imports]
 
 
-# [START datastore_example_1]
 class TestModel(ndb.Model):
     """A model class used for testing."""
     number = ndb.IntegerProperty(default=42)
@@ -43,10 +41,8 @@ def GetEntityViaMemcache(entity_key):
     if entity is not None:
         memcache.set(entity_key, entity)
     return entity
-# [END datastore_example_1]
 
 
-# [START datastore_example_test]
 class DatastoreTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -63,20 +59,13 @@ class DatastoreTestCase(unittest.TestCase):
         # using ndb.get_context().set_cache_policy(False)
         ndb.get_context().clear_cache()
 
-# [END datastore_example_test]
-
-    # [START datastore_example_teardown]
     def tearDown(self):
         self.testbed.deactivate()
-    # [END datastore_example_teardown]
 
-    # [START datastore_example_insert]
     def testInsertEntity(self):
         TestModel().put()
         self.assertEqual(1, len(TestModel.query().fetch(2)))
-    # [END datastore_example_insert]
 
-    # [START datastore_example_filter]
     def testFilterByNumber(self):
         root = TestEntityGroupRoot(id="root")
         TestModel(parent=root.key).put()
@@ -86,18 +75,14 @@ class DatastoreTestCase(unittest.TestCase):
         results = query.fetch(2)
         self.assertEqual(1, len(results))
         self.assertEqual(42, results[0].number)
-    # [END datastore_example_filter]
 
-    # [START datastore_example_memcache]
     def testGetEntityViaMemcache(self):
         entity_key = TestModel(number=18).put().urlsafe()
         retrieved_entity = GetEntityViaMemcache(entity_key)
         self.assertNotEqual(None, retrieved_entity)
         self.assertEqual(18, retrieved_entity.number)
-    # [END datastore_example_memcache]
 
 
-# [START HRD_example_1]
 from google.appengine.datastore import datastore_stub_util  # noqa
 
 
@@ -138,9 +123,7 @@ class HighReplicationTestCaseOne(unittest.TestCase):
         self.assertEqual(0, TestModel.query().count(3))
         # Ancestor query does see the data.
         self.assertEqual(2, TestModel.query(ancestor=user_key).count(3))
-# [END HRD_example_1]
 
-    # [START HRD_example_2]
     def testDeterministicOutcome(self):
         # 50% chance to apply.
         self.policy.SetProbability(.5)
@@ -156,7 +139,6 @@ class HighReplicationTestCaseOne(unittest.TestCase):
         self.assertEqual(0, TestModel.query().count(3))
         # Will always be applied before the third query.
         self.assertEqual(1, TestModel.query().count(3))
-    # [END HRD_example_2]
 
 
 # [START main]
