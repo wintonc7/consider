@@ -1,3 +1,7 @@
+"""
+To run test suite, enter /model folder and run:
+	> python runner.py /path/to/google_appengine
+"""
 import Response as model
 import unittest
 
@@ -8,6 +12,7 @@ from google.appengine.ext import testbed
 
 class TestResponse(ndb.Model):
 	comment = "This is a comment."
+	student = "student@gmail.com"
 
 
 class ModelTestCase(unittest.TestCase):
@@ -23,17 +28,20 @@ class ModelTestCase(unittest.TestCase):
 		self.testbed.deactivate()
 
 	def testInsertEntity(self):
-		TestLogEntry().put()
-		self.assertEqual(1, len(TestLogEntry.query().fetch(2)))
+		TestResponse().put()
+		self.assertEqual(1, len(TestResponse.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
+		comment = "This is a comment."
 		student = "student@gmail.com"
-		LogEntry_expected = model.LogEntry(student=student)
-		LogEntry_expected.put();
+		response_expected = model.Response(comment=comment, student=student)
+		response_expected.put();
 		
-		LogEntry_actual = LogEntry_expected.key.get()
-		assert LogEntry_actual.student == student
+		response_actual = response_expected.key.get()
+		assert response_actual.comment == comment
+		assert response_actual.student == student
 
+	# Test key as a group
 	# TODO: Test Structured Property
 	# TODO: Test parent-child relationships
 	# TODO: Test all properties
