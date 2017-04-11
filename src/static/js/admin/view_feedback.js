@@ -3,19 +3,13 @@
  */
 $(document).ready(function() {
     $('#tag-select').change(filterFeedback);
-    //var id = 1;
-    //var cardTitle = document.getElementById("cardTitle"+id);
-    //while(cardTitle){
-    //    $('#delete'+id).onClick = deleteTicket(id);
-    //    $('#advance'+id).onClick = advanceTicket(id);
-    //    id = id+1;
-    //    cardTitle = document.getElementById("cardTitle"+id);
-    //}
+    $('#status-select').change(filterFeedback)
 });
 
 function filterFeedback(){
     //console.log("filter feedback")
-    var filterTo = $('#tag-select')[0].value;
+    var filterToTag = $('#tag-select')[0].value;
+    var filterToStatus = $('#status-select')[0].value;
     //console.log(filterTo + " Selected");
     //construct ids
     var id = 1;
@@ -26,24 +20,53 @@ function filterFeedback(){
     var cardBody = document.getElementById(cardBodyId);
     while(card){
         //console.log(cardId);
-        if(filterTo=="DEFAULT"){
+        if(filterToTag=="DEFAULT" && filterToStatus=="DEFAULT"){
             //make everything visible
             card.style.display = 'block';
-        }else if(filterTo == "Other"){
-            //check card value and only displays cards w/ true
-            if(card.getAttribute("value") == "True"){
+        }else if(filterToTag=="DEFAULT" && filterToStatus!="DEFAULT"){
+            //filter based only on status
+            var status = document.getElementById("status"+id).getAttribute("value");
+            if(status==filterToStatus){
                 card.style.display = 'block';
             }else{
                 card.style.display = 'none';
+            }
+        }else if(filterToTag!="DEFAULT" && filterToStatus=="DEFAULT"){
+            //filter based only on tag
+            if(filterToTag=="Other"){
+                if(card.getAttribute("value") == "True"){
+                    card.style.display = 'block';
+                }else{
+                    card.style.display = 'none';
+                }
+            }else{
+                var tags = cardBody.getAttribute("value");
+                if(~tags.indexOf(filterToTag)){
+                    card.style.display = 'block';
+                }else{
+                    card.style.display = 'none';
+                }
             }
         }else{
+        //filter by both
             var tags = cardBody.getAttribute("value");
-            if(~tags.indexOf(filterTo)){
-                card.style.display = 'block';
-            }else{
-                card.style.display = 'none';
+            var status = document.getElementById("status"+id).getAttribute("value");
+            //if filtering for other tag
+            if(filterToTag=="Other"){
+                if((card.getAttribute("value") == "True") && (status==filterToStatus)){
+                    card.style.display = 'block';
+                }else{
+                    card.style.display = "none";
+                }
+            }else{//filtering by tag that is not other
+               if((~tags.indexOf(filterToTag)) &&  (status==filterToStatus)){
+                    card.style.display = 'block';
+               }else{
+                    card.style.display = "none";
+               }
             }
         }
+
         //update element objects
         id = id+1;
         cardId = "card" + id;
@@ -54,7 +77,7 @@ function filterFeedback(){
 }
 
 function advanceTicket(idnum){
-    console.log("advance ticket " +idnum);
+    //console.log("advance ticket " +idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
     $.post("/view_feedback", {id: fb_id, action: "ADVANCE"}, function(resp){
         //console.log(resp);
@@ -87,7 +110,7 @@ function markClosed(idnum){
 }
 
 function deleteTicket(idnum){
-    console.log("delete ticket " + idnum);
+    //console.log("delete ticket " + idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
     $.post("/view_feedback", {id: fb_id, action: "DELETE"}, function(resp){
         //console.log(resp);
