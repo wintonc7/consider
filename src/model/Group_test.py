@@ -10,10 +10,6 @@ from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 
 
-class TestGroup(ndb.Model):
-	number = 12345
-
-
 class ModelTestCase(unittest.TestCase):
 
 	def setUp(self):
@@ -25,10 +21,6 @@ class ModelTestCase(unittest.TestCase):
 
 	def tearDown(self):
 		self.testbed.deactivate()
-
-	def testInsertEntity(self):
-		TestGroup().put()
-		self.assertEqual(1, len(TestGroup.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
 		number = 12345

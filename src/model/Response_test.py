@@ -10,11 +10,6 @@ from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 
 
-class TestResponse(ndb.Model):
-	comment = "This is a comment."
-	student = "student@gmail.com"
-
-
 class ModelTestCase(unittest.TestCase):
 
 	def setUp(self):
@@ -26,10 +21,6 @@ class ModelTestCase(unittest.TestCase):
 
 	def tearDown(self):
 		self.testbed.deactivate()
-
-	def testInsertEntity(self):
-		TestResponse().put()
-		self.assertEqual(1, len(TestResponse.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
 		comment = "This is a comment."

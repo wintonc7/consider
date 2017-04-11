@@ -10,10 +10,6 @@ from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 
 
-class TestGrader(ndb.Model):
-	email = ndb.StringProperty(default="grader@gmail.com")
-	is_active = ndb.BooleanProperty(default=True)
-
 class ModelTestCase(unittest.TestCase):
 
 	def setUp(self):
@@ -25,10 +21,6 @@ class ModelTestCase(unittest.TestCase):
 
 	def tearDown(self):
 		self.testbed.deactivate()
-
-	def testInsertEntity(self):
-		TestGrader().put()
-		self.assertEqual(1, len(TestGrader.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
 		email = "grader@gmail.com"

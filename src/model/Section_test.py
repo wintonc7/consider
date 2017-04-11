@@ -12,12 +12,6 @@ from google.appengine.ext import testbed
 
 # TODO: Refactor class structure
 
-"""
-StudentInfo
-"""
-class TestStudentInfo(ndb.Model):
-	email = "student@gmail.com"
-
 class ModelTestCase_StudentInfo(unittest.TestCase):
 
 	def setUp(self):
@@ -30,10 +24,6 @@ class ModelTestCase_StudentInfo(unittest.TestCase):
 	def tearDown(self):
 		self.testbed.deactivate()
 
-	def testInsertEntity(self):
-		TestStudentInfo().put()
-		self.assertEqual(1, len(TestStudentInfo.query().fetch(2)))
-
 	def testKeyProperty(testbed):		
 		email = "student@gmail.com"
 		studentinfo = model.StudentInfo(email=email)
@@ -44,9 +34,6 @@ class ModelTestCase_StudentInfo(unittest.TestCase):
 """
 GraderInfo
 """
-class TestGraderInfo(ndb.Model):
-	email = "grader@gmail.com"
-
 class ModelTestCase_GraderInfo(unittest.TestCase):
 
 	def setUp(self):
@@ -59,10 +46,6 @@ class ModelTestCase_GraderInfo(unittest.TestCase):
 	def tearDown(self):
 		self.testbed.deactivate()
 
-	def testInsertEntity(self):
-		TestGraderInfo().put()
-		self.assertEqual(1, len(TestGraderInfo.query().fetch(2)))
-
 	def testKeyProperty(testbed):		
 		email = "grader@gmail.com"
 		graderinfo = model.GraderInfo(email=email)
@@ -73,9 +56,6 @@ class ModelTestCase_GraderInfo(unittest.TestCase):
 """
 Section
 """
-class TestSection(ndb.Model):	
-	name = "CSE1100"
-
 class ModelTestCase_Section(unittest.TestCase):
 
 	def setUp(self):
@@ -87,10 +67,6 @@ class ModelTestCase_Section(unittest.TestCase):
 
 	def tearDown(self):
 		self.testbed.deactivate()
-
-	def testInsertEntity(self):
-		TestSection().put()
-		self.assertEqual(1, len(TestSection.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
 		name = "CSE1100"
