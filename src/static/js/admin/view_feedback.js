@@ -56,13 +56,17 @@ function filterFeedback(){
 function advanceTicket(idnum){
     console.log("advance ticket " +idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
-    $.post("/view_feedback", {id: fb_id, action: "ADVANCE"});
-    location.reload();
+    $.post("/view_feedback", {id: fb_id, action: "ADVANCE"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
 }
 
 function deleteTicket(idnum){
     console.log("delete ticket " + idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
-    $.post("/view_feedback", {id: fb_id, action: "DELETE"});
-    location.reload();
+    $.post("/view_feedback", {id: fb_id, action: "DELETE"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
 }

@@ -49,8 +49,12 @@ class ViewFeedBackPage(webapp2.RequestHandler):
             action = self.request.get('action')
             if action == "ADVANCE":
                 fb.advance_ticket_status()
+                fb.put()
+                self.response.out.write("Status updated to: " + fb.ticket_status)
             elif action == "DELETE":
                 fb.key.delete()
+                fb.put()
+                self.response.out.write("Deleted")
         else:
             import logging
             logging.info("fb object not found for id: " + id)
