@@ -288,7 +288,7 @@ a:hover {
 }
 
 .nav-active {
-    background-color: rgba(251, 0, 13, 0.6) !important;
+    background-color: #D32F2F !important;
 }
 
 /* CURRENT ROUND HIGLIGHTING */
@@ -327,10 +327,6 @@ a:hover {
 
 .card-header button {
     margin: 0 5px;
-}
-
-.round-viewing {
-    border: 1px solid #bb0000;
 }
 
 /* From discussion.css */
@@ -596,6 +592,7 @@ a:hover {
 
 .nonparticipant {
     padding: 15px 20px 10px 20px;
+    margin-top: 15px;
     background-color: #eeeeee;
     border-radius: 5px;
 }

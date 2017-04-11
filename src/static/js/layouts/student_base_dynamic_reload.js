@@ -7,9 +7,9 @@ var sectionKey = $('#reload').data().sectionkey;
 var curr_round = currentPage;
 function loadRound(round) {
     var url = location.href.split('?')[0] + '?section=' + sectionKey + '&round=' + round;
-    $("#navbar li").removeClass("round-viewing nav-active");
-    $("#navbar a").removeClass("round-viewing nav-active");
-    getRoundButton(round).addClass("round-viewing nav-active");
+    $("#navbar li").removeClass("nav-active");
+    $("#navbar a").removeClass("nav-active");
+    getRoundButton(round).addClass("nav-active");
     $('#pageContent').load(url + ' #pageContent', function() {
         $(this).children(':first').unwrap();
         if (curr_round == round) {
