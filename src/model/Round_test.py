@@ -39,12 +39,6 @@ class ModelTestCase_Question(unittest.TestCase):
 	# TODO: Test all properties
 	# TODO: Test methods
 
-class TestRound(ndb.Model):	
-	deadline = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
-	number = 1
-	starttime = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
-
-
 class ModelTestCase_Round(unittest.TestCase):
 
 	def setUp(self):
@@ -56,10 +50,6 @@ class ModelTestCase_Round(unittest.TestCase):
 
 	def tearDown(self):
 		self.testbed.deactivate()
-
-	def testInsertEntity(self):
-		TestRound().put()
-		self.assertEqual(1, len(TestRound.query().fetch(2)))
 
 	def testKeyProperty(testbed):		
 		deadline = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
