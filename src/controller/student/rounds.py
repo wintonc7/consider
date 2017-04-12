@@ -316,6 +316,10 @@ class Rounds(webapp2.RequestHandler):
                 utils.log('Posts: ' + str(posts))
                 # 3. Send all the posts to the template
                 template_values['posts'] = posts
+                timestamps = []
+                for post in template_values['posts']:
+                    timestamps.append(datetime.datetime.strptime(post.timestamp[:19], '%Y-%m-%d %H:%M:%S').strftime('%c'))
+                template_values['timestamps'] = timestamps
 
                 # 4. Grab all posts from the previous round (initial)
                 initial = model.Round.get_by_id(1, parent=section.key)

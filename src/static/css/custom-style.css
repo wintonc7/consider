@@ -631,6 +631,13 @@ a:hover {
     background-color: #00B0E8;
 }
 
+.sequential-post-number {
+    padding: 4px 12px;
+    margin-right: 8px;
+    border-radius: 15px;
+    background-color: #0277bd;
+}
+
 .response-card .card-title {
     background-color: #00B0E8;
 }
