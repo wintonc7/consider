@@ -23,12 +23,11 @@ class ModelTestCase(unittest.TestCase):
 		self.testbed.deactivate()
 
 	def testKeyProperty(testbed):
-		name = "CSE1100"
-		course_expected = model.Course(name=name, is_active=True)
-		course_expected.put();
-		
-		course_actual = course_expected.key.get()
-		assert course_actual.name == name
+		name = "CSE1100"		
+		course = model.Course(name=name)
+		course.put();		
+		course = course.key.get()
+		assert course.name == name
 
 	# TODO: Test Structured Property
 	# TODO: Test parent-child relationships
