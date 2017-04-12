@@ -69,27 +69,35 @@
 </div><!-- ./container -->
 {%- if not expired -%}
 <!-- fixed position discussion response text editor -->
+
+
 <div class="container-fluid navbar-fixed-bottom" id="discussion-response">
     <div class="container">
-        <form id="seqDiscussionForm" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
-            <div id="text-editor">
+        <div class="row">
+            <form id="seqDiscussionForm" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
+                <div class="col-md-11">
+                    <div id="text-editor">
 
-                <textarea class="form-control" rows="5" id="seqDiscussionPost"
-                          placeholder="Enter your response here" required {% if expired -%}
-                          disabled="true" {%- endif -%}>
-                {%- if comment -%}
-                    {{comment}}
-                {%- endif -%}
-                </textarea>
-            </div>
-            <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
-                    -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
-                    <br />
-                    Submit
-            </button>
-            <!-- replace plain textarea with CKEditor WYSIWYG -->
-            <script type="text/javascript" src="js/students/seq_discussion_editor_replace.js"></script>
-        </form>
+                        <textarea class="form-control" rows="5" id="seqDiscussionPost"
+                                  placeholder="Enter your response here" required {% if expired -%}
+                                  disabled="true" {%- endif -%}>
+                        {%- if comment -%}
+                            {{comment}}
+                        {%- endif -%}
+                        </textarea>
+                    </div>
+                    <!-- replace plain textarea with CKEditor WYSIWYG -->
+                    <script type="text/javascript" src="js/students/seq_discussion_editor_replace.js"></script>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
+                            -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                            <br />
+                            Submit
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {%- endif -%}
