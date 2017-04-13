@@ -82,22 +82,32 @@ $(document).ready(function() {
       var message = 'Current student ';
 
       if (type == 1) {
-          $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
+          $("#title_" + index).removeClass().addClass('card response-card support');
           resp[index] = 'support';
           message += 'supports ';
       } else if (type == 0) {
-          $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
+          $("#title_" + index).removeClass().addClass('card response-card neutral');
           resp[index] = 'neutral';
           message += 'seeks clarification from ';
       } else {
-          $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
+          $("#title_" + index).removeClass().addClass('card response-card disagree');
           resp[index] = 'disagree';
           message += 'disagrees with ';
       }
       message += email + '\'s Round ' + page;
       console.log(message);
       thumbs[email] = type;
+      displayChangesNotification();
     }
+  }
+
+  // check for changes in ckeditor
+  for (instance in CKEDITOR.instances) {
+      CKEDITOR.instances[instance].on('change', function(e) {
+        if (e.editor.checkDirty()) {
+            displayChangesNotification();
+        }
+      });
   }
 });
 
@@ -120,4 +130,8 @@ function collapse_prompt() {
       prompt.className = 'collapsible-prompt';
       prompt.children[0].innerHTML = "<strong>Original Prompt</strong> (click to hide)";
   }
+}
+
+function displayChangesNotification() {
+    $('#unsaved-changes').removeClass('hidden');
 }

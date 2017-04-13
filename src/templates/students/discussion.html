@@ -34,7 +34,7 @@
         </div>
     {% endif %}
     {% for comment in comments %}
-        <div class="card response-card{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
+        <div id="title_{{ loop.index }}" class="card response-card{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
             <div class="card-title">
                 <div class="row">
                     <div class="col-sm-8 col-xs-6">
@@ -122,10 +122,13 @@
 
         </div>
         <div class="col-md-1">
-          <button type="submit" id="submit" class="btn btn-lg btn-success btn-success-submit" {% if expired -%} disabled="true" {%- endif
+            <button type="submit" id="submit" class="btn btn-lg btn-success btn-success-submit" {% if expired -%} disabled="true" {%- endif
                   -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
                   <br />
                   Submit
+                    <div id="unsaved-changes" class="alert alert-warning alert-unsaved hidden hidden-xs">
+                        <span class="glyphicon glyphicon-info-sign"></span> You have made unsaved changes
+                    </div>
           </button>
         </div>
         </form>

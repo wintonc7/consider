@@ -471,6 +471,15 @@ a:hover {
     box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 
+.alert-unsaved {
+    text-transform: none;
+    font-size: 0.8em;
+    position: absolute;
+    top: -60px;
+    right: -25px;
+    padding: 8px;
+}
+
 .placeholders {
     margin-bottom: 30px;
     text-align: center;
@@ -640,6 +649,7 @@ a:hover {
 
 .response-card .card-title {
     background-color: #00B0E8;
+    transition: background-color 0.2s linear;
 }
 
 .response-option {
