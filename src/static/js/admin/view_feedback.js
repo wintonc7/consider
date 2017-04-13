@@ -1,9 +1,14 @@
 /**
  * Created by Daniel Stelson on 4/7/2017.
  */
+
+ var fbNum = 0;
+
 $(document).ready(function() {
     $('#tag-select').change(filterFeedback);
-    $('#status-select').change(filterFeedback)
+    $('#status-select').change(filterFeedback);
+    $('#show-select').change(filterArchives);
+    filterArchives();
 });
 
 function filterFeedback(){
@@ -74,6 +79,39 @@ function filterFeedback(){
         card = document.getElementById(cardId);
         cardBody = document.getElementById(cardBodyId);
     }
+    fbNum = id-1;
+    console.log(fbNum);
+}
+
+function sendGet(){
+    var show = $('#show-select')[0].value;
+    $.get("/view_feedback", {show: show});
+
+}
+
+function filterArchives(){
+    filterFeedback();
+    console.log(fbNum);
+    var showArchived = ($('#show-select')[0].value == "Archived");
+    console.log("showArchived: " + showArchived);
+    for(count = 1; count<=fbNum; count++){
+        console.log("iteration: " + count);
+        var card = document.getElementById("card" + count);
+        if(card){
+            var deleteButton = document.getElementById("delete" + count);
+            if(deleteButton){
+                if(!showArchived){
+                    console.log("hiding card");
+                    card.style.display = 'none';
+                }
+            }else{
+                if(showArchived){
+                    console.log("showing card");
+                    card.style.display = 'none';
+                }
+            }
+        }
+    }
 }
 
 function advanceTicket(idnum){
@@ -113,6 +151,22 @@ function deleteTicket(idnum){
     //console.log("delete ticket " + idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
     $.post("/view_feedback", {id: fb_id, action: "DELETE"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
+}
+
+function archiveTicket(idnum){
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "ARCHIVE"}, function(resp){
+        //console.log(resp);
+        location.reload(true);
+    });
+}
+
+function reactivateTicket(idnum){
+    var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
+    $.post("/view_feedback", {id: fb_id, action: "REACTIVATE"}, function(resp){
         //console.log(resp);
         location.reload(true);
     });

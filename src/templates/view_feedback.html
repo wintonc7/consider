@@ -9,6 +9,11 @@
 {% block content %}
     {{ super() }}
     <div class="container" id='pageContent'>
+        <label>Show:</label>
+        <select class="form-control" id="show-select">
+            <option value="Active" selected>Active Tickets</option>
+            <option value="Archived">Archived Tickets</option>
+        </select>
         <label>Filter By Tag:</label>
         <select class="form-control" id="tag-select">
             <option value="DEFAULT" selected>Feedback with any tag(s)</option>
@@ -49,6 +54,10 @@
                      {% endfor %}
                      <br>
                      <strong>Feedback:</strong> {{ fb.feedback }}
+                     {% if fb.is_archived %}
+                     <button class="form-control" type="button" id="delete{{ cardID }}" onclick="deleteTicket( {{ cardID }} )">Delete</button>
+                     <button class="form-control" type="button" id="reactivate{{ cardID }}" onclick="reactivateTicket( {{ cardID }} )">Reactivate</button>
+                     {% else %}
                      <table>
                          <tr>
                              <td>
@@ -62,7 +71,8 @@
                              </td>
                          </tr>
                      </table>
-                     <button class="form-control" type="button" id="delete{{ cardID }}" onclick="deleteTicket( {{ cardID }} )">Delete</button>
+                     <button class="form-control" type="button" id="archive{{ cardID }}" onclick="archiveTicket( {{ cardID }} )">Archive</button>
+                     {% endif %}
                  </div>
             </div>
         {% set cardID = cardID+1 %}

@@ -21,8 +21,10 @@ class ViewFeedBackPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)
-           #get feedback
-            feedback = model.Feedback.query().order(-model.Feedback.timestamp)
+
+            feedback = model.Feedback.query()
+            feedback = feedback.order(-model.Feedback.timestamp)
+            feedback = feedback.fetch()
 
             from src import config
             template_values = {
@@ -49,24 +51,19 @@ class ViewFeedBackPage(webapp2.RequestHandler):
             action = self.request.get('action')
             if action == "ADVANCE":
                 fb.advance_ticket_status()
-                fb.put()
-                self.response.out.write("Status updated to: " + fb.ticket_status)
             elif action == "OPEN":
                 fb.mark_ticket_as("OPEN")
-                fb.put()
-                self.response.out.write("Status updated to: " + fb.ticket_status)
             elif action == "IN PROGRESS":
                 fb.mark_ticket_as("IN PROGRESS")
-                fb.put()
-                self.response.out.write("Status updated to: " + fb.ticket_status)
             elif action == "CLOSED":
                 fb.mark_ticket_as("CLOSED")
-                fb.put()
-                self.response.out.write("Status updated to: " + fb.ticket_status)
+            elif action ==  "ARCHIVE":
+                fb.is_archived = True
             elif action == "DELETE":
                 fb.key.delete()
-                fb.put()
-                self.response.out.write("Deleted")
+            elif action == "REACTIVATE":
+                fb.is_archived = False
+            fb.put()
         else:
             import logging
             logging.info("fb object not found for id: " + id)

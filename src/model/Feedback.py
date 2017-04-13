@@ -23,6 +23,9 @@ class Feedback(ndb.Model):
     #Status flow Open -> In Progress -> Closed
     ticket_status = ndb.StringProperty(required=True)
 
+    #indicator if ticket is archived
+    is_archived = ndb.BooleanProperty(required=True)
+
     def advance_ticket_status(self):
         if self.ticket_status == "OPEN":
             self.ticket_status = "IN PROGRESS"

@@ -58,6 +58,7 @@ class FeedbackForm(webapp2.RequestHandler):
             feedback.feedback = "NO COMMENTS"
         feedback.other_selected = (othertag == "true")
         feedback.ticket_status = "OPEN"
+        feedback.is_archived = False;
 
         feedback.put()
         if(is_student):
