@@ -1,4 +1,7 @@
 """
+Group.py
+Test classes for Group.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -24,15 +27,13 @@ class ModelTestCase(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		number = 12345
-		group_expected = model.Group(number=number)
-		group_expected.put();
-		
-		group_actual = group_expected.key.get()
-		assert group_actual.number == number
+		group = model.Group(number=number)
+		group.put();		
+		group = group.key.get()
+		assert group.number == number
 
-	# TODO: Test Structured Property
-	# TODO: Test parent-child relationships
 	# TODO: Test all properties
+	# TODO: Test parent-child relationships
 
 
 if __name__ == '__main__':

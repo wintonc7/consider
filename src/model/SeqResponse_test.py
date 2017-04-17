@@ -1,4 +1,7 @@
 """
+SeqResponse_test.py
+Test classes for SeqResponse.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -34,11 +37,7 @@ class ModelTestCase(unittest.TestCase):
 		assert seqresponse.timestamp == timestamp
 		assert seqresponse.author == author		
 
-	# Test key as a group
-	# TODO: Test Structured Property
-	# TODO: Test parent-child relationships
-	# TODO: Test all properties
-	# TODO: Test methods
+	# TODO: Test all properties	
 
 
 if __name__ == '__main__':

@@ -1,4 +1,7 @@
 """
+Instructor_test.py
+Test classes for Instructor.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -24,13 +27,11 @@ class ModelTestCase(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		email = "instructor@gmail.com"
-		instructor_expected = model.Instructor(email=email, is_active=True)
-		instructor_expected.put();
-		
-		instructor_actual = instructor_expected.key.get()
-		assert instructor_actual.email == email
+		instructor = model.Instructor(email=email, is_active=True)
+		instructor.put();		
+		instructor = instructor.key.get()
+		assert instructor.email == email
 
-	# TODO: Test Structured Property
 	# TODO: Test parent-child relationships
 	# TODO: Test all properties
 

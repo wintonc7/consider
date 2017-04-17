@@ -1,4 +1,7 @@
 """
+Student_test.py
+Test classes for Student.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """

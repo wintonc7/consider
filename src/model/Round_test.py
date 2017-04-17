@@ -1,4 +1,7 @@
 """
+Round_test.py
+Test classes for Round.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -25,19 +28,15 @@ class ModelTestCase_Question(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		options_total = 0
-		question = "Is this a question?"
-		question_expected = model.Question(options_total=options_total, question=question)
-		question_expected.put();
-		
-		question_actual = question_expected.key.get()
-		assert question_actual.options_total == options_total
-		assert question_actual.question == question
+		questionText = "Is this a question?"
+		question = model.Question(options_total=options_total, question=questionText)
+		question.put();		
+		question = question.key.get()
+		assert question.options_total == options_total
+		assert question.question == questionText
 
-	# Test key as a group
-	# TODO: Test Structured Property
-	# TODO: Test parent-child relationships
+	# Test key as a group	
 	# TODO: Test all properties
-	# TODO: Test methods
 
 class ModelTestCase_Round(unittest.TestCase):
 
@@ -55,13 +54,13 @@ class ModelTestCase_Round(unittest.TestCase):
 		deadline = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
 		number = 1
 		starttime = datetime.strptime("2017/01/02 16:30", "%Y/%m/%d %H:%M")
-		response_expected = model.Round(deadline=deadline, number=number, starttime=starttime)
-		response_expected.put();
+		response = model.Round(deadline=deadline, number=number, starttime=starttime)
+		response.put();
 		
-		response_actual = response_expected.key.get()
-		assert response_actual.deadline == deadline
-		assert response_actual.number == number
-		assert response_actual.starttime == starttime
+		response = response.key.get()
+		assert response.deadline == deadline
+		assert response.number == number
+		assert response.starttime == starttime
 
 	# Test key as a group
 	# TODO: Test Structured Property

@@ -1,4 +1,7 @@
 """
+Section_test.py
+Test classes for Section.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -26,10 +29,14 @@ class ModelTestCase_StudentInfo(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		email = "student@gmail.com"
-		studentinfo = model.StudentInfo(email=email)
+		alias = "Arya Stark"
+		group = 1
+		studentinfo = model.StudentInfo(email=email, alias=alias, group=group)
 		studentinfo.put();		
 		studentinfo = studentinfo.key.get()
 		assert studentinfo.email == email		
+		assert studentinfo.alias == alias	
+		assert studentinfo.group == group	
 
 """
 GraderInfo
@@ -48,10 +55,14 @@ class ModelTestCase_GraderInfo(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		email = "grader@gmail.com"
-		graderinfo = model.GraderInfo(email=email)
+		alias = "Sansa Stark"
+		group = 1
+		graderinfo = model.GraderInfo(email=email, alias=alias, group=group)
 		graderinfo.put();		
 		graderinfo = graderinfo.key.get()
 		assert graderinfo.email == email
+		assert graderinfo.alias == alias	
+		assert graderinfo.group == group	
 
 """
 Section

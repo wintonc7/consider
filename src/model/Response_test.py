@@ -1,4 +1,7 @@
 """
+Response_test.py
+Test classes for Response.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -25,15 +28,14 @@ class ModelTestCase(unittest.TestCase):
 	def testKeyProperty(testbed):		
 		comment = "This is a comment."
 		student = "student@gmail.com"
-		response_expected = model.Response(comment=comment, student=student)
-		response_expected.put();
+		response = model.Response(comment=comment, student=student)
+		response.put();
 		
-		response_actual = response_expected.key.get()
-		assert response_actual.comment == comment
-		assert response_actual.student == student
+		response = response.key.get()
+		assert response.comment == comment
+		assert response.student == student
 
 	# Test key as a group
-	# TODO: Test Structured Property
 	# TODO: Test parent-child relationships
 	# TODO: Test all properties
 	# TODO: Test methods

@@ -1,4 +1,7 @@
 """
+Grader_test.py
+Test classes for Grader.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -28,6 +31,8 @@ class ModelTestCase(unittest.TestCase):
 		grader.put();		
 		grader = grader.key.get()
 		assert grader.email == email	
+
+	# Test all properties
 
 
 if __name__ == '__main__':

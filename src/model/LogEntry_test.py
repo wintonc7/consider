@@ -1,4 +1,7 @@
 """
+LogEntry_test.py
+Test classes for LogEntry.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -24,14 +27,11 @@ class ModelTestCase(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		student = "student@gmail.com"
-		LogEntry_expected = model.LogEntry(student=student)
-		LogEntry_expected.put();
-		
-		LogEntry_actual = LogEntry_expected.key.get()
-		assert LogEntry_actual.student == student
+		logentry = model.LogEntry(student=student)
+		logentry.put()		
+		logentry = logentry.key.get()
+		assert logentry.student == student
 
-	# TODO: Test Structured Property
-	# TODO: Test parent-child relationships
 	# TODO: Test all properties
 
 
