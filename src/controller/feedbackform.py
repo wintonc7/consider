@@ -29,6 +29,8 @@ class FeedbackForm(webapp2.RequestHandler):
             # Redirect home if not a student
             user = utils.check_privilege(model.Role.instructor)
             is_student = False
+            if not user:
+                return self.redirect("/")
         # end
 
         feedback = model.Feedback()
@@ -55,6 +57,8 @@ class FeedbackForm(webapp2.RequestHandler):
         else:
             feedback.feedback = "NO COMMENTS"
         feedback.other_selected = (othertag == "true")
+        feedback.ticket_status = "OPEN"
+        feedback.is_archived = False;
 
         feedback.put()
         if(is_student):
@@ -74,6 +78,8 @@ class FeedbackForm(webapp2.RequestHandler):
             # Redirect home if not a student
             user = utils.check_privilege(model.Role.instructor)
             is_student = False
+            if not user:
+                return self.redirect("/")
         # end
 
         # Create a url for the user to logout
