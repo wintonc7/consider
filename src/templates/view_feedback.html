@@ -1,0 +1,81 @@
+{% extends "layouts/base.html" %}
+
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/admin/view_feedback.js"></script>
+{{ super() }}
+{% endblock head %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container" id='pageContent'>
+        <label>Show:</label>
+        <select class="form-control" id="show-select">
+            <option value="Active" selected>Active Tickets</option>
+            <option value="Archived">Archived Tickets</option>
+        </select>
+        <label>Filter By Tag:</label>
+        <select class="form-control" id="tag-select">
+            <option value="DEFAULT" selected>Feedback with any tag(s)</option>
+            <option value="Profile">Profile</option>
+            <option value="Viewing Questions">Viewing Questions</option>
+            <option value="Posting Responses">Posting Responses</option>
+            <option value="Viewing Responses">Viewing Responses</option>
+            <option value="Adding Students">Adding Students</option>
+            <option value="Adding Assignments">Adding Assignments</option>
+            <option value="Adding Courses">Adding Courses</option>
+            <option value="Adding Rounds">Adding Rounds</option>
+            <option value="Other">Other</option>
+        </select>
+        <label>Filter By Ticket Status:</label>
+        <select class="form-control" id="status-select">
+            <option value="DEFAULT" selected>Feedback with any status</option>
+            <option value="OPEN">Open</option>
+            <option value="IN PROGRESS">In Progress</option>
+            <option value="CLOSED">Closed</option>
+        </select>
+        {% set cardID = 1 %}
+        {% for fb in feedback %}
+            <div class="card" id="card{{ cardID }}" value="{{ fb.other_selected }}">
+                <div class="card-title" id="cardTitle{{ cardID}}" value="{{ fb.key.id() }}">
+                    <h3>
+                        Timestamp: {{ fb.timestamp.strftime('%x %H:%M') }}
+                    </h3>
+                    <h4 id="status{{ cardID }}" value="{{ fb.ticket_status }}">
+                        Status: {{ fb.ticket_status }}
+                    </h4>
+                </div>
+                 <div class="card-body" id="cardBody{{ cardID }}" value="{{ fb.tags }}">
+                     <strong>Submitted By:</strong> {{ fb.email }}
+                     <br>
+                     <strong>Tags:</strong>
+                     {% for str in fb.tags %}
+                        {{str}} <strong>|</strong>
+                     {% endfor %}
+                     <br>
+                     <strong>Feedback:</strong> {{ fb.feedback }}
+                     {% if fb.is_archived %}
+                     <button class="form-control" type="button" id="delete{{ cardID }}" onclick="deleteTicket( {{ cardID }} )">Delete</button>
+                     <button class="form-control" type="button" id="reactivate{{ cardID }}" onclick="reactivateTicket( {{ cardID }} )">Reactivate</button>
+                     {% else %}
+                     <table>
+                         <tr>
+                             <td>
+                                 <button class="form-control" type="button" id="markOpen{{ cardID }}" onclick="markOpen( {{ cardID }} )">Mark as Open</button>
+                             </td>
+                             <td>
+                                 <button class="form-control" type="button" id="markIP{{ cardID }}" onclick="markInProgress( {{ cardID }} )">Mark as In Progress</button>
+                             </td>
+                             <td>
+                                 <button class="form-control" type="button" id="markClosed{{ cardID }}" onclick="markClosed( {{ cardID }} )">Mark as Closed</button>
+                             </td>
+                         </tr>
+                     </table>
+                     <button class="form-control" type="button" id="archive{{ cardID }}" onclick="archiveTicket( {{ cardID }} )">Archive</button>
+                     {% endif %}
+                 </div>
+            </div>
+        {% set cardID = cardID+1 %}
+        {% endfor %}
+    </div>
+{% endblock content %}
