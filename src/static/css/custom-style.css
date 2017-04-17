@@ -308,6 +308,16 @@ a:hover {
     background-color: #D32F2F !important;
 }
 
+.nav-inactive {
+    background-color: #4c4c4c;
+    color: #eeeeee;
+    padding: 15px 5px;
+}
+
+.nav-inactive:hover {
+    background-color: #4c4c4c !important;
+}
+
 /* CURRENT ROUND HIGLIGHTING */
 
 .row-highlight {

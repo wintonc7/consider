@@ -8,6 +8,9 @@
 
 {% block topnavbar %}
 {{ super() }}
+<li class="nav-inactive">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+</li>
 {% for i in range(0,rounds) %}
 <li class="{% if curr_page == i+1 %}nav-active{% endif %}">
 <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}" data-round="{{i+1}}" class="nav_reload">{{ round_names[i] }}</a>
