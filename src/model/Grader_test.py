@@ -24,15 +24,10 @@ class ModelTestCase(unittest.TestCase):
 
 	def testKeyProperty(testbed):		
 		email = "grader@gmail.com"
-		grader_expected = model.Grader(email=email, is_active=True)
-		grader_expected.put();
-		
-		grader_actual = grader_expected.key.get()
-		assert grader_actual.email == email
-
-	# TODO: Test Structured Property
-	# TODO: Test parent-child relationships
-	# TODO: Test all properties
+		grader = model.Grader(email=email, is_active=True)
+		grader.put();		
+		grader = grader.key.get()
+		assert grader.email == email	
 
 
 if __name__ == '__main__':

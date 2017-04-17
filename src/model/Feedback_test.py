@@ -1,4 +1,7 @@
 """
+Feedback_test.py
+Test classes for Feedback.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -22,18 +25,19 @@ class ModelTestCase(unittest.TestCase):
 	def tearDown(self):
 		self.testbed.deactivate()
 
-	def testKeyProperty(testbed):	
+	def testModelKey(testbed):	
 		email = "user@gmail.com"
 		other_selected = True
 		feedback_text = "This is user feedback."
 		feedback = model.Feedback(email=email, other_selected=other_selected, feedback=feedback_text)
 		feedback.put()
 		feedback = feedback.key.get()
+
 		assert feedback.email == email
 		assert feedback.other_selected == other_selected
 		assert feedback.feedback == feedback_text
 
-	# TODO: Comprehensive property test
+	# TODO: Test all property test
 	
 
 if __name__ == '__main__':

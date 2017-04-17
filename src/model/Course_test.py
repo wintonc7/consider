@@ -1,4 +1,7 @@
 """
+Course_test.py
+Test classes for Course.py model. 
+
 To run test suite, enter /model folder and run:
 	> python runner.py /path/to/google_appengine
 """
@@ -11,7 +14,7 @@ from google.appengine.ext import testbed
 
 
 class ModelTestCase(unittest.TestCase):
-
+	
 	def setUp(self):
 		self.testbed = testbed.Testbed()
 		self.testbed.activate()
@@ -22,11 +25,12 @@ class ModelTestCase(unittest.TestCase):
 	def tearDown(self):
 		self.testbed.deactivate()
 
-	def testKeyProperty(testbed):
+	def testModelKey(testbed):		
 		name = "CSE1100"		
 		course = model.Course(name=name)
 		course.put();		
 		course = course.key.get()
+		
 		assert course.name == name
 
 	# TODO: Test Structured Property
