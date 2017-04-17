@@ -255,6 +255,8 @@ class Rounds(webapp2.RequestHandler):
             # template_values['deadline'] = datetime.datetime.strptime(requested_round.deadline, '%Y-%m-%dT%H:%M')
             template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
+            template_values['sectionName'] = section.name
+            template_values['courseName'] = section.key.parent().get().name
             template_values['rounds'] = section.current_round
             template_values['num_total_rounds'] = section.rounds
             template_values['show_name'] = not section.is_anonymous
