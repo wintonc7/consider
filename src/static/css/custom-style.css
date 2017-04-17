@@ -5,51 +5,6 @@ body {
     padding-top: 70px;
 }
 
-/* FORM INPUT STYLING - turning this off because I think it looks mad ugly
-   TODO: See if Swaroop and Neelam are okay with getting rid of form gradients.
-
-input, textarea, select {
-    border-radius: 0px !important;
-    background: rgba(255, 255, 255, 1) !important;
-    background: -moz-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
-    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255, 255, 255, 1)), color-stop(47%, rgba(255, 255, 255, 1)), color-stop(100%, rgba(247, 247, 247, 1))) !important;
-    background: -webkit-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
-    background: -o-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
-    background: -ms-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 47%, rgba(247, 247, 247, 1) 100%) !important;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7', GradientType=0) !important;
-} */
-
-/* BUTTON STYLING
-   TODO: See which of these button classes are not harmful/hideous
-.btn {
-    color: #ffffff !important;
-    font-size: 13px !important;
-    background: rgb(170, 170, 170) !important;
-    padding: 6px 10px 6px 10px !important;
-    text-decoration: none !important;
-    border: 1px solid black;
-    border-radius: 0px !important;
-}
-
-.btn:hover {
-    text-decoration: none !important;
-    border-radius: 0px !important;
-}
-
-.btn-success:hover {
-    background: #59A766 !important;
-    border-radius: 4px !important;
-}
-
-.btn-danger:hover {
-    background: #c9302c !important;
-}
-
-.btn-info:hover {
-    background: #31b0d5 !important;
-}
-*/
 .btn {
     border: 0;
     font-family: 'Roboto', sans-serif;
@@ -498,11 +453,21 @@ a:hover {
 
 .alert-unsaved {
     text-transform: none;
-    font-size: 0.8em;
+    font-size: 0.75em;
     position: absolute;
-    top: -60px;
-    right: -25px;
+    top: -55px;
+    right: -28px;
     padding: 8px;
+}
+
+.alert-unsaved .glyphicon {
+    margin-right: 5px;
+    font-size: 0.9em;
+}
+
+.alert-unsaved:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    cursor: default;
 }
 
 .placeholders {
