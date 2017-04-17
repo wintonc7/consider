@@ -49,21 +49,36 @@ class ViewFeedBackPage(webapp2.RequestHandler):
         if fb:
        #determine which action to take: advance ticket or delete
             action = self.request.get('action')
+            resp = "POST RECEIVED"
             if action == "ADVANCE":
                 fb.advance_ticket_status()
+                resp = "TICKET ADVANCED"
+                fb.put()
             elif action == "OPEN":
                 fb.mark_ticket_as("OPEN")
+                resp = "TICKET OPENED"
+                fb.put()
             elif action == "IN PROGRESS":
                 fb.mark_ticket_as("IN PROGRESS")
+                resp = "TICKET IN PROGRESS"
+                fb.put()
             elif action == "CLOSED":
                 fb.mark_ticket_as("CLOSED")
+                resp = "TICKET CLOSED"
+                fb.put()
             elif action ==  "ARCHIVE":
                 fb.is_archived = True
+                resp = "TICKET ARCHIVED"
+                fb.put()
             elif action == "DELETE":
                 fb.key.delete()
+                resp = "TICKET DELETED"
             elif action == "REACTIVATE":
                 fb.is_archived = False
-            fb.put()
+                resp = "TICKET REACTIVATED"
+                fb.put()
+            self.response.out.write(resp)
+            self.redirect('/view_feedback')
         else:
             import logging
             logging.info("fb object not found for id: " + id)

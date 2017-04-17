@@ -5,8 +5,8 @@
  var fbNum = 0;
 
 $(document).ready(function() {
-    $('#tag-select').change(filterFeedback);
-    $('#status-select').change(filterFeedback);
+    $('#tag-select').change(filterArchives);
+    $('#status-select').change(filterArchives);
     $('#show-select').change(filterArchives);
     filterArchives();
 });
@@ -80,7 +80,6 @@ function filterFeedback(){
         cardBody = document.getElementById(cardBodyId);
     }
     fbNum = id-1;
-    console.log(fbNum);
 }
 
 function sendGet(){
@@ -150,24 +149,33 @@ function markClosed(idnum){
 function deleteTicket(idnum){
     //console.log("delete ticket " + idnum);
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
-    $.post("/view_feedback", {id: fb_id, action: "DELETE"}, function(resp){
-        //console.log(resp);
-        location.reload(true);
+    bootbox.confirm("Are you sure you want to delete this ticket?", function(){
+        $.post("/view_feedback", {id: fb_id, action: "DELETE"}, function(resp){
+            //console.log(resp);
+            location.reload(true);
+        });
     });
 }
 
 function archiveTicket(idnum){
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
-    $.post("/view_feedback", {id: fb_id, action: "ARCHIVE"}, function(resp){
-        //console.log(resp);
-        location.reload(true);
-    });
+    var status = document.getElementById("status"+idnum).getAttribute("value");
+    if(status == "CLOSED"){
+        $.when($.post("/view_feedback", {id: fb_id, action: "ARCHIVE"}, function(resp){
+            //console.log(resp);
+        })).done(function(){
+            location.reload(true);
+        });
+     }else{
+        bootbox.alert("Error: You can only archive closed tickets");
+     }
 }
 
 function reactivateTicket(idnum){
     var fb_id = document.getElementById("cardTitle"+idnum).getAttribute("value");
-    $.post("/view_feedback", {id: fb_id, action: "REACTIVATE"}, function(resp){
+    $.when($.post("/view_feedback", {id: fb_id, action: "REACTIVATE"}, function(resp){
         //console.log(resp);
+     })).done(function(){
         location.reload(true);
-    });
+     });
 }
