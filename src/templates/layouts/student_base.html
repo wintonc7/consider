@@ -11,6 +11,9 @@
 <div class="course-section-tooltip hidden-xs">
     <strong>{{ courseName }}</strong> <span class="separator-bar">|</span> {{ sectionName }}
 </div>
+<li class="course-section-collapse visible-xs">
+    <span class="glyphicon glyphicon-menu-right"></span> <strong>{{ courseName }}</strong> <span class="separator-bar">|</span> {{ sectionName }}
+</li>
 {% for i in range(0,rounds) %}
 <li class="{% if curr_page == i+1 %}nav-active{% endif %}">
 <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}" data-round="{{i+1}}" class="nav_reload">{{ round_names[i] }}</a>

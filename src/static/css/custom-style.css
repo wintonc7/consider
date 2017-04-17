@@ -112,6 +112,7 @@ input, textarea, select {
 .nav-sidebar > li > a {
     padding-right: 20px;
     padding-left: 20px;
+    transition: background-color 0.2s linear;
 }
 
 .nav-sidebar > .active > a,
@@ -296,20 +297,16 @@ a:hover {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
-.nav li {
+.navbar li {
     transition: background-color 0.2s linear;
 }
 
-.nav li:hover {
+.navbar li:hover {
     background-color: #333333;
 }
 
 .nav-active {
     background-color: #D32F2F !important;
-}
-
-.nav-inactive:hover {
-    background-color: #4c4c4c !important;
 }
 
 .course-section-tooltip {
@@ -322,6 +319,18 @@ a:hover {
     top: 50px;
     left: 121px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.course-section-collapse {
+    margin-top: -8px;
+    padding: 3px 15px 5px;
+    color: #ffffff;
+    background-color: #333333;
+}
+
+.course-section-collapse .glyphicon {
+    font-size: 0.8em;
+    margin-right: 5px;
 }
 
 /* CURRENT ROUND HIGLIGHTING */
