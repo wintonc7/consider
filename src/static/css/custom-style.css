@@ -469,6 +469,15 @@ a:hover {
     padding: 8px;
 }
 
+@media only screen and (max-width: 992px) {
+    .alert-unsaved {
+        left: 110px;
+        right: auto;
+        top: 5px;
+
+    }
+}
+
 .alert-unsaved .glyphicon {
     margin-right: 5px;
     font-size: 0.9em;
