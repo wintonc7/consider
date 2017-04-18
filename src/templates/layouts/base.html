@@ -52,9 +52,9 @@
             {% endif %}
                 <li><a class="navbar-link" href="{{documentation}}"><span class="glyphicon glyphicon-book"></span> Documentation</a></li>
             {% if loginpage %}
-                <li><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li id="login"><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
             {% else %}
-                <li><a href="{{logouturl}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                <li id="logout"><a href="{{logouturl}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
             {% endif %}
             </ul>
         </div>
