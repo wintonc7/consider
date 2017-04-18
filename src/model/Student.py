@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 
-#from . import Section
-import Section
+from . import Section
+# import Section for testing
 
 class Student(ndb.Model):
     """
