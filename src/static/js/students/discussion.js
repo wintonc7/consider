@@ -144,3 +144,7 @@ function hideChangesNotification() {
     $('#unsaved-changes').addClass('hidden');
     window.onbeforeunload = null;
 }
+
+function returnToTop() {
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
+}
