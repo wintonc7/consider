@@ -30,12 +30,11 @@ class ModelTestCase(unittest.TestCase):
 		course = model.Course(name=name)
 		course.put();		
 		course = course.key.get()
-		
 		assert course.name == name
 
-	# TODO: Test Structured Property
-	# TODO: Test parent-child relationships
-	# TODO: Test all properties
+	# TODO: Test Structured Property?
+	# TODO: Test parent-child relationships?
+	# TODO: Test all properties?
 
 
 if __name__ == '__main__':
