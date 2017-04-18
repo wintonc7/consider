@@ -29,13 +29,16 @@ class ModelTestCase(unittest.TestCase):
 		email = "user@gmail.com"
 		other_selected = True
 		feedback_text = "This is user feedback."
-		feedback = model.Feedback(email=email, other_selected=other_selected, feedback=feedback_text)
+		ticket_status = "status"
+		is_archived = True
+		feedback = model.Feedback(email=email, other_selected=other_selected, feedback=feedback_text, ticket_status=ticket_status, is_archived=is_archived)
 		feedback.put()
 		feedback = feedback.key.get()
-
 		assert feedback.email == email
 		assert feedback.other_selected == other_selected
 		assert feedback.feedback == feedback_text
+		assert feedback.ticket_status == ticket_status
+		assert feedback.is_archived == is_archived
 
 	# TODO: Test all property test
 	
