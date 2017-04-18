@@ -212,14 +212,12 @@ h1 {
 
 a:link, a:visited {
     color: #0277bd;
-
     text-decoration: none;
     target-new: none;
 }
 
 a:hover {
-    color: #0288d1 !important;
-
+    color: #0288d1;
     target-new: none;
 }
 
@@ -265,15 +263,13 @@ a:hover {
 }
 
 .course-section-tooltip {
-    position: fixed;
-    padding: 5px 10px;
-    background-color: #4c4c4c;
-    border-top: 1px solid #666666;
-    border-radius: 0 0 3px 3px;
+    padding: 15px 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 370px;
+    overflow: hidden;
+    background-color: #4c4c4c !important;
     color: #ffffff;
-    top: 50px;
-    left: 121px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
 .course-section-collapse {
@@ -281,6 +277,9 @@ a:hover {
     padding: 3px 15px 5px;
     color: #ffffff;
     background-color: #333333;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .course-section-collapse .glyphicon {
@@ -562,6 +561,45 @@ a:hover {
 }
 
 /* Rounds-based/Discussion UI */
+
+.round-tabs {
+    display: table;
+    border-spacing: 5px 0;
+    margin-top: 10px;
+    margin-bottom: -20px;
+}
+
+@media only screen and (max-width : 768px) {
+    .round-tabs {
+        display: none;
+    }
+}
+
+.round-tabs div {
+    border-radius: 5px 5px 0 0;
+    display: table-cell;
+    padding: 5px 10px;
+    background-color: #4c4c4c;
+    margin-right: 5px;
+    transition: background-color 0.2s linear;
+}
+
+.round-tabs .round-active {
+    background-color: #D32F2F !important;
+}
+
+.round-tabs div:hover {
+    background-color: #666666;
+}
+
+.round-tabs a, .round-tabs a:hover, .round-tabs a:visited {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.round-active {
+
+}
 
 .collapsible-prompt {
     margin-top: 5px;

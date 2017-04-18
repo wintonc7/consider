@@ -8,14 +8,14 @@
 
 {% block topnavbar %}
 {{ super() }}
-<div class="course-section-tooltip hidden-xs">
+<li class="course-section-tooltip hidden-xs">
     <strong>{{ courseName }}</strong> <span class="separator-bar">|</span> {{ sectionName }}
-</div>
+</li>
 <li class="course-section-collapse visible-xs">
     <span class="glyphicon glyphicon-menu-right"></span> <strong>{{ courseName }}</strong> <span class="separator-bar">|</span> {{ sectionName }}
 </li>
 {% for i in range(0,rounds) %}
-<li class="{% if curr_page == i+1 %}nav-active{% endif %}">
+<li class="hidden-lg hidden-md hidden-sm{% if curr_page == i+1 %} nav-active{% endif %}">
 <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}" data-round="{{i+1}}" class="nav_reload">{{ round_names[i] }}</a>
 </li>
 {% endfor %}
@@ -31,6 +31,17 @@
             </p>
         </div>
     </div>
+
+    <!-- Round Tabs - enable navigation between rounds -->
+    <div class="round-tabs">
+    {% for i in range(0,rounds) %}
+        <div class="{% if curr_page == i+1 %}round-active{% endif %}">
+        <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}" data-round="{{i+1}}" class="nav_reload">{{ round_names[i] }}</a>
+        </div>
+    {% endfor %}
+    </div>
+    <!-- End Round Tabs -->
+
 </div>
 {% endblock content %}
 
