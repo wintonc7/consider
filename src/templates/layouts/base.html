@@ -43,18 +43,18 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
             {% if student %}
-                <li><a class="navbar-link" href="/activity_log"><span class="glyphicon glyphicon-list"></span> <span class="hidden-sm">Log</span></a></li>
-                <li><a class="navbar-link" href="/student_profile"><span class="glyphicon glyphicon-cog"></span> <span class="hidden-sm">Settings</span></a></li>
-                <li><a class="navbar-link" href="/feedback_form"><span class="glyphicon glyphicon-comment"></span> <span class="hidden-sm">Feedback</span></a></li>
+                <li><a class="navbar-link" href="/activity_log" title="Activity Log"><span class="glyphicon glyphicon-list"></span> <span class="hidden-sm">Log</span></a></li>
+                <li><a class="navbar-link" href="/student_profile" title="Settings"><span class="glyphicon glyphicon-cog"></span> <span class="hidden-sm">Settings</span></a></li>
+                <li><a class="navbar-link" href="/feedback_form" title="Feedback"><span class="glyphicon glyphicon-comment"></span> <span class="hidden-sm">Feedback</span></a></li>
             {% endif %}
             {% if instructor %}
-                <li><a class="navbar-link" href="/feedback_form"><span class="glyphicon glyphicon-comment"></span> <span class="hidden-sm">Feedback</span></a></li>
+                <li><a class="navbar-link" href="/feedback_form" title="Feedback"><span class="glyphicon glyphicon-comment"></span> <span class="hidden-sm">Feedback</span></a></li>
             {% endif %}
-                <li><a class="navbar-link" href="{{documentation}}"><span class="glyphicon glyphicon-book"></span> <span class="hidden-sm">Documentation</span></a></li>
+                <li><a class="navbar-link" href="{{documentation}}" title="Documentation"><span class="glyphicon glyphicon-book"></span> <span class="hidden-sm">Documentation</span></a></li>
             {% if loginpage %}
-                <li><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> <span class="hidden-sm">Login</span></a></li>
+                <li><a href="{{loginurl}}" title="Login"><span class="glyphicon glyphicon-log-in"></span> <span class="hidden-sm">Login</span></a></li>
             {% else %}
-                <li><a href="{{logouturl}}"><span class="glyphicon glyphicon-log-out"></span> <span class="hidden-sm">Logout</span></a></li>
+                <li><a href="{{logouturl}}" title="Logout"><span class="glyphicon glyphicon-log-out"></span> <span class="hidden-sm">Logout</span></a></li>
             {% endif %}
             </ul>
         </div>

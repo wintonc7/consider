@@ -8,6 +8,7 @@ var curr_round = currentPage;
 function loadRound(round) {
     var url = location.href.split('?')[0] + '?section=' + sectionKey + '&round=' + round;
     $(".nav").find(".nav-active").removeClass("nav-active");
+    $(".round-tabs").find('div').removeClass("nav-active");
     getRoundButton(round).addClass("nav-active");
     $('#pageContent').load(url + ' #pageContent', function() {
         $(this).children(':first').unwrap();

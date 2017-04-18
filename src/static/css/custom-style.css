@@ -272,6 +272,12 @@ a:hover {
     color: #ffffff;
 }
 
+@media only screen and (min-width: 1200px) {
+    .course-section-tooltip {
+        width: 570px;
+    }
+}
+
 .course-section-collapse {
     margin-top: -8px;
     padding: 3px 15px 5px;
@@ -575,6 +581,12 @@ a:hover {
     }
 }
 
+@media only screen and (max-width: 992px) {
+    .round-tabs div {
+        font-size: 0.8em;
+    }
+}
+
 .round-tabs div {
     border-radius: 5px 5px 0 0;
     display: table-cell;
@@ -584,10 +596,6 @@ a:hover {
     transition: background-color 0.2s linear;
 }
 
-.round-tabs .round-active {
-    background-color: #D32F2F !important;
-}
-
 .round-tabs div:hover {
     background-color: #666666;
 }
@@ -595,10 +603,6 @@ a:hover {
 .round-tabs a, .round-tabs a:hover, .round-tabs a:visited {
     text-decoration: none;
     color: #ffffff;
-}
-
-.round-active {
-
 }
 
 .collapsible-prompt {
