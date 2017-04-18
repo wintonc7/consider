@@ -36,7 +36,7 @@
     <div class="round-tabs">
     {% for i in range(0,rounds) %}
         <div class="{% if curr_page == i+1 %}round-active{% endif %}">
-        <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}" data-round="{{i+1}}" class="nav_reload">{{ round_names[i] }}</a>
+        <a href="/student_rounds?section={{sectionKey}}&round={{i+1}}" data-round="{{i+1}}" class="nav_reload">{% if round_names[i][:5] == 'Round' %}<span class="hidden-sm">{{ round_names[i][:5] }}</span>{{ round_names[i][5:] }}{% else %}{{ round_names[i] }}{% endif %}</a>
         </div>
     {% endfor %}
     </div>

@@ -569,7 +569,7 @@ a:hover {
     margin-bottom: -20px;
 }
 
-@media only screen and (max-width : 768px) {
+@media only screen and (max-width: 768px) {
     .round-tabs {
         display: none;
     }

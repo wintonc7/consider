@@ -17,7 +17,6 @@ import json
 import webapp2
 from google.appengine.api import users
 from google.appengine.ext import ndb
-from jinja2 import Markup
 
 from src import model, utils
 
@@ -266,9 +265,9 @@ class Rounds(webapp2.RequestHandler):
             # Send round names
             if section.has_rounds:
                 if section.rounds > 3:
-                    disc_round_names = [Markup('<span class="hidden-sm">Round</span> ' + str(i)) for i in range(1, section.rounds - 2)] + ['Latest Posts']
+                    disc_round_names = ['Round ' + str(i) for i in range(1, section.rounds - 2)] + ['Latest Posts']
                 else:
-                    disc_round_names = [Markup('<span class="hidden-sm">Round</span> 1')]
+                    disc_round_names = ['Round 1']
             else:
                 disc_round_names = ['Discussion']
 
