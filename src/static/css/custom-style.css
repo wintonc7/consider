@@ -469,12 +469,17 @@ a:hover {
     padding: 8px;
 }
 
+@media only screen and (max-width: 1200px) {
+    .alert-unsaved {
+        right: -45px;
+    }
+}
+
 @media only screen and (max-width: 992px) {
     .alert-unsaved {
         left: 110px;
         right: auto;
         top: 5px;
-
     }
 }
 
@@ -601,6 +606,7 @@ a:hover {
     border-spacing: 5px 0;
     margin-top: 10px;
     margin-bottom: -20px;
+    padding: 0 5px;
 }
 
 @media only screen and (max-width: 768px) {
