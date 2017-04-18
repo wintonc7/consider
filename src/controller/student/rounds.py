@@ -220,7 +220,7 @@ class Rounds(webapp2.RequestHandler):
         current_round = self.request.get('round')
         # Now check that the round number passed in actually exists, and set
         # the requested round number appropriately if not
-        if current_round:
+        if current_round and current_round != 'undefined':
             requested_round_number = int(current_round)
         else:
             requested_round_number = section.current_round

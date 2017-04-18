@@ -58,6 +58,7 @@ $(document).ready(function() {
               bootbox.alert(data, function () {
                   ocomment = comment;
               });
+              hideChangesNotification();
           });
       }
     }
@@ -134,4 +135,14 @@ function collapse_prompt() {
 
 function displayChangesNotification() {
     $('#unsaved-changes').removeClass('hidden');
+    window.onbeforeunload = confirmExit;
+}
+
+function hideChangesNotification() {
+    $('#unsaved-changes').addClass('hidden');
+    window.onbeforeunload = null;
+}
+
+function confirmExit() {
+    return 'You have made unsaved changes. Are you sure you wish to leave this page?';
 }
