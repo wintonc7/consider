@@ -579,6 +579,21 @@ a:hover {
     padding-left: 15px;
 }
 
+#activity-table tr td:nth-child(2),
+#activity-table tr td:nth-child(3) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+}
+
+@media only screen and (max-width: 768px) {
+    #activity-table tr td:nth-child(2),
+    #activity-table tr td:nth-child(3) {
+        max-width: 120px;
+    }
+}
+
 /* Rounds-based/Discussion UI */
 
 .round-tabs {

@@ -135,14 +135,12 @@ function collapse_prompt() {
 
 function displayChangesNotification() {
     $('#unsaved-changes').removeClass('hidden');
-    window.onbeforeunload = confirmExit;
+    window.onbeforeunload = function confirmExit() {
+        return 'You have made unsaved changes. Are you sure you wish to leave this page?';
+    };
 }
 
 function hideChangesNotification() {
     $('#unsaved-changes').addClass('hidden');
     window.onbeforeunload = null;
-}
-
-function confirmExit() {
-    return 'You have made unsaved changes. Are you sure you wish to leave this page?';
 }
