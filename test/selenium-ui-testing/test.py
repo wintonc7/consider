@@ -18,13 +18,13 @@ driver.find_element_by_id(constants.LOGIN_ID).click()
 # verify elements
 
 # Login
-driver.get("http://localhost:8080/_ah/login?continue=http%3A//localhost%3A8080/")
+#driver.get("http://localhost:8080/_ah/login?continue=http%3A//localhost%3A8080/")
 driver.find_element_by_id("email").clear()
 driver.find_element_by_id("email").send_keys("aang@gmail.com")
 driver.find_element_by_id("submit-login").click()
 
 # close browser window
-driver.quit
+driver.quit()
 
 
 
