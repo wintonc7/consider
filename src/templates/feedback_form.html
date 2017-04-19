@@ -1,3 +1,9 @@
+{% if is_student %}
+    {% set student = True %}
+{% else %}
+    {% set instructor = True %}
+{% endif %}
+
 {% extends 'layouts/base.html' %}
 
 {% block title %}| Feedback Form{% endblock %}
@@ -23,37 +29,42 @@
     <div class="container" id='pageContent'>
         <div class="card">
             <div class="card-title">
-                <h2>Feedback Form</h2>
+                <h2><span class="glyphicon glyphicon-comment"></span> Feedback</h2>
             </div>
             <div class="card-body">
                 <form id="feedback" method="post" action="/feedback_form">
-                    <label>Would you like this feedback to be submitted anonymously?</label>
-                    <input type="checkbox" name="email" id="email" value="{{ is_student }}"/>
-                    <br>
-                    *If left unchecked, your preferred email will be included in the feedback
-                    <br>
-                    <br>
-                    <strong>Tag(s): Please Select All That Apply</strong>
-                    <br>
-                    <label>{% if is_student %} Profile {% else %} Adding Students {% endif %}</label>
-                    <input type="checkbox" name ="tag1" id="tag1" value="{% if is_student %} Profile {% else %} Adding Students {% endif %}">
-                    <br>
-                    <label>{% if is_student %} Viewing Questions {% else %} Adding Assignments {% endif %}</label>
-                    <input type="checkbox" name ="tag2" id="tag2" value="{% if is_student %} Viewing Questions {% else %} Adding Assignments {% endif %}">
-                    <br>
-                    <label>{% if is_student %} Posting Responses {% else %} Adding Courses {% endif %}</label>
-                    <input type="checkbox" name ="tag3" id="tag3" value="{% if is_student %} Posting Responses {% else %} Adding Courses {% endif %}">
-                    <br>
-                    <label>{% if is_student %} Viewing Responses {% else %} Adding Rounds {% endif %}</label>
-                    <input type="checkbox" name ="tag4" id="tag4" value="{% if is_student %} Viewing Responses {% else %} Adding Rounds {% endif %}">
-                    <br>
-                    <label>Other</label>
-                    <input type="checkbox" name ="other" id="other" onchange="CheckTag()">
-                    <br>
+                    <div>
+                        <input type="checkbox" name="email" id="email" value="{{ is_student }}"/>
+                        <label>Submit my feedback anonymously</label>
+                        <h6><span class="glyphicon glyphicon-info-sign"></span> If left unchecked, your preferred email will be included in the feedback</h6>
+                    </div>
+                    <div>
+                    <strong>Please select all tags that apply to your feedback:</strong>
+                    <ul class="feedback-tag-list">
+                    <li>
+                        <input type="checkbox" name ="tag1" id="tag1" value="{% if is_student %} Profile {% else %} Adding Students {% endif %}">
+                        <label for="tag1">{% if is_student %} Profile {% else %} Adding Students {% endif %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name ="tag2" id="tag2" value="{% if is_student %} Viewing Questions {% else %} Adding Assignments {% endif %}">
+                        <label for="tag2">{% if is_student %} Viewing Questions {% else %} Adding Assignments {% endif %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name ="tag3" id="tag3" value="{% if is_student %} Posting Responses {% else %} Adding Courses {% endif %}">
+                        <label for="tag3">{% if is_student %} Posting Responses {% else %} Adding Courses {% endif %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name ="tag4" id="tag4" value="{% if is_student %} Viewing Responses {% else %} Adding Rounds {% endif %}">
+                        <label for="tag4">{% if is_student %} Viewing Responses {% else %} Adding Rounds {% endif %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name ="other" id="other" onchange="CheckTag()">
+                        <label for="other">Other</label>
+                    </li>
                     <input class="form-control" type="text" name="othertag" id="othertag" style='display:none' placeholder="Please enter the topic of your feedback"/>
-                    <br>
-                    <strong>Feedback</strong>
-                    <br>
+                    </ul>
+                    </div>
+                    <h4>Feedback</h4>
                     <input type="text" name="comments" id="comments"/>
                     <script type="text/javascript">
                         CKEDITOR.replace("comments",

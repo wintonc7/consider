@@ -15,7 +15,7 @@ import webapp2
 from google.appengine.api import users
 
 from src import model, utils
-
+import logging
 
 class HomePage(webapp2.RequestHandler):
     def get(self):
@@ -40,6 +40,10 @@ class HomePage(webapp2.RequestHandler):
             'nickname': student.email,
             'student': True
         }
+        # Use first and last name for nickname if set
+        if student.fname and student.lname:
+            template_values['nickname'] = student.fname + " " + student.lname
+
         # Grab the sections the student is a part of
         sections = student.sections
         # Create a new list for holding the section objects from the db
@@ -60,6 +64,9 @@ class HomePage(webapp2.RequestHandler):
                             'key': section.urlsafe(),
                             'name': section_obj.name,
                             'course': course_obj.name,
+                            'rounds_based': section_obj.has_rounds,
+                            'current_round': section_obj.current_round,
+                            'total_rounds': section_obj.rounds,
                             'group': findGroupIDByEmail(section_obj, student.email),
                             'round': utils.get_current_round(section_obj)
                         }
@@ -68,8 +75,12 @@ class HomePage(webapp2.RequestHandler):
                         # end
                         # end
         # end
+        # Get list of courses
+        course_list = list(set([section['course'] for section in section_list]))
+        course_list.sort()
         # Add the list of sections the student is in to our template
         template_values['sections'] = section_list
+        template_values['courses'] = course_list
         # Set the template html page
         template = utils.jinja_env().get_template('students/home.html')
         # And render it

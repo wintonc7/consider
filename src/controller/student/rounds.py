@@ -220,7 +220,7 @@ class Rounds(webapp2.RequestHandler):
         current_round = self.request.get('round')
         # Now check that the round number passed in actually exists, and set
         # the requested round number appropriately if not
-        if current_round:
+        if current_round and current_round != 'undefined':
             requested_round_number = int(current_round)
         else:
             requested_round_number = section.current_round
@@ -228,6 +228,9 @@ class Rounds(webapp2.RequestHandler):
 
         # Grab the requested round
         requested_round = model.Round.get_by_id(requested_round_number, parent=section.key)
+        # Grab the first round
+        first_round = model.Round.get_by_id(1, parent=section.key)
+
         # And check that it's not null
         if not requested_round:
             # Error if so
@@ -252,9 +255,12 @@ class Rounds(webapp2.RequestHandler):
             # template_values['deadline'] = datetime.datetime.strptime(requested_round.deadline, '%Y-%m-%dT%H:%M')
             template_values['deadline'] = requested_round.deadline
             template_values['sectionKey'] = self.request.get('section')
+            template_values['sectionName'] = section.name
+            template_values['courseName'] = section.key.parent().get().name
             template_values['rounds'] = section.current_round
             template_values['num_total_rounds'] = section.rounds
             template_values['show_name'] = not section.is_anonymous
+            template_values['prompt'] = first_round.quiz.question
 
             # Send round names
             if section.has_rounds:
@@ -312,6 +318,10 @@ class Rounds(webapp2.RequestHandler):
                 utils.log('Posts: ' + str(posts))
                 # 3. Send all the posts to the template
                 template_values['posts'] = posts
+                timestamps = []
+                for post in template_values['posts']:
+                    timestamps.append(datetime.datetime.strptime(post.timestamp[:19], '%Y-%m-%d %H:%M:%S').strftime('%c'))
+                template_values['timestamps'] = timestamps
 
                 # 4. Grab all posts from the previous round (initial)
                 initial = model.Round.get_by_id(1, parent=section.key)

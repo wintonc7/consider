@@ -19,64 +19,72 @@
     {% set opinions = [] %}
 {%- endif -%}
 <div class="container discussion-container" id='pageContent'>
-
-    <div class="card">
-    <div class="card-title">
-        <h2>{{ round_names[curr_page-1] }}
-            &gt; Welcome {{alias}}
-        </h2>
+    <div class="card discussion-card">
+    <div class="card-title support">
+        <h2>{{ round_names[curr_page-1] }}</h2>
     </div>
     <div class="card-body">
     {% if description %}
         <h1 class="well lead" style="font-size: 1.5em !important; text-align: left">{{description}}</h1>
+    {% else %}
+        <div class="collapsible-prompt collapsed" id="initialPrompt">
+            <div class="prompt-head" onClick="collapse_prompt()"><strong>Question</strong> (click to show)</div>
+            <div class="prompt-body">{{ prompt }}</div>
+        </div>
     {% endif %}
     {% for comment in comments %}
-        <div class="jumbotron{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}" id="jum_{{loop.index}}">
-            <div class="row card-header">
-                <div class="col-md-6">
-                    <h2>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h2>
+        <div id="title_{{ loop.index }}" class="card response-card{%- if opinions[loop.index - 1] -%}{{" " + opinions[loop.index - 1]}}{%- endif -%}">
+            <div class="card-title">
+                <div class="row">
+                    <div class="col-sm-8 col-xs-6">
+                        <h4>{% if show_name -%} {{comment.email}} {%- else -%}{{comment.alias}}{%- endif -%} {%- if alias == comment.alias -%}&nbsp;(You) {%- endif -%}</h4>
+                    </div>
+                    <div class="col-sm-4 col-xs-6 text-right">
+                        {% for (key, value) in comment.thumbs %}
+                            {%  if expired %}
+                            <span class="badge">{{ key }}: <span
+                                    class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
+                                    aria-hidden="true"></span></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
-
-                {%- if not expired and comment.response -%}
-                <div class="col-md-12">
-                <button type="button" data-toggle="tooltip" title="Neutral" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="pull-right btn btn-sm btn-info" {% if
-                            expired -%} disabled="true" {%- endif -%}>
-                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Did not understand some key points
-                    </button>
-                    <button type="button" data-toggle="tooltip" title="Disagree" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="pull-right btn btn-sm btn-danger" {% if
-                            expired -%} disabled="true" {%- endif -%}>
-                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Disagree with at least one key point
-                    </button>
-
-                    <button type="button" data-toggle="tooltip" title="Support" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="pull-right btn btn-sm btn-success" {% if
-                            expired -%} disabled="true" {%- endif -%}>
-                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Agree with ALL key points
-                    </button>
-                </div>
-                {%- endif -%}
             </div>
-            {% if comment.option %}
-            <span class="alert alert-info" style="padding: 3px;display: inline-block;margin-bottom: 5px;">Option selected: {{comment.option}}</span><br>
-            {% endif %}
 
-            {% for (key, value) in comment.thumbs %}
-                {%  if expired %}
-                <span class="badge">{{ key }}: <span
-                        class="glyphicon glyphicon-{%- if value == 1 -%}thumbs-up{%- elif value == 0 -%}question-sign{%- else -%}thumbs-down{%- endif -%}"
-                        aria-hidden="true"></span></span>
-                {% endif %}
-            {% endfor %}
+            <div class="card-body">
             <div class="row">
-                <div class="well col-md-12"
-                     style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 1.2em;font-weight: 300; margin-bottom: 10px; margin-top: 10px;">
-                    {{ comment.response|safe }}
-                </div>
+            <div class="student-response col-sm-8">
+                {{ comment.response|safe }}
             </div>
+            {%- if not expired and comment.response -%}
+                <div class="text-right col-sm-4">
+                    <button type="button" data-toggle="tooltip" data-placement="top" title="Did not understand some key points" id="neu_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',0)" class="btn btn-sm btn-neutral" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" data-toggle="tooltip" title="Disagree with at least one key point" id="dis_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',-1)" class="btn btn-sm btn-danger" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                            <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+                    </button>
+
+                    <button type="button" data-toggle="tooltip" title="Agree with ALL key points" id="sup_{{loop.index}}" onclick="updateAlert(this,'{{comment.email}}',1)" class="btn btn-sm btn-success" {% if
+                            expired -%} disabled="true" {%- endif -%}>
+                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+                    </button>
+                </div>
+            {%- endif -%}
+            {% if comment.option %}
+            <div class="student-response col-sm-4">
+                <span class="response-option">Option selected: {{comment.option}}</span>
+            </div>
+            {% endif %}
         </div>
+        </div>
+    </div>
     {% endfor %}
     {% if did_not_participate %}
-    <div class="jumbotron">
-        <strong>These students did not participate in the last round</strong>
+    <div class="nonparticipant">
+        <strong>These students did not participate in the last round:</strong>
         {% for name in did_not_participate %}
             <p>{{ name }}</p>
         {% endfor %}
@@ -113,16 +121,19 @@
 
         </div>
         <div class="col-md-1">
-          <button type="submit" id="submit" class="btn btn-lg btn-success btn-success-submit" {% if expired -%} disabled="true" {%- endif
+            <button type="submit" id="submit" class="btn btn-lg btn-success btn-success-submit" {% if expired -%} disabled="true" {%- endif
                   -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
                   <br />
                   Submit
+                    <div id="unsaved-changes" class="alert alert-warning alert-unsaved hidden">
+                        <span class="glyphicon glyphicon-info-sign"></span> You have made unsaved changes
+                    </div>
           </button>
         </div>
         </form>
 
+    </div>
   </div>
-</div>
 </div>
 {%- endif -%}
 {% endblock content %}

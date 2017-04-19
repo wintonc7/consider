@@ -18,9 +18,9 @@
             {% if description %}
             <h2 class="well lead" style="font-size: 1.5em !important; white-space: pre-wrap; text-align: left">{{description}}</h2>
             {% endif %}
-            <div class="card">
+            <div class="card sequential-initial-answers">
                 <div class="card-title">
-                    <h3>Initial Answers</h3>
+                    <h4>Initial Answers</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -44,15 +44,18 @@
                     </div>
                 </div>
             </div>
+            {% set i = 0 %}
             {%- for post in posts -%}
-            <div class="card">
+            <div class="card sequential-card">
                 <div class="card-title">
-                    <h3 style="text-align: left">#{{post.index}} &mdash; {{post.author if show_name else post.author_alias}}{% if alias==post.author_alias %} (You) {% endif %}</h3>
+                    <h4>{{post.author if show_name else post.author_alias}}{% if alias==post.author_alias %} (You) {% endif %}
+                        <div class="pull-right text-right"><span class="sequential-post-number">#{{post.index}}</span> {{ timestamps[i] }}</div></h4>
                 </div>
                 <div class="card-body" style="text-align: left">
                     {{post.text|safe}}
                 </div>
             </div>
+            {% set i = i + 1 %}
             {%- endfor -%}
         </div><!-- ./card-body -->
     </div><!-- ./card -->
@@ -68,27 +71,35 @@
 </div><!-- ./container -->
 {%- if not expired -%}
 <!-- fixed position discussion response text editor -->
+
+
 <div class="container-fluid navbar-fixed-bottom" id="discussion-response">
     <div class="container">
-        <form id="seqDiscussionForm" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
-            <div id="text-editor">
+        <div class="row">
+            <form id="seqDiscussionForm" method="post" {% if not expired -%} action="/student_rounds" {%- endif -%}>
+                <div class="col-md-11">
+                    <div id="text-editor">
 
-                <textarea class="form-control" rows="5" id="seqDiscussionPost"
-                          placeholder="Enter your response here" required {% if expired -%}
-                          disabled="true" {%- endif -%}>
-                {%- if comment -%}
-                    {{comment}}
-                {%- endif -%}
-                </textarea>
-            </div>
-            <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
-                    -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
-                    <br />
-                    Submit
-            </button>
-            <!-- replace plain textarea with CKEditor WYSIWYG -->
-            <script type="text/javascript" src="js/students/seq_discussion_editor_replace.js"></script>
-        </form>
+                        <textarea class="form-control" rows="5" id="seqDiscussionPost"
+                                  placeholder="Enter your response here" required {% if expired -%}
+                                  disabled="true" {%- endif -%}>
+                        {%- if comment -%}
+                            {{comment}}
+                        {%- endif -%}
+                        </textarea>
+                    </div>
+                    <!-- replace plain textarea with CKEditor WYSIWYG -->
+                    <script type="text/javascript" src="js/students/seq_discussion_editor_replace.js"></script>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" id="submit" class="btn btn-lg btn-success" {% if expired -%} disabled="true" {%- endif
+                            -%}><span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                            <br />
+                            Submit
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {%- endif -%}

@@ -7,9 +7,9 @@ var sectionKey = $('#reload').data().sectionkey;
 var curr_round = currentPage;
 function loadRound(round) {
     var url = location.href.split('?')[0] + '?section=' + sectionKey + '&round=' + round;
-    $("#navbar li").removeClass("round-viewing nav-active");
-    $("#navbar a").removeClass("round-viewing nav-active");
-    getRoundButton(round).addClass("round-viewing nav-active");
+    $(".nav").find(".nav-active").removeClass("nav-active");
+    $(".round-tabs").find('div').removeClass("nav-active");
+    getRoundButton(round).addClass("nav-active");
     $('#pageContent').load(url + ' #pageContent', function() {
         $(this).children(':first').unwrap();
         if (curr_round == round) {
@@ -35,7 +35,7 @@ function reloadOpinions() {
 // Returns the jQuert element corresponding to the specified
 // round's button (li element).
 function getRoundButton(round) {
-    return $('.nav_reload[data-round="' + round + '"]')
+    return $('.nav_reload[data-round="' + round + '"]').parent()
 }
 
 var view_page = currentPage;
