@@ -640,13 +640,21 @@ a:hover {
     right: 15px
 }
 
-@media only screen and (min-width: 992px) {
+@media only screen and (max-width: 768px) {
     #return-top-button {
-        position: relative;
-        bottom: -130px;
-        right: 18px;
+        bottom: 20px;
+    }
+
+    #cke_comment {
+        height: 210px;
+    }
+
+    .cke_contents {
+        height: 140px !important;
     }
 }
+
+
 
 .collapsible-prompt {
     margin-top: 5px;
