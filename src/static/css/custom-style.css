@@ -106,7 +106,7 @@ body {
 }
 
 h1 {
-    color: #D32F2F !important;
+    color: #0288d1 !important;
 }
 
 /* CARD STYLING */
@@ -133,8 +133,8 @@ h1 {
 
 .card-title {
     padding: 1px 15px;
-    background-color: #D32F2F;
-    color: white !important;
+    background-color: #0288d1;
+    color: #ffffff;
     border-radius: 5px 5px 0 0;
 }
 
@@ -263,7 +263,7 @@ a:hover {
 }
 
 .nav-active {
-    background-color: #D32F2F !important;
+    background-color: #0288d1 !important;
 }
 
 .course-section-tooltip {
@@ -533,11 +533,6 @@ a:hover {
 
 /* Student Home Page */
 
-.course-name {
-    color: #D32F2F;
-    font-weight: bold;
-}
-
 .separator-bar {
     color: #BDBDBD;
     padding: 0px 3px;
@@ -717,18 +712,18 @@ a:hover {
 }
 
 .sequential-card .card-title {
-    background-color: #00B0E8;
+    background-color: #0288d1;
 }
 
 .sequential-post-number {
     padding: 4px 12px;
     margin-right: 8px;
     border-radius: 15px;
-    background-color: #0277bd;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .response-card .card-title {
-    background-color: #00B0E8;
+    background-color: #0288d1;
     transition: background-color 0.2s linear;
 }
 
