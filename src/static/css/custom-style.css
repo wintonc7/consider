@@ -640,6 +640,14 @@ a:hover {
     right: 15px
 }
 
+@media only screen and (min-width: 1200px) {
+    #return-top-button {
+        position: relative;
+        bottom: -120px;
+        right: -20px;
+    }
+}
+
 @media only screen and (max-width: 768px) {
     #return-top-button {
         bottom: 20px;
