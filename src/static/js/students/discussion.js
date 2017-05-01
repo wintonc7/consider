@@ -1,3 +1,7 @@
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 $(document).ready(function() {
   var numComments = $('#student-discussion').data().numcomments;
   var response = $('#student-discussion').data().response;
@@ -54,6 +58,7 @@ $(document).ready(function() {
               bootbox.alert(data, function () {
                   ocomment = comment;
               });
+              hideChangesNotification();
           });
       }
     }
@@ -78,22 +83,32 @@ $(document).ready(function() {
       var message = 'Current student ';
 
       if (type == 1) {
-          $("#jum_" + index).removeClass().addClass('jumbotron').addClass('support');
+          $("#title_" + index).removeClass().addClass('card response-card support');
           resp[index] = 'support';
           message += 'supports ';
       } else if (type == 0) {
-          $("#jum_" + index).removeClass().addClass('jumbotron').addClass('neutral');
+          $("#title_" + index).removeClass().addClass('card response-card neutral');
           resp[index] = 'neutral';
           message += 'seeks clarification from ';
       } else {
-          $("#jum_" + index).removeClass().addClass('jumbotron').addClass('disagree');
+          $("#title_" + index).removeClass().addClass('card response-card disagree');
           resp[index] = 'disagree';
           message += 'disagrees with ';
       }
       message += email + '\'s Round ' + page;
       console.log(message);
       thumbs[email] = type;
+      displayChangesNotification();
     }
+  }
+
+  // check for changes in ckeditor
+  for (instance in CKEDITOR.instances) {
+      CKEDITOR.instances[instance].on('change', function(e) {
+        if (e.editor.checkDirty()) {
+            displayChangesNotification();
+        }
+      });
   }
 });
 
@@ -105,4 +120,31 @@ if ($('#student-discussion').data().expired.length == 0)
           return "It looks like you have input you haven't submitted.";
       }
   });
+}
+
+function collapse_prompt() {
+  var prompt = document.getElementById('initialPrompt');
+  if (prompt.className == 'collapsible-prompt') {
+      prompt.className = 'collapsible-prompt collapsed';
+      prompt.children[0].innerHTML = "<strong>Question</strong> (click to show)";
+  } else {
+      prompt.className = 'collapsible-prompt';
+      prompt.children[0].innerHTML = "<strong>Question</strong> (click to hide)";
+  }
+}
+
+function displayChangesNotification() {
+    $('#unsaved-changes').removeClass('hidden');
+    window.onbeforeunload = function confirmExit() {
+        return 'You have made unsaved changes. Are you sure you wish to leave this page?';
+    };
+}
+
+function hideChangesNotification() {
+    $('#unsaved-changes').addClass('hidden');
+    window.onbeforeunload = null;
+}
+
+function returnToTop() {
+    $('html, body').animate({ scrollTop: 0 }, 'fast');
 }

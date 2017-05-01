@@ -35,7 +35,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" style="color: palegoldenrod" href="/">CONSIDER</a>
+            <a class="navbar-brand" href="/">CONSIDER</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse" aria-expanded="true">
             <ul class="nav navbar-nav navbar-left hidden-big">
@@ -43,18 +43,18 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
             {% if student %}
-                <li><a class="navbar-link" href="/activity_log"><span class="glyphicon glyphicon-list"></span> Log</a></li>
-                <li><a class="navbar-link" href="/student_profile"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
-                <li><a class="navbar-link" href="/feedback_form"><span class="glyphicon glyphicon-comment"></span> Feedback</a></li>
+                <li><a class="navbar-link" href="/activity_log" title="Activity Log"><span class="glyphicon glyphicon-list"></span> <span class="hidden-sm">Log</span></a></li>
+                <li><a class="navbar-link" href="/student_profile" title="Settings"><span class="glyphicon glyphicon-cog"></span> <span class="hidden-sm">Settings</span></a></li>
+                <li><a class="navbar-link" href="/feedback_form" title="Feedback"><span class="glyphicon glyphicon-comment"></span> <span class="hidden-sm">Feedback</span></a></li>
             {% endif %}
             {% if instructor %}
-                <li><a class="navbar-link" href="/feedback_form"><span class="glyphicon glyphicon-comment"></span> Feedback</a></li>
+                <li><a class="navbar-link" href="/feedback_form" title="Feedback"><span class="glyphicon glyphicon-comment"></span> <span class="hidden-sm">Feedback</span></a></li>
             {% endif %}
-                <li><a class="navbar-link" href="{{documentation}}"><span class="glyphicon glyphicon-book"></span> Documentation</a></li>
+                <li><a class="navbar-link" href="{{documentation}}" title="Documentation"><span class="glyphicon glyphicon-book"></span> <span class="hidden-sm">Documentation</span></a></li>
             {% if loginpage %}
-                <li><a href="{{loginurl}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li><a href="{{loginurl}}" title="Login"><span class="glyphicon glyphicon-log-in"></span> <span class="hidden-sm">Login</span></a></li>
             {% else %}
-                <li><a href="{{logouturl}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                <li><a href="{{logouturl}}" title="Logout"><span class="glyphicon glyphicon-log-out"></span> <span class="hidden-sm">Logout</span></a></li>
             {% endif %}
             </ul>
         </div>
@@ -81,6 +81,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/bootbox.min.js"></script>
+<script src="/js/tether.min.js"></script>
 <script type="text/javascript" src="/js/layouts/base.js" ></script>
 {% block script %}{% endblock script %}
 </body>

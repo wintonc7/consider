@@ -7,3 +7,12 @@ function redirect(key, group, round) {
     location.href = '/student_rounds?section=' + key;
   }
 }
+
+function collapse(id) {
+  var card = document.getElementById(id);
+  if (card.hasChildNodes() && card.className == 'card course-card') {
+      card.className = 'card course-card course-card-collapsed';
+  } else {
+      card.className = 'card course-card';
+  }
+}

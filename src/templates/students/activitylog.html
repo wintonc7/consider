@@ -13,25 +13,27 @@
     <div class="container" id='pageContent'>
         <div class="card">
             <div class="card-title">
-                <h2>Activity Log</h2>
+                <h2><span class="glyphicon glyphicon-list"></span> Activity Log</h2>
             </div>
             <div class="card-body">
 
-                <select class="form-control" id="course-select">
-                    <option value="DEFAULT" selected>All Courses</option>
-                    {% for course in courses %}
-                    <option value="{{ course }}">{{ course }}</option>
-                    {% endfor %}
-                </select>
+                <div class="activity-log-filters">
+                    <select class="form-control" id="course-select">
+                        <option value="DEFAULT" selected>All Courses</option>
+                        {% for course in courses %}
+                        <option value="{{ course }}">{{ course }}</option>
+                        {% endfor %}
+                    </select>
 
-                <select class="form-control" id="assignment-select" disabled>
-                    <option value="DEFAULT" selected>All Assignments</option>
-                    {% for assignment in assignments %}
-                    <option value="{{ assignment }}">{{ assignment }}</option>
-                    {% endfor %}
-                </select>
+                    <select class="form-control" id="assignment-select" disabled>
+                        <option value="DEFAULT" selected>All Assignments</option>
+                        {% for assignment in assignments %}
+                        <option value="{{ assignment }}">{{ assignment }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                <table class="table table-striped" id="activity-table">
+                <table class="table" id="activity-table">
                     <tr>
                         <th class="col-xs-2">Timestamp</th>
                         <th class="col-xs-2">Course</th>
